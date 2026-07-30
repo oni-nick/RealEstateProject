@@ -1,12 +1,10 @@
 # PLOT OS
 
-## 빌딩을 보기 전에, 딜을 봅니다.
+## 이 건물, 어떤 조건에서 사야 할까요?
 
 > 서울 중소형 빌딩의 **적정 매입가, 수익 시나리오, 핵심 리스크와 다음 행동**을 한 화면에서 판단하는 AI Deal Underwriting 서비스
 
 [![Live Demo](https://img.shields.io/badge/LIVE_DEMO-OPEN_PLOT_OS-174e42?style=for-the-badge)](https://oni-nick.github.io/RealEstateProject/)
-[![Stage](https://img.shields.io/badge/STAGE-INTERACTIVE_DEMO-c58a2a?style=for-the-badge)](./plot-os-demo)
-
 ---
 
 ## 한 문장으로 설명하면
