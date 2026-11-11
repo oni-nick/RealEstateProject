@@ -149,3 +149,50 @@ All Node commands used the exact bundled executable from PLAN.md:
 - Lease renewal/collection behavior, construction costs/duration, feasible rent uplift and permitted use changes. No actual asset, tenant, owner or customer evidence was accessed.
 - The seven reference UNKNOWNs remain unresolved. Engine defaults and synthetic building inputs are separate modeling assumptions, never substitutes for verified evidence.
 
+## Step 4 — App shell, design system and SVG map (2026-11-12)
+
+### Done
+
+- Replaced the placeholder with the Korean PLOT OS shell: sticky navy navigation, Deal Radar / Listings / Proposal destinations, global evidence mode, persistent `예시 데이터 · 실제 매물 아님` badge, loading/error/retry states, skip link, page titles and footer.
+- Added design tokens, layout/component styles and A4 print CSS: light content cards, teal accent, system Korean fonts, tabular figures, focus/reduced-motion rules and responsive breakpoints. Added the landing hero with the specified tagline and three value points.
+- Built native-module hash routing, session state and cached relative JSON fetches, including request deduplication, retry after failure, allowlisted paths, deep-record validation, stale async render protection and view cleanup. No dependencies or external resources.
+- Implemented shared KPI card, chip, slider/output, semantic table, badge, dialog side panel, toast, evidence number, button and empty-state components. Key summary/engine numbers open a panel with formulas, inputs, provenance, low confidence, verification flags and UNKNOWNs.
+- Implemented SVG projection from `districts.json`: ten schematic gu polygons, Han river, 400 building dots, district labels, legend, hover/focus tooltip and building activation. Added viewBox pan/zoom/reset with bounds, wheel/buttons/keyboard controls, roving building focus, matching/dimmed states and listener cleanup.
+- Connected a working exploration slice: region/search/price/walk/deep-data filters shared by radar and listings, real aggregate KPIs, up to 24 candidate cards, sorting/pagination, building overview with lazy rent roll and engine-derived metrics, and explicitly limited buyer/seller building-summary proposals with an A4 print action.
+- Added the UI/extension contract in `docs/context/step04-ui-contract.md`; reserved future bid/value-up routes show an honest unavailable state. Optional Pipeline omitted.
+
+### Files
+
+- `web-v2/index.html`
+- `web-v2/css/tokens.css`, `layout.css`, `components.css`, `print.css`
+- `web-v2/js/app.js`, `data.js`, `router.js`, `store.js`, `views.js`, `package.json`
+- `web-v2/js/ui/components.js`, `format.js`, `map.js`
+- `tests/smoke.test.mjs`; updated the obsolete placeholder-only assertion in `tests/market-refs.test.mjs`
+- `docs/context/step04-ui-contract.md`, `docs/PROGRESS.md`
+- Temporary verification-only scripts under ignored `verify/`; no screenshots, images, fonts, PDFs or other binary artifacts created.
+
+### Commands and results
+
+All Node commands used `C:\Users\nicho\AppData\Local\OpenAI\Codex\runtimes\cua_node\6ef99b3d04073aa7\bin\node.exe`.
+
+- Read the required plan, historical analysis and progress, plus Step 2/3 contracts and existing tests/data/engine within this worktree. Initial read-only status confirmed `demo/plot-os-v2` with no changes. No historical main-tree links or excluded data were opened.
+- Exact requested `node --test tests/`: exit 1, sandbox child-process `spawn EPERM`; isolated tests did not complete.
+- `node --test --test-isolation=none tests/market-refs.test.mjs tests/data.test.mjs tests/engine.test.mjs tests/smoke.test.mjs`: final **69 passed, 0 failed**, exit 0 (57 existing + 12 smoke). An initial smoke run found a proposal-view syntax error; it was corrected before the passing runs.
+- Smoke checks cover every JSON parse (32 files), UTF-8/no BOM/size, every native module import and relative dependency, local HTML references, hash routes/history cleanup, store/filter behavior, loader deduplication/retry/schema, every map coordinate, viewBox bounds/zoom anchoring, and null formatting.
+- Minimal DOM fixture with real synthetic data: all five views construct; 400 circles/10 polygons; filter no-result/reset; 24 candidate cards; lazy detailed rent roll; proposal picker/seller audience; virtual map activation and listener teardown pass. This verifies DOM construction/logic, not browser rendering.
+- Temporary zero-dependency server at `http://127.0.0.1:4784/demo/` plus `node verify/step04-http-check.mjs`: **53 assets HTTP 200**, byte-identical to disk, JSON parse and JavaScript MIME correct. Server stdin was unavailable; its exact loopback listener PID was identified and stopped. Confirmed port 4784 no longer listening. No server left running.
+- Browser host discovery failed (`browser access host is unavailable`). The computer-use fallback was stopped by URL-confidence policy before the demo could be inspected. No browser screenshots, layout, console, native interactions or print-preview results are claimed.
+- `git diff --check`: passed (Git reports existing LF/CRLF normalization warnings). No git write commands, network installs, external requests, secrets, real records or main-tree changes.
+
+### Known issues
+
+- Actual browser rendering, desktop/mobile viewport layout, console behavior, native hover/pointer/keyboard behavior and print pagination remain unverified because browser automation was unavailable/stopped. CSS breakpoints and print rules are implemented; DOM/math/HTTP checks are not visual QA.
+- Requires HTTP serving for native modules/JSON. Works without external internet when locally served; `file://` has an explanation. No service-worker persistence for reopening a hosted site offline. State is session-only and resets on reload.
+- Radar currently filters physical/search criteria and shows Cap rate, not investor IRR scoring. Max-bid/value-up UI, full investor matching and complete proposal/evidence appendices remain subsequent-step work. Current proposal is clearly labeled a building summary, with no recommended bid or valuation.
+- Map geometry and building positions are fictional sketches. All underlying market numbers, financial assumptions and model outputs have low confidence and require verification. Engine exclusions from Step 3 remain applicable.
+
+### UNKNOWNs
+
+- Real market observations, actual leases/expenses/condition, lender underwriting, tax/VAT treatment, intervention feasibility and the seven reference UNKNOWNs remain unresolved. No new market claims or real customer/owner/tenant data were introduced.
+- Final browser appearance, performance, console state, physical pan/zoom behavior and A4 page count require browser access; no visual or print assurance is inferred from the passing smoke tests.
+

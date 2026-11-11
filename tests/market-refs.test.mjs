@@ -143,10 +143,11 @@ test('documented funding example applies financing fees to debt and treats depos
   assert.ok(docs.includes('100 + 4.6 + 0.5 + 0.3 + 0.25 − 50 − 2 = 53.65억원'));
 });
 
-test('placeholder and tracked folder scaffolding use only local relative resources', () => {
+test('app shell and tracked folder scaffolding use only local relative resources', () => {
   const html = readFileSync(at('web-v2/index.html'), 'utf8');
   assert.ok(html.includes('lang="ko"'));
   assert.ok(html.includes('href="./data/market_refs.json"'));
-  assert.ok(!html.match(/https?:\/\/|<script\b/i));
+  assert.ok(!html.match(/https?:\/\//i));
+  assert.ok(html.includes('<script type="module" src="./js/app.js"></script>'));
   for (const path of ['web-v2/css/.gitkeep', 'web-v2/js/engine/.gitkeep', 'scripts/.gitkeep']) assert.ok(existsSync(at(path)), path);
 });
