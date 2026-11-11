@@ -1,5 +1,5 @@
 /** Session-only state. No customer records, cookies or persistent storage. */
-export const DEFAULT_FILTERS = Object.freeze({ query: '', districts: Object.freeze([]), maxPriceEok: 150, maxWalk: 18, deepOnly: false });
+export const DEFAULT_FILTERS = Object.freeze({ query: '', districts: Object.freeze([]), minPriceEok: 30, maxPriceEok: 150, maxWalk: 18, deepOnly: false, equityEok: 30, targetIrrPct: 8, ltvPct: 50, useKo: '' });
 export function createStore(initial = {}) {
   let state = Object.freeze({ filters: DEFAULT_FILTERS, evidenceMode: false, selectedId: null, ...initial });
   const listeners = new Set();
@@ -22,7 +22,9 @@ export function filterBuildings(buildings, filters) {
   const query = filters.query.trim().toLocaleLowerCase('ko');
   return buildings.filter((b) => b.statusKo !== '거래완료 참고'
     && (!filters.districts.length || filters.districts.includes(b.districtId))
+    && b.askingPriceKrw >= (filters.minPriceEok ?? 30) * 1e8
     && b.askingPriceKrw <= filters.maxPriceEok * 1e8
+    && (!filters.useKo || b.useKo.includes(filters.useKo))
     && b.walkMinutes <= filters.maxWalk
     && (!filters.deepOnly || Boolean(b.deepPath))
     && (!query || `${b.nameKo} ${b.addressKo} ${b.stationNameKo}`.toLocaleLowerCase('ko').includes(query)));

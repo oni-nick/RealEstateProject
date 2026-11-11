@@ -116,3 +116,49 @@ button.chip:hover { border-color: var(--accent); color: var(--accent); }
 @keyframes panel-in { from { transform: translateX(24px); opacity: .5; } to { transform: translateX(0); opacity: 1; } }
 @media (max-width: 1200px) { .map-canvas { height: 560px; } .kpi-value { font-size: 24px; } }
 @media (max-width: 760px) { .map-canvas { height: 440px; min-height: 360px; } .kpi-card { padding: 16px; } .section-card { padding: 20px; } .map-help { display: none; } }
+/* Deal Radar investor criteria and building lease exposure. */
+.investor-ranges { display: grid; gap: 18px; }
+.investor-panel .filter-group + .filter-group { margin-top: 18px; padding-top: 18px; }
+.investor-panel .select-field { width: 100%; margin-top: 8px; }
+.preset-list { display: grid; gap: 6px; }
+.preset-list .chip { text-align: left; border-radius: var(--radius-small); }
+.preset-note { margin-top: 9px; font-size: 10px; }
+.radar-list-toolbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 12px; }
+.radar-list-toolbar .select-field { width: 100%; }
+.radar-list-toolbar .check-label { font-size: 11px; }
+.radar-card { display: block; }
+.radar-card .candidate-link { display: block; margin: 10px 0; }
+.candidate-link:hover h3 { color: var(--accent); text-decoration: underline; }
+.radar-card .price-row { margin-top: 8px; }
+.match-score { color: var(--accent); font-size: 15px; font-weight: 800; }
+.radar-financials { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 14px 0; padding: 10px 0; border-block: 1px solid var(--line); }
+.radar-financials > div { display: grid; justify-items: start; gap: 4px; }
+.radar-financials span { font-size: 10px; color: var(--muted); }
+.radar-financials .evidence-number { font-size: 16px; font-weight: 700; }
+.match-reasons { font-size: 11px; margin-bottom: 12px; }
+.match-reasons summary { cursor: pointer; font-weight: 700; }
+.match-reasons summary span { float: right; color: var(--muted); font-weight: 400; }
+.match-reasons ul { list-style: none; padding: 8px 0 0; margin: 0; display: grid; gap: 5px; }
+.check-pass { color: var(--accent); }
+.check-fail { color: #a34432; }
+.is-near-miss { border-style: dashed; }
+.radar-card .value-link { font-size: 11px; }
+.radar-pagination { display: flex; align-items: center; justify-content: space-between; margin: 12px 0; font-size: 11px; }
+.scoring-guide { padding: 14px 18px; font-size: 11px; color: var(--muted); }
+.scoring-guide summary { color: var(--ink); cursor: pointer; font-weight: 700; }
+.scoring-guide p { margin-top: 10px; }
+.building-kpis { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.expiry-summary { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; font-size: 12px; margin-bottom: 12px; }
+.expiry-summary span { color: var(--muted); }
+.waterfall-scroll { overflow-x: auto; }
+.lease-waterfall { width: 100%; min-width: 560px; height: auto; }
+.waterfall-axis { stroke: var(--line-strong); }
+.waterfall-total { fill: var(--accent); }
+.waterfall-expiry { fill: #8c9fb2; }
+.waterfall-connector { stroke: var(--line-strong); stroke-dasharray: 3 3; }
+.waterfall-value { fill: var(--ink); font-size: 12px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.waterfall-label, .waterfall-unit { fill: var(--muted); font-size: 11px; }
+@media (max-width: 760px) {
+  .building-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .investor-panel .filter-group { min-width: 0; }
+}

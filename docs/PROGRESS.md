@@ -196,3 +196,51 @@ All Node commands used `C:\Users\nicho\AppData\Local\OpenAI\Codex\runtimes\cua_n
 - Real market observations, actual leases/expenses/condition, lender underwriting, tax/VAT treatment, intervention feasibility and the seven reference UNKNOWNs remain unresolved. No new market claims or real customer/owner/tenant data were introduced.
 - Final browser appearance, performance, console state, physical pan/zoom behavior and A4 page count require browser access; no visual or print assurance is inferred from the passing smoke tests.
 
+## Step 5 — Deal Radar and building overview (2026-11-12)
+
+### Done
+
+- Replaced the exploratory radar with investor criteria: equity budget in 억, target levered IRR, LTV, district multi-select, minimum/maximum asking price, included building use, maximum subway walk time, search and deep-only filter. Range controls update on input and preserve native elements/focus; crossing a price bound moves the other bound. State survives route changes within the session.
+- Implemented the three exact PLAN presets: `자기자본 30억 · IRR 8%`, `강남 사옥용`, `성수 밸류업`. Presets reset all criteria and show active/custom status. Office/value-up presets explicitly remain current-income screens; owner-occupation benefits and value-up interventions are not invented.
+- Each of 400 buildings uses the existing engine/adapter at asking price and selected LTV. Initial equity includes acquisition costs, bank fees and inherited deposits; annualized levered IRR uses monthly cashflows. A match must pass all six investment gates plus search/deep/status filters. Unavailable IRR never passes. All buildings remain on the map; matches highlight and other/closed records dim. Map/card hover and click-through remain connected.
+- Added fit score (0–100), exact `왜 맞는지` label, six numeric reasons, evidence for score/IRR/equity, sorting by score/IRR/asking price/equity, 20-card pagination, and optional financial near misses within the physical screen. A disclosed score formula rewards financial headroom; it is not confidence or valuation. KPI strip shows match count, median IRR, median **land-basis** price per 평, and inventory-wide unavailable-IRR count. Empty medians remain unavailable.
+- Bounded financial memoization retains only the needed metrics in at most three LTV slices, keyed by immutable building snapshot objects. Physical/target/budget changes reuse engine evidence; LTV input events coalesce for 100 ms; sorting/pagination do not rerun financial models.
+- Extended building overview with six headline metrics (ask, NOI, cap, equity, IRR, DSCR), current radar LTV, building facts and links to bid/value-up/buyer proposal. Deep rent rolls include unit, category/use, occupied/vacant state, area, deposits, rent, management fees, start/end dates and assumed renewal risk.
+- Added accessible native SVG lease-expiry waterfall for all 25 deep records: snapshot-date boundaries, overdue and five annual expiry buckets, current/remaining monthly rent, 12-month exposure and explicit unknown expiries. Vacant units are excluded; expired rent plus remaining rent conserves the occupied total. This is contractual rent exposure with no renewal, not a vacancy prediction or replacement of the engine's operating assumptions.
+- Added 5–8 linked synthetic comps for deep buildings; summary-only buildings show six same-district examples nearest in schematic coordinates. Tables distinguish transaction price, land/GFA unit prices and assumed distances, and evidence correctly identifies `data/comps.json`. No public transaction or adjusted valuation is implied. Summary-only rent-roll/waterfall states remain explicit.
+
+### Files
+
+- `web-v2/js/radar.js`, `web-v2/js/ui/radar-view.js`
+- `web-v2/js/building-analysis.js`, `web-v2/js/ui/lease-waterfall.js`
+- `web-v2/js/views.js`, `web-v2/js/store.js`, `web-v2/css/components.css`
+- `tests/radar.test.mjs`, `tests/building-overview.test.mjs`, `tests/smoke.test.mjs`
+- `docs/context/step05-implementation-plan.md`, `docs/PROGRESS.md`
+- Verification-only `verify/step05-check.mjs` (gitignored); no binary artifacts/screenshots created.
+
+### Commands and results
+
+All Node commands used `C:\Users\nicho\AppData\Local\OpenAI\Codex\runtimes\cua_node\6ef99b3d04073aa7\bin\node.exe`.
+
+- Read PLAN first, then Step 0 analysis/progress and the Step 3/4 contracts, engine/UI code and synthetic data within this worktree. Initial read-only status was clean. No historical main-tree links or excluded files were opened.
+- `node --test tests/`: exit 1, sandbox child-process `spawn EPERM`; no isolated test completed.
+- `node --test --test-isolation=none tests/market-refs.test.mjs tests/data.test.mjs tests/engine.test.mjs tests/radar.test.mjs tests/building-overview.test.mjs tests/smoke.test.mjs`: **77 passed, 0 failed**, exit 0 (69 existing plus eight new analytical tests; existing DOM smoke expanded). New tests were observed failing before their implementations.
+- Coverage includes engine equivalence and engine-version evidence, all six hard gates/closed/unavailable cases, score headroom, cache reuse/LTV invalidation/bounds, sorting/nulls/medians/preset regions, lease-date boundaries/leap years/invalid dates/overdue/unknown/vacant records, rent conservation and deep/summary comps joins. DOM checks cover preset active state, crossed price bounds, default match count/map dimming, score reasons, sort order, near-miss pagination, live LTV updates, detailed tables/SVG/action links, comparable evidence and summary-only fallback.
+- `node verify/step05-check.mjs`: all 400 evaluations; default **3 matches**, median IRR **8.9333736823%**, median land price **54,013,358.9947 KRW/평**. Presets currently yield 3 / 0 / 1 matches in order. All 25 waterfalls conserve monthly rent and linked comps resolve. Representative Node timings: cold 442.7 ms, changed LTV 404.3 ms, cached filter median 1.82 ms/max 5.06 ms across 20 runs. These are Node timings, not browser frame-rate claims.
+- The same check served **59 assets** beneath `/demo/` with HTTP 200, byte-identical content, correct JavaScript MIME and UTF-8/no BOM/sub-1MB assertions. Transient loopback server closed in `finally`; verified `serverClosed: true`. No long-running server left behind.
+- Browser discovery returned `The browser access host is unavailable`. No browser navigation, screenshot, console, physical-input or print-preview checks are claimed.
+- `git diff --check`: passed with LF/CRLF normalization warnings. Read-only diff/status reviewed. No git write commands, installations, external network resources, real records or changes outside the dedicated worktree.
+
+### Known issues
+
+- Browser layout, actual browser performance/console, native pointer/keyboard behavior and print pagination remain unverified because the browser access host is unavailable. Minimal DOM/HTTP checks do not establish visual QA.
+- The Gangnam office preset returns zero matches under its 0% rental-IRR floor in this synthetic inventory. This is shown honestly; optional financial near misses expose the failed gates. The preset does not model saved owner-occupancy costs. The Seongsu preset does not apply an intervention; future value-up work owns that calculation.
+- Bid/value-up action links reach the existing explicitly unavailable future routes. The current proposal remains the Step 4 building-summary proposal with its own disclosed defaults; complete bid/value-up/proposal scenes are later steps.
+- Listings retain the shared physical criteria and explicitly disclose that IRR/equity gates apply in Radar. Match equity is the **initial** funding requirement, not a guarantee that future cash calls fit the same budget. Financial defaults/exclusions from Step 3 remain in force.
+- Session-only state and HTTP-serving requirement remain unchanged. Three LTV cache slices bound memory; uncached LTV changes still project the whole inventory.
+
+### UNKNOWNs
+
+- Actual current market prices/rents, verified leases and renewal/collection behavior, expenses, building condition, lender underwriting/deposit deductions, transaction-specific taxes/VAT, owner-occupation benefits and intervention feasibility. The seven reference UNKNOWNs remain unresolved.
+- Final browser appearance, console state, interaction responsiveness and A4 page count. No real customer, owner, tenant or actual lot-level records were accessed.
+

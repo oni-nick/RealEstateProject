@@ -1,8 +1,10 @@
 import { DEFAULT_FILTERS, filterBuildings, updateFilters } from './store.js';
 import { calculate, inputFromBuilding } from './engine/index.js';
-import { h, badge, button, chip, emptyState, kpiCard, linkButton, slider, table, toast } from './ui/components.js';
+import { h, badge, button, emptyState, kpiCard, linkButton, table, toast } from './ui/components.js';
 import { createSeoulMap } from './ui/map.js';
-import { eok, manwon, median, number, percent } from './ui/format.js';
+import { eok, manwon, number, percent } from './ui/format.js';
+import { selectComps } from './building-analysis.js';
+import { leaseWaterfall } from './ui/lease-waterfall.js';
 
 const buildingHref = (b) => `#/building/${b.id}`;
 const heading = (eyebrow, title, description, actions) => h('div', { className: 'page-heading' }, h('div', {}, h('div', { className: 'eyebrow' }, eyebrow), h('h1', {}, title), h('p', {}, description)), actions);
@@ -46,103 +48,7 @@ export function homeView(context) {
   return { element, destroy: map.destroy };
 }
 
-function filtersPanel(context, onReset) {
-  const filters = context.store.getState().filters;
-  const districtList = h('div', { className: 'chip-list' });
-  const districtButtons = new Map();
-  districtButtons.set('all', chip('전체', { onClick: () => updateFilters({ districts: [] }) }));
-  for (const d of context.data.geography.districts) districtButtons.set(d.id, chip(d.nameKo, { onClick: () => {
-    const current = context.store.getState().filters.districts;
-    updateFilters({ districts: current.includes(d.id) ? current.filter((id) => id !== d.id) : [...current, d.id] });
-  } }));
-  districtList.append(...districtButtons.values());
-  const refreshDistricts = () => {
-    const selected = context.store.getState().filters.districts;
-    for (const [id, control] of districtButtons) control.setAttribute('aria-pressed', String(id === 'all' ? !selected.length : selected.includes(id)));
-  };
-  refreshDistricts();
-  const queryInput = h('input', { type: 'search', className: 'search-field', placeholder: '동·역·가상 건물 검색', 'aria-label': '가상 건물 검색', value: filters.query, onInput: (e) => updateFilters({ query: e.target.value }) });
-  const deepInput = h('input', { type: 'checkbox', checked: filters.deepOnly, onChange: (e) => updateFilters({ deepOnly: e.target.checked }) });
-  const priceSlot = h('div'), walkSlot = h('div');
-  function updateRanges() {
-    const f = context.store.getState().filters;
-    priceSlot.replaceChildren(slider({ label: '최대 호가', min: 30, max: 150, value: f.maxPriceEok, format: (v) => `${v}억`, onChange: (maxPriceEok) => updateFilters({ maxPriceEok }) }));
-    walkSlot.replaceChildren(slider({ label: '역 도보 이내', min: 2, max: 18, value: f.maxWalk, format: (v) => `${v}분`, onChange: (maxWalk) => updateFilters({ maxWalk }) }));
-  }
-  updateRanges();
-  const element = h('aside', { className: 'card filter-panel', 'aria-label': '탐색 조건' },
-    h('div', { className: 'section-heading' }, h('h2', {}, '탐색 조건'), button('초기화', onReset, 'ghost button-small')),
-    h('div', { className: 'filter-group' }, h('label', { className: 'filter-title' }, '검색', queryInput)),
-    h('div', { className: 'filter-group' }, h('p', { className: 'filter-title' }, '관심 지역', h('span', { className: 'hint' }, ' · 복수 선택')), districtList),
-    h('div', { className: 'filter-group' }, priceSlot, h('div', { style: 'height:20px', 'aria-hidden': 'true' }), walkSlot,
-      h('label', { className: 'check-label' }, deepInput, '상세 임대차 보유만')),
-    h('p', { className: 'filter-summary' }, '지도에는 전체 건물을 표시하며 조건 외·거래완료는 흐리게 표시합니다.'),
-  );
-  let previous = filters;
-  const unsubscribe = context.store.subscribe(({ filters: next }) => {
-    if (next === previous) return;
-    refreshDistricts();
-    if (next.query !== queryInput.value) queryInput.value = next.query;
-    deepInput.checked = next.deepOnly;
-    // Keep native slider focus/drag intact unless values were changed elsewhere.
-    const inputs = [priceSlot.querySelector('input'), walkSlot.querySelector('input')];
-    if (Number(inputs[0].value) !== next.maxPriceEok || Number(inputs[1].value) !== next.maxWalk) updateRanges();
-    previous = next;
-  });
-  return { element, destroy: unsubscribe };
-}
-
-function radarKpis(context, matches) {
-  const { data, inspect } = context;
-  const cap = median(matches.map((b) => b.capRate));
-  const landUnit = median(matches.map((b) => b.askingPriceKrw / (b.landAreaM2 * 121 / 400)));
-  const stat = (label, text, formula, values) => contextNumber(label, text, { value: values, formula, inputs: { matchingBuildingIds: matches.map((b) => b.id) }, provenance: { kind: 'derived', confidence: 'low', formulaId: formula } });
-  const contextNumber = (label, text, evidence) => {
-    const b = button(text, () => inspect({ label, text, evidence, source: '가상 건물 요약 · 현재 탐색 조건' }));
-    b.className = 'evidence-number'; b.setAttribute('aria-label', `${label} ${text} · 근거 보기`); return b;
-  };
-  return [
-    kpiCard({ label: '조건에 맞는 후보', value: number(matches.length, 0), unit: '개', note: `전체 ${data.buildings.length}개 · 거래완료 제외`, accent: true }),
-    kpiCard({ label: '중앙값 Cap rate', value: stat('중앙값 Cap rate', percent(cap), 'median(연 NOI / 호가)', cap), note: '차입 전 · 호가 기준 · IRR과 다름' }),
-    kpiCard({ label: '중앙값 대지 평당가', value: stat('중앙값 대지 평당가', manwon(landUnit), 'median(호가 / (대지 m² × 121 / 400))', landUnit), unit: '만원/평', note: '건물별 호가를 대지 면적으로 나눈 값' }),
-    kpiCard({ label: '상세 임대차 보유', value: number(matches.filter((b) => b.deepPath).length, 0), unit: '개', note: '가상 임대차·운영비 확인 가능' }),
-  ];
-}
-
-export function radarView(context) {
-  const { data, store } = context;
-  let filters = store.getState().filters;
-  const kpis = h('div', { className: 'kpi-strip' });
-  const resultList = h('div', { className: 'result-list' });
-  const count = h('small', { role: 'status', 'aria-live': 'polite', 'aria-atomic': 'true' });
-  const map = createSeoulMap({ geography: data.geography, buildings: data.buildings,
-    onOpen: (id) => { location.hash = `#/building/${id}`; },
-    onHover: (id) => { for (const card of resultList.querySelectorAll('[data-card-id]')) card.classList.toggle('is-hovered', card.dataset.cardId === id); },
-  });
-  const panel = filtersPanel(context, resetFilters);
-  function refresh() {
-    const matches = sortedBuildings(filterBuildings(data.buildings, store.getState().filters));
-    kpis.replaceChildren(...radarKpis(context, matches));
-    count.textContent = `${matches.length}개 · 상세 우선`;
-    resultList.replaceChildren(...(matches.length ? matches.slice(0, 24).map((b) => {
-      const card = buildingCard(b, { selected: b.id === store.getState().selectedId });
-      card.addEventListener('pointerenter', () => map.highlight(b.id));
-      card.addEventListener('pointerleave', () => map.highlight(null));
-      card.addEventListener('focus', () => map.highlight(b.id));
-      card.addEventListener('blur', () => map.highlight(null));
-      return card;
-    }) : [emptyState('일치하는 후보가 없습니다', '지역·호가·도보 조건을 넓혀 보세요.', button('조건 초기화', resetFilters))]));
-    map.update({ matchingIds: new Set(matches.map((b) => b.id)), activeDistricts: store.getState().filters.districts });
-  }
-  refresh();
-  const unsubscribe = store.subscribe((state) => { if (state.filters !== filters) { filters = state.filters; refresh(); } });
-  const element = h('div', { className: 'page' }, heading('WORKSPACE / DEAL RADAR', '딜 레이더', '가능성이 있는 딜을 찾고, 숫자와 근거로 다음 대화를 시작하세요.', h('div', { className: 'actions' }, linkButton('전체 매물 목록  ↗', '#/listings'))), kpis,
-    h('div', { className: 'radar-workspace' }, panel.element,
-      h('section', { className: 'radar-map-column', 'aria-label': '서울 가상 건물 지도' }, map.element, h('div', { className: 'map-footnote' }, h('span', {}, '점을 눌러 건물의 수익 구조를 확인하세요.'), h('span', {}, `예시 스냅샷 ${data.metadata.snapshotDate}`))),
-      h('section', { className: 'radar-results', 'aria-label': '조건에 맞는 후보 목록' }, h('div', { className: 'section-heading results-heading' }, h('h2', {}, '발견한 후보'), count), resultList, h('p', { className: 'results-footer' }, h('a', { className: 'text-link', href: '#/listings' }, '전체 결과를 목록에서 보기 →'), h('span', { className: 'subtext hint' }, ' · 최대 24개 미리보기')))),
-  );
-  return { element, destroy() { unsubscribe(); panel.destroy(); map.destroy(); } };
-}
+export { radarView } from './ui/radar-view.js';
 
 export function listingsView(context) {
   const { data, store } = context;
@@ -154,7 +60,7 @@ export function listingsView(context) {
   function refresh() {
     const matches = filterBuildings(data.buildings, store.getState().filters).toSorted((a, b) => sort === 'price' ? a.askingPriceKrw - b.askingPriceKrw : sort === 'cap' ? b.capRate - a.capRate : Number(Boolean(b.deepPath)) - Number(Boolean(a.deepPath)) || a.askingPriceKrw - b.askingPriceKrw);
     page = Math.max(0, Math.min(page, Math.ceil(matches.length / size) - 1));
-    resultCount.textContent = `현재 조건 ${matches.length}개 / 전체 ${data.buildings.length}개 · 거래완료 제외 · 레이더 조건 유지`;
+    resultCount.textContent = `현재 조건 ${matches.length}개 / 전체 ${data.buildings.length}개 · 거래완료 제외 · 레이더 지역·가격·용도·도보 조건 (IRR·자본 미적용)`;
     const visible = matches.slice(page * size, (page + 1) * size);
     rowsSlot.replaceChildren(matches.length ? table({ caption: '가상 매물 목록 — 레이더 조건 적용', rows: visible, columns: [
       { label: '건물 / 위치', render: (b) => h('div', {}, h('a', { className: 'text-link', href: buildingHref(b) }, b.nameKo), h('span', { className: 'subtext' }, b.addressKo)) },
@@ -176,11 +82,13 @@ export function listingsView(context) {
 }
 
 function buildingKpis(context, building, result) {
-  return h('div', { className: 'kpi-strip' },
+  return h('div', { className: 'kpi-strip building-kpis' },
     kpiCard({ label: '매도 호가', value: context.summaryNumber(building, 'askingPriceKrw', '매도 호가', eok), unit: '억', note: '가상 호가 · 감정평가 아님', accent: true }),
     kpiCard({ label: '연간 NOI', value: context.metricNumber(result, 'noi', '연간 NOI', manwon), unit: '만원/년', note: '임대료 + 관리수입 − 소유자 운영비' }),
     kpiCard({ label: 'Cap rate', value: context.metricNumber(result, 'capRate', 'Cap rate', percent), note: '차입 전 · 연간 NOI / 호가' }),
-    kpiCard({ label: '초기 필요 자기자본', value: context.metricNumber(result, 'equityRequired', '초기 필요 자기자본', eok), unit: '억', note: 'LTV 50% · 취득 비용·보증금 반영' }),
+    kpiCard({ label: '초기 필요 자기자본', value: context.metricNumber(result, 'equityRequired', '초기 필요 자기자본', eok), unit: '억', note: `LTV ${number(result.assumptions.ltv * 100)}% · 취득 비용·보증금 반영` }),
+    kpiCard({ label: '레버리지 IRR', value: context.metricNumber(result, 'leveredIrr', '레버리지 IRR', percent), note: '10년 보유 · 월별 현금흐름 연율화' }),
+    kpiCard({ label: '첫해 DSCR', value: context.metricNumber(result, 'dscr', '첫해 DSCR', (v) => Number.isFinite(v) ? `${number(v)}배` : '해당 없음'), note: '첫해 NOI / 원리금 상환액' }),
   );
 }
 
@@ -191,28 +99,57 @@ function buildingFacts(building) {
   ].map(([label, value]) => h('div', {}, h('dt', {}, label), h('dd', {}, value))));
 }
 
+function compNumber(context, comp, key, label, format) {
+  const text = format(comp[key]);
+  const control = button(text, () => context.inspect({ label, text,
+    evidence: { value: comp[key], provenance: comp.provenance[key],
+      inputs: { compId: comp.id, transactionDate: comp.transactionDate, priceKrw: comp.priceKrw, landAreaM2: comp.landAreaM2, gfaM2: comp.gfaM2 },
+      formula: key === 'priceKrw' ? '합성 거래가: 가상 데이터 생성 규칙 f.ask' : `${key === 'landPricePerPyeong' ? '대지' : '연면적'} 평당가 = 가상 거래가 / (면적 m² × 121 / 400)` },
+    source: `data/comps.json · ${comp.id} · ${key} · 공적 실거래 기록 아님`,
+  }));
+  control.className = 'evidence-number'; control.setAttribute('aria-label', `${label} ${text} · 근거 보기`);
+  return control;
+}
+
 export async function buildingView(context, route) {
   const building = context.data.buildings.find((b) => b.id === route.id);
   if (!building) return { element: emptyState('가상 건물을 찾을 수 없습니다', '목록에서 다른 예시를 선택해 주세요.', linkButton('매물 목록', '#/listings')) };
-  const deep = await context.loader.loadDeep(building);
-  const result = calculate(inputFromBuilding(building, deep));
+  const [deep, inventory] = await Promise.all([context.loader.loadDeep(building), context.loader.load('comps.json')]);
+  const ltvPct = context.store.getState().filters.ltvPct;
+  const result = calculate(inputFromBuilding(building, deep, { ltv: ltvPct / 100 }));
+  const comps = selectComps(building, deep, inventory.comps);
   const proposalId = route.id;
   const rentRoll = deep ? table({ caption: `${building.nameKo} — 가상 임대차 내역`, rows: deep.rentRoll, columns: [
     { label: '층 / 호실', render: (u) => h('div', {}, u.floor, h('span', { className: 'subtext' }, u.unit)) },
     { label: '임차 업종', render: (u) => u.status === 'vacant' ? '공실' : u.tenantCategoryKo },
+    { label: '용도 / 상태', render: (u) => h('div', {}, u.useKo, h('span', { className: 'subtext' }, u.status === 'vacant' ? '공실' : '임대 중')) },
     { label: '면적 (평)', numeric: true, render: (u) => number(u.areaPyeong) },
     { label: '보증금 (만원)', numeric: true, render: (u) => manwon(u.depositKrw) },
     { label: '월 임대료 (만원)', numeric: true, render: (u) => manwon(u.monthlyRentKrw) },
+    { label: '월 관리비 (만원)', numeric: true, render: (u) => manwon(u.mgmtFeeKrw) },
+    { label: '계약 시작', render: (u) => u.status === 'vacant' ? '—' : u.leaseStart },
     { label: '만기', render: (u) => u.status === 'vacant' ? '—' : u.leaseEnd },
+    { label: '갱신 위험 (가정)', render: (u) => u.status === 'vacant' ? '해당 없음' : ({ low: '낮음', medium: '보통', high: '높음' }[u.renewalRisk] ?? 'UNKNOWN') },
   ] }) : h('p', { className: 'notice' }, '이 건물은 요약 데이터만 보유합니다. 상세 임대차는 25개 가상 건물에서 확인할 수 있습니다.');
   const assumptions = h('div', { className: 'stack' }, h('dl', { className: 'info-grid' }, [
-    ['보유기간', '10년'], ['LTV / 금리', '50% / 연 5%'], ['임대료 상승', '연 2%'], ['매각 Cap rate', '4.5%'],
+    ['보유기간', '10년'], ['LTV / 금리', `${ltvPct}% / 연 5%`], ['임대료 상승', '연 2%'], ['매각 Cap rate', '4.5%'],
     ['월별 현금흐름 IRR', context.metricNumber(result, 'leveredIrr', '레버리지 IRR', percent)], ['첫해 DSCR', context.metricNumber(result, 'dscr', 'DSCR', (v) => Number.isFinite(v) ? `${number(v)}배` : '해당 없음')],
   ].map(([label, value]) => h('div', {}, h('dt', {}, label), h('dd', {}, value)))), h('p', { className: 'notice' }, '검증 전 예시 가정입니다. 보증금은 부채로 반영하며, 임대료에 공실을 중복 차감하지 않습니다. VAT·양도소득세·법인세·재융자 등은 제외됩니다.'));
   const element = h('div', { className: 'page' }, h('div', { className: 'breadcrumb' }, h('a', { href: '#/radar' }, '딜 레이더'), ' / ', h('a', { href: '#/listings' }, '매물 탐색'), ' / ', building.nameKo),
-    heading('PROPERTY / OVERVIEW', building.nameKo, `${building.addressKo} · ${building.statusKo}`, h('div', { className: 'actions' }, badge('예시 데이터 · 실제 매물 아님', 'accent'), linkButton('요약 제안서  ↗', `#/building/${proposalId}/proposal?for=buyer`, 'primary'))),
+    heading('PROPERTY / OVERVIEW', building.nameKo, `${building.addressKo} · ${building.statusKo}`, h('div', { className: 'actions' }, badge('예시 데이터 · 실제 매물 아님', 'accent'), linkButton('매수 한도가', `#/building/${proposalId}/bid`), linkButton('밸류업', `#/building/${proposalId}/valueup`), linkButton('요약 제안서  ↗', `#/building/${proposalId}/proposal?for=buyer`, 'primary'))),
     buildingKpis(context, building, result),
-    h('div', { className: 'content-grid' }, h('div', { className: 'stack' }, section('건물 개요', buildingFacts(building), building.id), section('임대차 현황', rentRoll, deep ? `${deep.rentRoll.length}개 가상 호실 · 금액 만원` : '요약만 보유')),
+    h('div', { className: 'content-grid' }, h('div', { className: 'stack' }, section('건물 개요', buildingFacts(building), building.id), section('임대차 현황', rentRoll, deep ? `${deep.rentRoll.length}개 가상 호실 · 금액 만원` : '요약만 보유'),
+      section('임대차 만기 워터폴', deep ? leaseWaterfall(deep) : h('p', { className: 'notice' }, '요약 데이터에는 호실별 만기가 없습니다. 만기 노출은 상세 임대차 보유 건물에서만 확인할 수 있습니다.'), '월세 노출 · 확정 공실 예측 아님'),
+      section('가상 비교 거래', h('div', {}, h('p', { className: 'notice' }, '예시 데이터 · 실제 매물 아님. 아래 거래는 모두 합성 예시이며 공적 실거래 기록이 아닙니다. 가격의 시점·면적·용도 차이를 보정하지 않았습니다.'),
+        comps.length ? table({ caption: `${building.nameKo} — 가상 비교 거래`, rows: comps, columns: [
+          { label: '가상 거래 / 블록', render: (c) => h('div', {}, c.nameKo, h('span', { className: 'subtext' }, c.addressKo), h('span', { className: 'subtext' }, c.id)) },
+          { label: '가상 거래일', render: (c) => c.transactionDate },
+          { label: '거리 (가정)', numeric: true, render: (c) => `${number(c.distanceM, 0)}m` },
+          { label: '거래가 (억)', numeric: true, render: (c) => compNumber(context, c, 'priceKrw', '가상 비교 거래가', eok) },
+          { label: '대지 평당가 (만원/평)', numeric: true, render: (c) => compNumber(context, c, 'landPricePerPyeong', '대지 평당가', manwon) },
+          { label: '연면적 평당가 (만원/평)', numeric: true, render: (c) => compNumber(context, c, 'gfaPricePerPyeong', '연면적 평당가', manwon) },
+        ] }) : h('p', { className: 'hint' }, '연결된 가상 비교 거래가 없습니다.')),
+        deep ? `${comps.length}개 연결 예시 · 가상 좌표 거리` : '동일 구 내 가상 좌표 근접 6개 · 도보 거리 아님')),
       h('div', { className: 'stack' }, section('수익 구조의 기본 가정', assumptions, '월별 계산 엔진'), section('검토 메모', h('div', { className: 'stack' }, h('p', { className: 'hint' }, `매도 동기 (가상): ${building.sellerMotivationKo}`), h('p', { className: 'hint' }, `등록 경과 (가상): ${building.daysOnMarket}일`), h('p', { className: 'notice' }, '실제 임대차 계약, 운영비 증빙, 대출 심사와 건물 상태를 확인해야 합니다. 위치·도보 시간은 측정값이 아닙니다.'))))),
   );
   // Stale asynchronous views must not overwrite the current selection.
