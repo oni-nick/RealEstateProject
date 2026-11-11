@@ -1,0 +1,2326 @@
+{
+  "schemaVersion": "1.0.0",
+  "metadata": {
+    "title": "PLOT OS v2 — 서울 소형·중형 상업용 빌딩 데모 참고 가정",
+    "labelKo": "예시 데이터 · 실제 매물 아님",
+    "warningKo": "검증 전 참고 가정 · 실거래·감정평가·대출 또는 세무 자문 아님",
+    "dataKind": "synthetic_reference_assumptions",
+    "preparedDate": "2026-11-12",
+    "contextPeriod": "2024-2026 broad context; financing scenario intended for 2025-2026 demo",
+    "observationsAsOf": "UNKNOWN",
+    "sourcesConsulted": false,
+    "method": "Model-authored estimates from general knowledge only, per user instruction; no browsing, reports, lender quotes or customer records consulted.",
+    "sourcePolicy": "Every source name is a candidate for later verification, not a citation or evidence for a row. No report title, URL or publication date was invented.",
+    "confidenceMeaning": {
+      "low": "Unverified broad demo estimate or explicitly unknown; not measured accuracy, probability or investment confidence."
+    },
+    "units": {
+      "currency": "KRW",
+      "storedRateConvention": "Ratios: 0.05 means 5%; multiply by 100 only for display.",
+      "pyeongConversion": "1 pyeong = 400/121 square metres (approximately 3.305785); pyeong = m2 x 121/400."
+    },
+    "limitations": [
+      "Bands pool heterogeneous submarkets, ages, frontage, floor mix and redevelopment options; they are not observed averages, confidence intervals or a 2024-2026 time series.",
+      "No verified November 2026 data or trend claim. Prime trophy, institutional towers, redevelopment land and distressed assets may fall outside bands.",
+      "Independent bands are screening envelopes, not jointly consistent observations. Never sample prices, rent, vacancy and cap independently and present the result as an evidenced deal.",
+      "Future generated assets must satisfy the separate 3-15 billion KRW demo price filter; not every land-area/price endpoint combination fits that filter.",
+      "Candidate reports may use institutional assets, different area bases or geography. Reconcile definitions before calibrating these small-building scenarios."
+    ]
+  },
+  "metricDefinitions": {
+    "landPricePerPyeong": {
+      "unit": "KRW/pyeong_land",
+      "labelKo": "대지 기준 매입 평당가",
+      "basis": "Whole-property purchase consideration / land area in pyeong; includes building consideration, excludes acquisition costs and separately payable VAT."
+    },
+    "gfaPricePerPyeong": {
+      "unit": "KRW/pyeong_gfa",
+      "labelKo": "연면적 기준 매입 평당가",
+      "basis": "Same whole-property purchase consideration / total registered gross floor area in pyeong, including basement; not building-only construction value."
+    },
+    "retail1fRentPerPyeongMonth": {
+      "unit": "KRW/pyeong_exclusive/month",
+      "labelKo": "1층 상가 월세",
+      "basis": "Potential face monthly base rent per exclusive leasable pyeong for ordinary 1F retail; excludes deposit conversion, VAT, management fees, key money and incentives."
+    },
+    "upperFloorRentPerPyeongMonth": {
+      "unit": "KRW/pyeong_exclusive/month",
+      "labelKo": "상층부 월세",
+      "basis": "Potential face monthly base rent per exclusive leasable pyeong for ordinary 2F+ office/neighborhood-service space; same exclusions as 1F; excludes basement and rooftop."
+    },
+    "vacancyRate": {
+      "unit": "ratio",
+      "labelKo": "면적 기준 공실률",
+      "basis": "Vacant exclusive leasable area / total exclusive leasable area at a point in time; synthetic physical vacancy, not credit loss, annual rent loss or an official district statistic."
+    },
+    "capRate": {
+      "unit": "ratio/year",
+      "labelKo": "순영업소득 기준 캡레이트",
+      "basis": "Year-1 forward unlevered NOI / whole-property purchase price before acquisition costs; NOI after vacancy and owner operating expenses, before financing, income taxes and capex."
+    }
+  },
+  "sources": [
+    {
+      "id": "molit",
+      "name": "국토교통부 실거래가 공개시스템 (MOLIT)",
+      "scope": "Future check of reported building transactions; reconstruct land/GFA denominators and exclude unusual deals.",
+      "status": "candidate_not_consulted",
+      "url": "UNKNOWN",
+      "reportTitle": "UNKNOWN",
+      "publicationDate": "UNKNOWN",
+      "accessedAt": "UNKNOWN"
+    },
+    {
+      "id": "seoul-open-data",
+      "name": "서울 열린데이터광장 (Seoul Open Data Plaza)",
+      "scope": "Future check of geographic/building context; not evidence for these exact price or rent bands.",
+      "status": "candidate_not_consulted",
+      "url": "UNKNOWN",
+      "reportTitle": "UNKNOWN",
+      "publicationDate": "UNKNOWN",
+      "accessedAt": "UNKNOWN"
+    },
+    {
+      "id": "kreb",
+      "name": "한국부동산원 상업용부동산 임대동향조사",
+      "scope": "Future check of retail/office rent and vacancy context; published samples and geography may differ from small whole-building assets.",
+      "status": "candidate_not_consulted",
+      "url": "UNKNOWN",
+      "reportTitle": "UNKNOWN",
+      "publicationDate": "UNKNOWN",
+      "accessedAt": "UNKNOWN"
+    },
+    {
+      "id": "rsquare",
+      "name": "알스퀘어 (RSQUARE)",
+      "scope": "Candidate commercial-market commentary; no exact report or row consulted.",
+      "status": "candidate_not_consulted",
+      "url": "UNKNOWN",
+      "reportTitle": "UNKNOWN",
+      "publicationDate": "UNKNOWN",
+      "accessedAt": "UNKNOWN"
+    },
+    {
+      "id": "jll-korea",
+      "name": "JLL Korea",
+      "scope": "Candidate market context; institutional office evidence cannot be substituted directly for small-building rents or yields.",
+      "status": "candidate_not_consulted",
+      "url": "UNKNOWN",
+      "reportTitle": "UNKNOWN",
+      "publicationDate": "UNKNOWN",
+      "accessedAt": "UNKNOWN"
+    },
+    {
+      "id": "cbre-korea",
+      "name": "CBRE Korea",
+      "scope": "Candidate market context; institutional office evidence cannot be substituted directly for small-building rents or yields.",
+      "status": "candidate_not_consulted",
+      "url": "UNKNOWN",
+      "reportTitle": "UNKNOWN",
+      "publicationDate": "UNKNOWN",
+      "accessedAt": "UNKNOWN"
+    },
+    {
+      "id": "lender-quotes",
+      "name": "거래 금융기관의 개별 대출조건서",
+      "scope": "Obtain an actual lender quote for rate, LTV, collateral deductions, DSCR and fees. No lender or quote identified.",
+      "status": "candidate_not_consulted",
+      "url": "UNKNOWN",
+      "reportTitle": "UNKNOWN",
+      "publicationDate": "UNKNOWN",
+      "accessedAt": "UNKNOWN"
+    },
+    {
+      "id": "wetax",
+      "name": "위택스 (Wetax) / 관할 지방자치단체 세무부서",
+      "scope": "Future confirmation of applicable acquisition taxes, additions, exemptions and taxpayer-specific treatment.",
+      "status": "candidate_not_consulted",
+      "url": "UNKNOWN",
+      "reportTitle": "UNKNOWN",
+      "publicationDate": "UNKNOWN",
+      "accessedAt": "UNKNOWN"
+    },
+    {
+      "id": "broker-quotes",
+      "name": "현지 공인중개사 확인 / 거래별 중개보수 견적",
+      "scope": "Future check of small-building rents, deposits, operating expenses and negotiated brokerage fees; no broker consulted.",
+      "status": "candidate_not_consulted",
+      "url": "UNKNOWN",
+      "reportTitle": "UNKNOWN",
+      "publicationDate": "UNKNOWN",
+      "accessedAt": "UNKNOWN"
+    },
+    {
+      "id": "nts",
+      "name": "국세청 (National Tax Service)",
+      "scope": "Candidate for transaction-specific VAT and national-tax treatment; no guidance consulted.",
+      "status": "candidate_not_consulted",
+      "url": "UNKNOWN",
+      "reportTitle": "UNKNOWN",
+      "publicationDate": "UNKNOWN",
+      "accessedAt": "UNKNOWN"
+    }
+  ],
+  "districts": [
+    {
+      "id": "gangnam",
+      "nameKo": "강남구",
+      "neighborhoods": [
+        "역삼동",
+        "논현동",
+        "신사동",
+        "청담동",
+        "삼성동"
+      ],
+      "scope": "Selected example neighborhoods; bands are not measured gu-wide statistics or matched observations.",
+      "sharedRefIds": [
+        "seoul.loan_interest_rate",
+        "seoul.typical_ltv",
+        "seoul.deposit_to_monthly_rent_months"
+      ],
+      "metrics": {
+        "landPricePerPyeong": {
+          "id": "gangnam.landPricePerPyeong",
+          "range": {
+            "min": 100000000,
+            "max": 250000000
+          },
+          "unit": "KRW/pyeong_land",
+          "sourceIds": [
+            "molit",
+            "seoul-open-data",
+            "rsquare"
+          ],
+          "sourceNames": [
+            "국토교통부 실거래가 공개시스템 (MOLIT)",
+            "서울 열린데이터광장 (Seoul Open Data Plaza)",
+            "알스퀘어 (RSQUARE)"
+          ],
+          "sourceRole": "verification_candidates_only",
+          "tag": "reference/approximate - verify",
+          "confidence": "low",
+          "verificationStatus": "not_verified",
+          "provenance": {
+            "kind": "assumption",
+            "assumptionId": "gangnam.landPricePerPyeong",
+            "confidence": "low"
+          },
+          "notes": "Whole-property purchase consideration / land area in pyeong; includes building consideration, excludes acquisition costs and separately payable VAT. Broad offline demo estimate; no source observation supports these exact endpoints."
+        },
+        "gfaPricePerPyeong": {
+          "id": "gangnam.gfaPricePerPyeong",
+          "range": {
+            "min": 25000000,
+            "max": 65000000
+          },
+          "unit": "KRW/pyeong_gfa",
+          "sourceIds": [
+            "molit",
+            "seoul-open-data",
+            "rsquare"
+          ],
+          "sourceNames": [
+            "국토교통부 실거래가 공개시스템 (MOLIT)",
+            "서울 열린데이터광장 (Seoul Open Data Plaza)",
+            "알스퀘어 (RSQUARE)"
+          ],
+          "sourceRole": "verification_candidates_only",
+          "tag": "reference/approximate - verify",
+          "confidence": "low",
+          "verificationStatus": "not_verified",
+          "provenance": {
+            "kind": "assumption",
+            "assumptionId": "gangnam.gfaPricePerPyeong",
+            "confidence": "low"
+          },
+          "notes": "Same whole-property purchase consideration / total registered gross floor area in pyeong, including basement; not building-only construction value. Broad offline demo estimate; no source observation supports these exact endpoints."
+        },
+        "retail1fRentPerPyeongMonth": {
+          "id": "gangnam.retail1fRentPerPyeongMonth",
+          "range": {
+            "min": 150000,
+            "max": 450000
+          },
+          "unit": "KRW/pyeong_exclusive/month",
+          "sourceIds": [
+            "kreb",
+            "broker-quotes"
+          ],
+          "sourceNames": [
+            "한국부동산원 상업용부동산 임대동향조사",
+            "현지 공인중개사 확인 / 거래별 중개보수 견적"
+          ],
+          "sourceRole": "verification_candidates_only",
+          "tag": "reference/approximate - verify",
+          "confidence": "low",
+          "verificationStatus": "not_verified",
+          "provenance": {
+            "kind": "assumption",
+            "assumptionId": "gangnam.retail1fRentPerPyeongMonth",
+            "confidence": "low"
+          },
+          "notes": "Potential face monthly base rent per exclusive leasable pyeong for ordinary 1F retail; excludes deposit conversion, VAT, management fees, key money and incentives. Broad offline demo estimate; no source observation supports these exact endpoints."
+        },
+        "upperFloorRentPerPyeongMonth": {
+          "id": "gangnam.upperFloorRentPerPyeongMonth",
+          "range": {
+            "min": 60000,
+            "max": 130000
+          },
+          "unit": "KRW/pyeong_exclusive/month",
+          "sourceIds": [
+            "kreb",
+            "broker-quotes"
+          ],
+          "sourceNames": [
+            "한국부동산원 상업용부동산 임대동향조사",
+            "현지 공인중개사 확인 / 거래별 중개보수 견적"
+          ],
+          "sourceRole": "verification_candidates_only",
+          "tag": "reference/approximate - verify",
+          "confidence": "low",
+          "verificationStatus": "not_verified",
+          "provenance": {
+            "kind": "assumption",
+            "assumptionId": "gangnam.upperFloorRentPerPyeongMonth",
+            "confidence": "low"
+          },
+          "notes": "Potential face monthly base rent per exclusive leasable pyeong for ordinary 2F+ office/neighborhood-service space; same exclusions as 1F; excludes basement and rooftop. Broad offline demo estimate; no source observation supports these exact endpoints."
+        },
+        "vacancyRate": {
+          "id": "gangnam.vacancyRate",
+          "range": {
+            "min": 0.05,
+            "max": 0.12
+          },
+          "unit": "ratio",
+          "sourceIds": [
+            "kreb",
+            "broker-quotes"
+          ],
+          "sourceNames": [
+            "한국부동산원 상업용부동산 임대동향조사",
+            "현지 공인중개사 확인 / 거래별 중개보수 견적"
+          ],
+          "sourceRole": "verification_candidates_only",
+          "tag": "reference/approximate - verify",
+          "confidence": "low",
+          "verificationStatus": "not_verified",
+          "provenance": {
+            "kind": "assumption",
+            "assumptionId": "gangnam.vacancyRate",
+            "confidence": "low"
+          },
+          "notes": "Vacant exclusive leasable area / total exclusive leasable area at a point in time; synthetic physical vacancy, not credit loss, annual rent loss or an official district statistic. Broad offline demo estimate; no source observation supports these exact endpoints."
+        },
+        "capRate": {
+          "id": "gangnam.capRate",
+          "range": {
+            "min": 0.02,
+            "max": 0.035
+          },
+          "unit": "ratio/year",
+          "sourceIds": [
+            "rsquare",
+            "jll-korea",
+            "cbre-korea",
+            "broker-quotes"
+          ],
+          "sourceNames": [
+            "알스퀘어 (RSQUARE)",
+            "JLL Korea",
+            "CBRE Korea",
+            "현지 공인중개사 확인 / 거래별 중개보수 견적"
+          ],
+          "sourceRole": "verification_candidates_only",
+          "tag": "reference/approximate - verify",
+          "confidence": "low",
+          "verificationStatus": "not_verified",
+          "provenance": {
+            "kind": "assumption",
+            "assumptionId": "gangnam.capRate",
+            "confidence": "low"
+          },
+          "notes": "Year-1 forward unlevered NOI / whole-property purchase price before acquisition costs; NOI after vacancy and owner operating expenses, before financing, income taxes and capex. Broad offline demo estimate; no source observation supports these exact endpoints."
+        }
+      }
+    },
+    {
+      "id": "seocho",
+      "nameKo": "서초구",
+      "neighborhoods": [
+        "서초동",
+        "방배동",
+        "양재동"
+      ],
+      "scope": "Selected example neighborhoods; bands are not measured gu-wide statistics or matched observations.",
+      "sharedRefIds": [
+        "seoul.loan_interest_rate",
+        "seoul.typical_ltv",
+        "seoul.deposit_to_monthly_rent_months"
+      ],
+      "metrics": {
+        "landPricePerPyeong": {
+          "id": "seocho.landPricePerPyeong",
+          "range": {
+            "min": 75000000,
+            "max": 180000000
+          },
+          "unit": "KRW/pyeong_land",
+          "sourceIds": [
+            "molit",
+            "seoul-open-data",
+            "rsquare"
+          ],
+          "sourceNames": [
+            "국토교통부 실거래가 공개시스템 (MOLIT)",
+            "서울 열린데이터광장 (Seoul Open Data Plaza)",
+            "알스퀘어 (RSQUARE)"
+          ],
+          "sourceRole": "verification_candidates_only",
+          "tag": "reference/approximate - verify",
+          "confidence": "low",
+          "verificationStatus": "not_verified",
+          "provenance": {
+            "kind": "assumption",
+            "assumptionId": "seocho.landPricePerPyeong",
+            "confidence": "low"
+          },
+          "notes": "Whole-property purchase consideration / land area in pyeong; includes building consideration, excludes acquisition costs and separately payable VAT. Broad offline demo estimate; no source observation supports these exact endpoints."
+        },
+        "gfaPricePerPyeong": {
+          "id": "seocho.gfaPricePerPyeong",
+          "range": {
+            "min": 20000000,
+            "max": 50000000
+          },
+          "unit": "KRW/pyeong_gfa",
+          "sourceIds": [
+            "molit",
+            "seoul-open-data",
+            "rsquare"
+          ],
+          "sourceNames": [
+            "국토교통부 실거래가 공개시스템 (MOLIT)",
+            "서울 열린데이터광장 (Seoul Open Data Plaza)",
+            "알스퀘어 (RSQUARE)"
+          ],
+          "sourceRole": "verification_candidates_only",
+          "tag": "reference/approximate - verify",
+          "confidence": "low",
+          "verificationStatus": "not_verified",
+          "provenance": {
+            "kind": "assumption",
+            "assumptionId": "seocho.gfaPricePerPyeong",
+            "confidence": "low"
+          },
+          "notes": "Same whole-property purchase consideration / total registered gross floor area in pyeong, including basement; not building-only construction value. Broad offline demo estimate; no source observation supports these exact endpoints."
+        },
+        "retail1fRentPerPyeongMonth": {
+          "id": "seocho.retail1fRentPerPyeongMonth",
+          "range": {
+            "min": 120000,
+            "max": 300000
+          },
+          "unit": "KRW/pyeong_exclusive/month",
+          "sourceIds": [
+            "kreb",
+            "broker-quotes"
+          ],
+          "sourceNames": [
+            "한국부동산원 상업용부동산 임대동향조사",
+            "현지 공인중개사 확인 / 거래별 중개보수 견적"
+          ],
+          "sourceRole": "verification_candidates_only",
+          "tag": "reference/approximate - verify",
+          "confidence": "low",
+          "verificationStatus": "not_verified",
+          "provenance": {
+            "kind": "assumption",
+            "assumptionId": "seocho.retail1fRentPerPyeongMonth",
+            "confidence": "low"
+          },
+          "notes": "Potential face monthly base rent per exclusive leasable pyeong for ordinary 1F retail; excludes deposit conversion, VAT, management fees, key money and incentives. Broad offline demo estimate; no source observation supports these exact endpoints."
+        },
+        "upperFloorRentPerPyeongMonth": {
+          "id": "seocho.upperFloorRentPerPyeongMonth",
+          "range": {
+            "min": 50000,
+            "max": 110000
+          },
+          "unit": "KRW/pyeong_exclusive/month",
+          "sourceIds": [
+            "kreb",
+            "broker-quotes"
+          ],
+          "sourceNames": [
+            "한국부동산원 상업용부동산 임대동향조사",
+            "현지 공인중개사 확인 / 거래별 중개보수 견적"
+          ],
+          "sourceRole": "verification_candidates_only",
+          "tag": "reference/approximate - verify",
+          "confidence": "low",
+          "verificationStatus": "not_verified",
+          "provenance": {
+            "kind": "assumption",
+            "assumptionId": "seocho.upperFloorRentPerPyeongMonth",
+            "confidence": "low"
+          },
+          "notes": "Potential face monthly base rent per exclusive leasable pyeong for ordinary 2F+ office/neighborhood-service space; same exclusions as 1F; excludes basement and rooftop. Broad offline demo estimate; no source observation supports these exact endpoints."
+        },
+        "vacancyRate": {
+          "id": "seocho.vacancyRate",
+          "range": {
+            "min": 0.05,
+            "max": 0.13
+          },
+          "unit": "ratio",
+          "sourceIds": [
+            "kreb",
+            "broker-quotes"
+          ],
+          "sourceNames": [
+            "한국부동산원 상업용부동산 임대동향조사",
+            "현지 공인중개사 확인 / 거래별 중개보수 견적"
+          ],
+          "sourceRole": "verification_candidates_only",
+          "tag": "reference/approximate - verify",
+          "confidence": "low",
+          "verificationStatus": "not_verified",
+          "provenance": {
+            "kind": "assumption",
+            "assumptionId": "seocho.vacancyRate",
+            "confidence": "low"
+          },
+          "notes": "Vacant exclusive leasable area / total exclusive leasable area at a point in time; synthetic physical vacancy, not credit loss, annual rent loss or an official district statistic. Broad offline demo estimate; no source observation supports these exact endpoints."
+        },
+        "capRate": {
+          "id": "seocho.capRate",
+          "range": {
+            "min": 0.023,
+            "max": 0.038
+          },
+          "unit": "ratio/year",
+          "sourceIds": [
+            "rsquare",
+            "jll-korea",
+            "cbre-korea",
+            "broker-quotes"
+          ],
+          "sourceNames": [
+            "알스퀘어 (RSQUARE)",
+            "JLL Korea",
+            "CBRE Korea",
+            "현지 공인중개사 확인 / 거래별 중개보수 견적"
+          ],
+          "sourceRole": "verification_candidates_only",
+          "tag": "reference/approximate - verify",
+          "confidence": "low",
+          "verificationStatus": "not_verified",
+          "provenance": {
+            "kind": "assumption",
+            "assumptionId": "seocho.capRate",
+            "confidence": "low"
+          },
+          "notes": "Year-1 forward unlevered NOI / whole-property purchase price before acquisition costs; NOI after vacancy and owner operating expenses, before financing, income taxes and capex. Broad offline demo estimate; no source observation supports these exact endpoints."
+        }
+      }
+    },
+    {
+      "id": "songpa",
+      "nameKo": "송파구",
+      "neighborhoods": [
+        "잠실동",
+        "문정동"
+      ],
+      "scope": "Selected example neighborhoods; bands are not measured gu-wide statistics or matched observations.",
+      "sharedRefIds": [
+        "seoul.loan_interest_rate",
+        "seoul.typical_ltv",
+        "seoul.deposit_to_monthly_rent_months"
+      ],
+      "metrics": {
+        "landPricePerPyeong": {
+          "id": "songpa.landPricePerPyeong",
+          "range": {
+            "min": 50000000,
+            "max": 120000000
+          },
+          "unit": "KRW/pyeong_land",
+          "sourceIds": [
+            "molit",
+            "seoul-open-data",
+            "rsquare"
+          ],
+          "sourceNames": [
+            "국토교통부 실거래가 공개시스템 (MOLIT)",
+            "서울 열린데이터광장 (Seoul Open Data Plaza)",
+            "알스퀘어 (RSQUARE)"
+          ],
+          "sourceRole": "verification_candidates_only",
+          "tag": "reference/approximate - verify",
+          "confidence": "low",
+          "verificationStatus": "not_verified",
+          "provenance": {
+            "kind": "assumption",
+            "assumptionId": "songpa.landPricePerPyeong",
+            "confidence": "low"
+          },
+          "notes": "Whole-property purchase consideration / land area in pyeong; includes building consideration, excludes acquisition costs and separately payable VAT. Broad offline demo estimate; no source observation supports these exact endpoints."
+        },
+        "gfaPricePerPyeong": {
+          "id": "songpa.gfaPricePerPyeong",
+          "range": {
+            "min": 15000000,
+            "max": 35000000
+          },
+          "unit": "KRW/pyeong_gfa",
+          "sourceIds": [
+            "molit",
+            "seoul-open-data",
+            "rsquare"
+          ],
+          "sourceNames": [
+            "국토교통부 실거래가 공개시스템 (MOLIT)",
+            "서울 열린데이터광장 (Seoul Open Data Plaza)",
+            "알스퀘어 (RSQUARE)"
+          ],
+          "sourceRole": "verification_candidates_only",
+          "tag": "reference/approximate - verify",
+          "confidence": "low",
+          "verificationStatus": "not_verified",
+          "provenance": {
+            "kind": "assumption",
+            "assumptionId": "songpa.gfaPricePerPyeong",
+            "confidence": "low"
+          },
+          "notes": "Same whole-property purchase consideration / total registered gross floor area in pyeong, including basement; not building-only construction value. Broad offline demo estimate; no source observation supports these exact endpoints."
+        },
+        "retail1fRentPerPyeongMonth": {
+          "id": "songpa.retail1fRentPerPyeongMonth",
+          "range": {
+            "min": 90000,
+            "max": 220000
+          },
+          "unit": "KRW/pyeong_exclusive/month",
+          "sourceIds": [
+            "kreb",
+            "broker-quotes"
+          ],
+          "sourceNames": [
+            "한국부동산원 상업용부동산 임대동향조사",
+            "현지 공인중개사 확인 / 거래별 중개보수 견적"
+          ],
+          "sourceRole": "verification_candidates_only",
+          "tag": "reference/approximate - verify",
+          "confidence": "low",
+          "verificationStatus": "not_verified",
+          "provenance": {
+            "kind": "assumption",
+            "assumptionId": "songpa.retail1fRentPerPyeongMonth",
+            "confidence": "low"
+          },
+          "notes": "Potential face monthly base rent per exclusive leasable pyeong for ordinary 1F retail; excludes deposit conversion, VAT, management fees, key money and incentives. Broad offline demo estimate; no source observation supports these exact endpoints."
+        },
+        "upperFloorRentPerPyeongMonth": {
+          "id": "songpa.upperFloorRentPerPyeongMonth",
+          "range": {
+            "min": 40000,
+            "max": 85000
+          },
+          "unit": "KRW/pyeong_exclusive/month",
+          "sourceIds": [
+            "kreb",
+            "broker-quotes"
+          ],
+          "sourceNames": [
+            "한국부동산원 상업용부동산 임대동향조사",
+            "현지 공인중개사 확인 / 거래별 중개보수 견적"
+          ],
+          "sourceRole": "verification_candidates_only",
+          "tag": "reference/approximate - verify",
+          "confidence": "low",
+          "verificationStatus": "not_verified",
+          "provenance": {
+            "kind": "assumption",
+            "assumptionId": "songpa.upperFloorRentPerPyeongMonth",
+            "confidence": "low"
+          },
+          "notes": "Potential face monthly base rent per exclusive leasable pyeong for ordinary 2F+ office/neighborhood-service space; same exclusions as 1F; excludes basement and rooftop. Broad offline demo estimate; no source observation supports these exact endpoints."
+        },
+        "vacancyRate": {
+          "id": "songpa.vacancyRate",
+          "range": {
+            "min": 0.06,
+            "max": 0.15
+          },
+          "unit": "ratio",
+          "sourceIds": [
+            "kreb",
+            "broker-quotes"
+          ],
+          "sourceNames": [
+            "한국부동산원 상업용부동산 임대동향조사",
+            "현지 공인중개사 확인 / 거래별 중개보수 견적"
+          ],
+          "sourceRole": "verification_candidates_only",
+          "tag": "reference/approximate - verify",
+          "confidence": "low",
+          "verificationStatus": "not_verified",
+          "provenance": {
+            "kind": "assumption",
+            "assumptionId": "songpa.vacancyRate",
+            "confidence": "low"
+          },
+          "notes": "Vacant exclusive leasable area / total exclusive leasable area at a point in time; synthetic physical vacancy, not credit loss, annual rent loss or an official district statistic. Broad offline demo estimate; no source observation supports these exact endpoints."
+        },
+        "capRate": {
+          "id": "songpa.capRate",
+          "range": {
+            "min": 0.028,
+            "max": 0.042
+          },
+          "unit": "ratio/year",
+          "sourceIds": [
+            "rsquare",
+            "jll-korea",
+            "cbre-korea",
+            "broker-quotes"
+          ],
+          "sourceNames": [
+            "알스퀘어 (RSQUARE)",
+            "JLL Korea",
+            "CBRE Korea",
+            "현지 공인중개사 확인 / 거래별 중개보수 견적"
+          ],
+          "sourceRole": "verification_candidates_only",
+          "tag": "reference/approximate - verify",
+          "confidence": "low",
+          "verificationStatus": "not_verified",
+          "provenance": {
+            "kind": "assumption",
+            "assumptionId": "songpa.capRate",
+            "confidence": "low"
+          },
+          "notes": "Year-1 forward unlevered NOI / whole-property purchase price before acquisition costs; NOI after vacancy and owner operating expenses, before financing, income taxes and capex. Broad offline demo estimate; no source observation supports these exact endpoints."
+        }
+      }
+    },
+    {
+      "id": "mapo",
+      "nameKo": "마포구",
+      "neighborhoods": [
+        "합정동",
+        "연남동",
+        "서교동",
+        "공덕동"
+      ],
+      "scope": "Selected example neighborhoods; bands are not measured gu-wide statistics or matched observations.",
+      "sharedRefIds": [
+        "seoul.loan_interest_rate",
+        "seoul.typical_ltv",
+        "seoul.deposit_to_monthly_rent_months"
+      ],
+      "metrics": {
+        "landPricePerPyeong": {
+          "id": "mapo.landPricePerPyeong",
+          "range": {
+            "min": 50000000,
+            "max": 140000000
+          },
+          "unit": "KRW/pyeong_land",
+          "sourceIds": [
+            "molit",
+            "seoul-open-data",
+            "rsquare"
+          ],
+          "sourceNames": [
+            "국토교통부 실거래가 공개시스템 (MOLIT)",
+            "서울 열린데이터광장 (Seoul Open Data Plaza)",
+            "알스퀘어 (RSQUARE)"
+          ],
+          "sourceRole": "verification_candidates_only",
+          "tag": "reference/approximate - verify",
+          "confidence": "low",
+          "verificationStatus": "not_verified",
+          "provenance": {
+            "kind": "assumption",
+            "assumptionId": "mapo.landPricePerPyeong",
+            "confidence": "low"
+          },
+          "notes": "Whole-property purchase consideration / land area in pyeong; includes building consideration, excludes acquisition costs and separately payable VAT. Broad offline demo estimate; no source observation supports these exact endpoints."
+        },
+        "gfaPricePerPyeong": {
+          "id": "mapo.gfaPricePerPyeong",
+          "range": {
+            "min": 15000000,
+            "max": 40000000
+          },
+          "unit": "KRW/pyeong_gfa",
+          "sourceIds": [
+            "molit",
+            "seoul-open-data",
+            "rsquare"
+          ],
+          "sourceNames": [
+            "국토교통부 실거래가 공개시스템 (MOLIT)",
+            "서울 열린데이터광장 (Seoul Open Data Plaza)",
+            "알스퀘어 (RSQUARE)"
+          ],
+          "sourceRole": "verification_candidates_only",
+          "tag": "reference/approximate - verify",
+          "confidence": "low",
+          "verificationStatus": "not_verified",
+          "provenance": {
+            "kind": "assumption",
+            "assumptionId": "mapo.gfaPricePerPyeong",
+            "confidence": "low"
+          },
+          "notes": "Same whole-property purchase consideration / total registered gross floor area in pyeong, including basement; not building-only construction value. Broad offline demo estimate; no source observation supports these exact endpoints."
+        },
+        "retail1fRentPerPyeongMonth": {
+          "id": "mapo.retail1fRentPerPyeongMonth",
+          "range": {
+            "min": 110000,
+            "max": 300000
+          },
+          "unit": "KRW/pyeong_exclusive/month",
+          "sourceIds": [
+            "kreb",
+            "broker-quotes"
+          ],
+          "sourceNames": [
+            "한국부동산원 상업용부동산 임대동향조사",
+            "현지 공인중개사 확인 / 거래별 중개보수 견적"
+          ],
+          "sourceRole": "verification_candidates_only",
+          "tag": "reference/approximate - verify",
+          "confidence": "low",
+          "verificationStatus": "not_verified",
+          "provenance": {
+            "kind": "assumption",
+            "assumptionId": "mapo.retail1fRentPerPyeongMonth",
+            "confidence": "low"
+          },
+          "notes": "Potential face monthly base rent per exclusive leasable pyeong for ordinary 1F retail; excludes deposit conversion, VAT, management fees, key money and incentives. Broad offline demo estimate; no source observation supports these exact endpoints."
+        },
+        "upperFloorRentPerPyeongMonth": {
+          "id": "mapo.upperFloorRentPerPyeongMonth",
+          "range": {
+            "min": 40000,
+            "max": 90000
+          },
+          "unit": "KRW/pyeong_exclusive/month",
+          "sourceIds": [
+            "kreb",
+            "broker-quotes"
+          ],
+          "sourceNames": [
+            "한국부동산원 상업용부동산 임대동향조사",
+            "현지 공인중개사 확인 / 거래별 중개보수 견적"
+          ],
+          "sourceRole": "verification_candidates_only",
+          "tag": "reference/approximate - verify",
+          "confidence": "low",
+          "verificationStatus": "not_verified",
+          "provenance": {
+            "kind": "assumption",
+            "assumptionId": "mapo.upperFloorRentPerPyeongMonth",
+            "confidence": "low"
+          },
+          "notes": "Potential face monthly base rent per exclusive leasable pyeong for ordinary 2F+ office/neighborhood-service space; same exclusions as 1F; excludes basement and rooftop. Broad offline demo estimate; no source observation supports these exact endpoints."
+        },
+        "vacancyRate": {
+          "id": "mapo.vacancyRate",
+          "range": {
+            "min": 0.07,
+            "max": 0.16
+          },
+          "unit": "ratio",
+          "sourceIds": [
+            "kreb",
+            "broker-quotes"
+          ],
+          "sourceNames": [
+            "한국부동산원 상업용부동산 임대동향조사",
+            "현지 공인중개사 확인 / 거래별 중개보수 견적"
+          ],
+          "sourceRole": "verification_candidates_only",
+          "tag": "reference/approximate - verify",
+          "confidence": "low",
+          "verificationStatus": "not_verified",
+          "provenance": {
+            "kind": "assumption",
+            "assumptionId": "mapo.vacancyRate",
+            "confidence": "low"
+          },
+          "notes": "Vacant exclusive leasable area / total exclusive leasable area at a point in time; synthetic physical vacancy, not credit loss, annual rent loss or an official district statistic. Broad offline demo estimate; no source observation supports these exact endpoints."
+        },
+        "capRate": {
+          "id": "mapo.capRate",
+          "range": {
+            "min": 0.025,
+            "max": 0.04
+          },
+          "unit": "ratio/year",
+          "sourceIds": [
+            "rsquare",
+            "jll-korea",
+            "cbre-korea",
+            "broker-quotes"
+          ],
+          "sourceNames": [
+            "알스퀘어 (RSQUARE)",
+            "JLL Korea",
+            "CBRE Korea",
+            "현지 공인중개사 확인 / 거래별 중개보수 견적"
+          ],
+          "sourceRole": "verification_candidates_only",
+          "tag": "reference/approximate - verify",
+          "confidence": "low",
+          "verificationStatus": "not_verified",
+          "provenance": {
+            "kind": "assumption",
+            "assumptionId": "mapo.capRate",
+            "confidence": "low"
+          },
+          "notes": "Year-1 forward unlevered NOI / whole-property purchase price before acquisition costs; NOI after vacancy and owner operating expenses, before financing, income taxes and capex. Broad offline demo estimate; no source observation supports these exact endpoints."
+        }
+      }
+    },
+    {
+      "id": "seongdong",
+      "nameKo": "성동구",
+      "neighborhoods": [
+        "성수동"
+      ],
+      "scope": "Selected example neighborhoods; bands are not measured gu-wide statistics or matched observations.",
+      "sharedRefIds": [
+        "seoul.loan_interest_rate",
+        "seoul.typical_ltv",
+        "seoul.deposit_to_monthly_rent_months"
+      ],
+      "metrics": {
+        "landPricePerPyeong": {
+          "id": "seongdong.landPricePerPyeong",
+          "range": {
+            "min": 70000000,
+            "max": 200000000
+          },
+          "unit": "KRW/pyeong_land",
+          "sourceIds": [
+            "molit",
+            "seoul-open-data",
+            "rsquare"
+          ],
+          "sourceNames": [
+            "국토교통부 실거래가 공개시스템 (MOLIT)",
+            "서울 열린데이터광장 (Seoul Open Data Plaza)",
+            "알스퀘어 (RSQUARE)"
+          ],
+          "sourceRole": "verification_candidates_only",
+          "tag": "reference/approximate - verify",
+          "confidence": "low",
+          "verificationStatus": "not_verified",
+          "provenance": {
+            "kind": "assumption",
+            "assumptionId": "seongdong.landPricePerPyeong",
+            "confidence": "low"
+          },
+          "notes": "Whole-property purchase consideration / land area in pyeong; includes building consideration, excludes acquisition costs and separately payable VAT. Broad offline demo estimate; no source observation supports these exact endpoints."
+        },
+        "gfaPricePerPyeong": {
+          "id": "seongdong.gfaPricePerPyeong",
+          "range": {
+            "min": 20000000,
+            "max": 60000000
+          },
+          "unit": "KRW/pyeong_gfa",
+          "sourceIds": [
+            "molit",
+            "seoul-open-data",
+            "rsquare"
+          ],
+          "sourceNames": [
+            "국토교통부 실거래가 공개시스템 (MOLIT)",
+            "서울 열린데이터광장 (Seoul Open Data Plaza)",
+            "알스퀘어 (RSQUARE)"
+          ],
+          "sourceRole": "verification_candidates_only",
+          "tag": "reference/approximate - verify",
+          "confidence": "low",
+          "verificationStatus": "not_verified",
+          "provenance": {
+            "kind": "assumption",
+            "assumptionId": "seongdong.gfaPricePerPyeong",
+            "confidence": "low"
+          },
+          "notes": "Same whole-property purchase consideration / total registered gross floor area in pyeong, including basement; not building-only construction value. Broad offline demo estimate; no source observation supports these exact endpoints."
+        },
+        "retail1fRentPerPyeongMonth": {
+          "id": "seongdong.retail1fRentPerPyeongMonth",
+          "range": {
+            "min": 130000,
+            "max": 400000
+          },
+          "unit": "KRW/pyeong_exclusive/month",
+          "sourceIds": [
+            "kreb",
+            "broker-quotes"
+          ],
+          "sourceNames": [
+            "한국부동산원 상업용부동산 임대동향조사",
+            "현지 공인중개사 확인 / 거래별 중개보수 견적"
+          ],
+          "sourceRole": "verification_candidates_only",
+          "tag": "reference/approximate - verify",
+          "confidence": "low",
+          "verificationStatus": "not_verified",
+          "provenance": {
+            "kind": "assumption",
+            "assumptionId": "seongdong.retail1fRentPerPyeongMonth",
+            "confidence": "low"
+          },
+          "notes": "Potential face monthly base rent per exclusive leasable pyeong for ordinary 1F retail; excludes deposit conversion, VAT, management fees, key money and incentives. Broad offline demo estimate; no source observation supports these exact endpoints."
+        },
+        "upperFloorRentPerPyeongMonth": {
+          "id": "seongdong.upperFloorRentPerPyeongMonth",
+          "range": {
+            "min": 50000,
+            "max": 120000
+          },
+          "unit": "KRW/pyeong_exclusive/month",
+          "sourceIds": [
+            "kreb",
+            "broker-quotes"
+          ],
+          "sourceNames": [
+            "한국부동산원 상업용부동산 임대동향조사",
+            "현지 공인중개사 확인 / 거래별 중개보수 견적"
+          ],
+          "sourceRole": "verification_candidates_only",
+          "tag": "reference/approximate - verify",
+          "confidence": "low",
+          "verificationStatus": "not_verified",
+          "provenance": {
+            "kind": "assumption",
+            "assumptionId": "seongdong.upperFloorRentPerPyeongMonth",
+            "confidence": "low"
+          },
+          "notes": "Potential face monthly base rent per exclusive leasable pyeong for ordinary 2F+ office/neighborhood-service space; same exclusions as 1F; excludes basement and rooftop. Broad offline demo estimate; no source observation supports these exact endpoints."
+        },
+        "vacancyRate": {
+          "id": "seongdong.vacancyRate",
+          "range": {
+            "min": 0.05,
+            "max": 0.14
+          },
+          "unit": "ratio",
+          "sourceIds": [
+            "kreb",
+            "broker-quotes"
+          ],
+          "sourceNames": [
+            "한국부동산원 상업용부동산 임대동향조사",
+            "현지 공인중개사 확인 / 거래별 중개보수 견적"
+          ],
+          "sourceRole": "verification_candidates_only",
+          "tag": "reference/approximate - verify",
+          "confidence": "low",
+          "verificationStatus": "not_verified",
+          "provenance": {
+            "kind": "assumption",
+            "assumptionId": "seongdong.vacancyRate",
+            "confidence": "low"
+          },
+          "notes": "Vacant exclusive leasable area / total exclusive leasable area at a point in time; synthetic physical vacancy, not credit loss, annual rent loss or an official district statistic. Broad offline demo estimate; no source observation supports these exact endpoints."
+        },
+        "capRate": {
+          "id": "seongdong.capRate",
+          "range": {
+            "min": 0.02,
+            "max": 0.035
+          },
+          "unit": "ratio/year",
+          "sourceIds": [
+            "rsquare",
+            "jll-korea",
+            "cbre-korea",
+            "broker-quotes"
+          ],
+          "sourceNames": [
+            "알스퀘어 (RSQUARE)",
+            "JLL Korea",
+            "CBRE Korea",
+            "현지 공인중개사 확인 / 거래별 중개보수 견적"
+          ],
+          "sourceRole": "verification_candidates_only",
+          "tag": "reference/approximate - verify",
+          "confidence": "low",
+          "verificationStatus": "not_verified",
+          "provenance": {
+            "kind": "assumption",
+            "assumptionId": "seongdong.capRate",
+            "confidence": "low"
+          },
+          "notes": "Year-1 forward unlevered NOI / whole-property purchase price before acquisition costs; NOI after vacancy and owner operating expenses, before financing, income taxes and capex. Broad offline demo estimate; no source observation supports these exact endpoints."
+        }
+      }
+    },
+    {
+      "id": "yongsan",
+      "nameKo": "용산구",
+      "neighborhoods": [
+        "한남동",
+        "이태원동"
+      ],
+      "scope": "Selected example neighborhoods; bands are not measured gu-wide statistics or matched observations.",
+      "sharedRefIds": [
+        "seoul.loan_interest_rate",
+        "seoul.typical_ltv",
+        "seoul.deposit_to_monthly_rent_months"
+      ],
+      "metrics": {
+        "landPricePerPyeong": {
+          "id": "yongsan.landPricePerPyeong",
+          "range": {
+            "min": 70000000,
+            "max": 200000000
+          },
+          "unit": "KRW/pyeong_land",
+          "sourceIds": [
+            "molit",
+            "seoul-open-data",
+            "rsquare"
+          ],
+          "sourceNames": [
+            "국토교통부 실거래가 공개시스템 (MOLIT)",
+            "서울 열린데이터광장 (Seoul Open Data Plaza)",
+            "알스퀘어 (RSQUARE)"
+          ],
+          "sourceRole": "verification_candidates_only",
+          "tag": "reference/approximate - verify",
+          "confidence": "low",
+          "verificationStatus": "not_verified",
+          "provenance": {
+            "kind": "assumption",
+            "assumptionId": "yongsan.landPricePerPyeong",
+            "confidence": "low"
+          },
+          "notes": "Whole-property purchase consideration / land area in pyeong; includes building consideration, excludes acquisition costs and separately payable VAT. Broad offline demo estimate; no source observation supports these exact endpoints."
+        },
+        "gfaPricePerPyeong": {
+          "id": "yongsan.gfaPricePerPyeong",
+          "range": {
+            "min": 20000000,
+            "max": 60000000
+          },
+          "unit": "KRW/pyeong_gfa",
+          "sourceIds": [
+            "molit",
+            "seoul-open-data",
+            "rsquare"
+          ],
+          "sourceNames": [
+            "국토교통부 실거래가 공개시스템 (MOLIT)",
+            "서울 열린데이터광장 (Seoul Open Data Plaza)",
+            "알스퀘어 (RSQUARE)"
+          ],
+          "sourceRole": "verification_candidates_only",
+          "tag": "reference/approximate - verify",
+          "confidence": "low",
+          "verificationStatus": "not_verified",
+          "provenance": {
+            "kind": "assumption",
+            "assumptionId": "yongsan.gfaPricePerPyeong",
+            "confidence": "low"
+          },
+          "notes": "Same whole-property purchase consideration / total registered gross floor area in pyeong, including basement; not building-only construction value. Broad offline demo estimate; no source observation supports these exact endpoints."
+        },
+        "retail1fRentPerPyeongMonth": {
+          "id": "yongsan.retail1fRentPerPyeongMonth",
+          "range": {
+            "min": 120000,
+            "max": 400000
+          },
+          "unit": "KRW/pyeong_exclusive/month",
+          "sourceIds": [
+            "kreb",
+            "broker-quotes"
+          ],
+          "sourceNames": [
+            "한국부동산원 상업용부동산 임대동향조사",
+            "현지 공인중개사 확인 / 거래별 중개보수 견적"
+          ],
+          "sourceRole": "verification_candidates_only",
+          "tag": "reference/approximate - verify",
+          "confidence": "low",
+          "verificationStatus": "not_verified",
+          "provenance": {
+            "kind": "assumption",
+            "assumptionId": "yongsan.retail1fRentPerPyeongMonth",
+            "confidence": "low"
+          },
+          "notes": "Potential face monthly base rent per exclusive leasable pyeong for ordinary 1F retail; excludes deposit conversion, VAT, management fees, key money and incentives. Broad offline demo estimate; no source observation supports these exact endpoints."
+        },
+        "upperFloorRentPerPyeongMonth": {
+          "id": "yongsan.upperFloorRentPerPyeongMonth",
+          "range": {
+            "min": 45000,
+            "max": 110000
+          },
+          "unit": "KRW/pyeong_exclusive/month",
+          "sourceIds": [
+            "kreb",
+            "broker-quotes"
+          ],
+          "sourceNames": [
+            "한국부동산원 상업용부동산 임대동향조사",
+            "현지 공인중개사 확인 / 거래별 중개보수 견적"
+          ],
+          "sourceRole": "verification_candidates_only",
+          "tag": "reference/approximate - verify",
+          "confidence": "low",
+          "verificationStatus": "not_verified",
+          "provenance": {
+            "kind": "assumption",
+            "assumptionId": "yongsan.upperFloorRentPerPyeongMonth",
+            "confidence": "low"
+          },
+          "notes": "Potential face monthly base rent per exclusive leasable pyeong for ordinary 2F+ office/neighborhood-service space; same exclusions as 1F; excludes basement and rooftop. Broad offline demo estimate; no source observation supports these exact endpoints."
+        },
+        "vacancyRate": {
+          "id": "yongsan.vacancyRate",
+          "range": {
+            "min": 0.08,
+            "max": 0.2
+          },
+          "unit": "ratio",
+          "sourceIds": [
+            "kreb",
+            "broker-quotes"
+          ],
+          "sourceNames": [
+            "한국부동산원 상업용부동산 임대동향조사",
+            "현지 공인중개사 확인 / 거래별 중개보수 견적"
+          ],
+          "sourceRole": "verification_candidates_only",
+          "tag": "reference/approximate - verify",
+          "confidence": "low",
+          "verificationStatus": "not_verified",
+          "provenance": {
+            "kind": "assumption",
+            "assumptionId": "yongsan.vacancyRate",
+            "confidence": "low"
+          },
+          "notes": "Vacant exclusive leasable area / total exclusive leasable area at a point in time; synthetic physical vacancy, not credit loss, annual rent loss or an official district statistic. Broad offline demo estimate; no source observation supports these exact endpoints."
+        },
+        "capRate": {
+          "id": "yongsan.capRate",
+          "range": {
+            "min": 0.022,
+            "max": 0.038
+          },
+          "unit": "ratio/year",
+          "sourceIds": [
+            "rsquare",
+            "jll-korea",
+            "cbre-korea",
+            "broker-quotes"
+          ],
+          "sourceNames": [
+            "알스퀘어 (RSQUARE)",
+            "JLL Korea",
+            "CBRE Korea",
+            "현지 공인중개사 확인 / 거래별 중개보수 견적"
+          ],
+          "sourceRole": "verification_candidates_only",
+          "tag": "reference/approximate - verify",
+          "confidence": "low",
+          "verificationStatus": "not_verified",
+          "provenance": {
+            "kind": "assumption",
+            "assumptionId": "yongsan.capRate",
+            "confidence": "low"
+          },
+          "notes": "Year-1 forward unlevered NOI / whole-property purchase price before acquisition costs; NOI after vacancy and owner operating expenses, before financing, income taxes and capex. Broad offline demo estimate; no source observation supports these exact endpoints."
+        }
+      }
+    },
+    {
+      "id": "jongno",
+      "nameKo": "종로구",
+      "neighborhoods": [
+        "종로 일대"
+      ],
+      "scope": "Selected example neighborhoods; bands are not measured gu-wide statistics or matched observations.",
+      "sharedRefIds": [
+        "seoul.loan_interest_rate",
+        "seoul.typical_ltv",
+        "seoul.deposit_to_monthly_rent_months"
+      ],
+      "metrics": {
+        "landPricePerPyeong": {
+          "id": "jongno.landPricePerPyeong",
+          "range": {
+            "min": 40000000,
+            "max": 130000000
+          },
+          "unit": "KRW/pyeong_land",
+          "sourceIds": [
+            "molit",
+            "seoul-open-data",
+            "rsquare"
+          ],
+          "sourceNames": [
+            "국토교통부 실거래가 공개시스템 (MOLIT)",
+            "서울 열린데이터광장 (Seoul Open Data Plaza)",
+            "알스퀘어 (RSQUARE)"
+          ],
+          "sourceRole": "verification_candidates_only",
+          "tag": "reference/approximate - verify",
+          "confidence": "low",
+          "verificationStatus": "not_verified",
+          "provenance": {
+            "kind": "assumption",
+            "assumptionId": "jongno.landPricePerPyeong",
+            "confidence": "low"
+          },
+          "notes": "Whole-property purchase consideration / land area in pyeong; includes building consideration, excludes acquisition costs and separately payable VAT. Broad offline demo estimate; no source observation supports these exact endpoints."
+        },
+        "gfaPricePerPyeong": {
+          "id": "jongno.gfaPricePerPyeong",
+          "range": {
+            "min": 12000000,
+            "max": 38000000
+          },
+          "unit": "KRW/pyeong_gfa",
+          "sourceIds": [
+            "molit",
+            "seoul-open-data",
+            "rsquare"
+          ],
+          "sourceNames": [
+            "국토교통부 실거래가 공개시스템 (MOLIT)",
+            "서울 열린데이터광장 (Seoul Open Data Plaza)",
+            "알스퀘어 (RSQUARE)"
+          ],
+          "sourceRole": "verification_candidates_only",
+          "tag": "reference/approximate - verify",
+          "confidence": "low",
+          "verificationStatus": "not_verified",
+          "provenance": {
+            "kind": "assumption",
+            "assumptionId": "jongno.gfaPricePerPyeong",
+            "confidence": "low"
+          },
+          "notes": "Same whole-property purchase consideration / total registered gross floor area in pyeong, including basement; not building-only construction value. Broad offline demo estimate; no source observation supports these exact endpoints."
+        },
+        "retail1fRentPerPyeongMonth": {
+          "id": "jongno.retail1fRentPerPyeongMonth",
+          "range": {
+            "min": 100000,
+            "max": 300000
+          },
+          "unit": "KRW/pyeong_exclusive/month",
+          "sourceIds": [
+            "kreb",
+            "broker-quotes"
+          ],
+          "sourceNames": [
+            "한국부동산원 상업용부동산 임대동향조사",
+            "현지 공인중개사 확인 / 거래별 중개보수 견적"
+          ],
+          "sourceRole": "verification_candidates_only",
+          "tag": "reference/approximate - verify",
+          "confidence": "low",
+          "verificationStatus": "not_verified",
+          "provenance": {
+            "kind": "assumption",
+            "assumptionId": "jongno.retail1fRentPerPyeongMonth",
+            "confidence": "low"
+          },
+          "notes": "Potential face monthly base rent per exclusive leasable pyeong for ordinary 1F retail; excludes deposit conversion, VAT, management fees, key money and incentives. Broad offline demo estimate; no source observation supports these exact endpoints."
+        },
+        "upperFloorRentPerPyeongMonth": {
+          "id": "jongno.upperFloorRentPerPyeongMonth",
+          "range": {
+            "min": 35000,
+            "max": 90000
+          },
+          "unit": "KRW/pyeong_exclusive/month",
+          "sourceIds": [
+            "kreb",
+            "broker-quotes"
+          ],
+          "sourceNames": [
+            "한국부동산원 상업용부동산 임대동향조사",
+            "현지 공인중개사 확인 / 거래별 중개보수 견적"
+          ],
+          "sourceRole": "verification_candidates_only",
+          "tag": "reference/approximate - verify",
+          "confidence": "low",
+          "verificationStatus": "not_verified",
+          "provenance": {
+            "kind": "assumption",
+            "assumptionId": "jongno.upperFloorRentPerPyeongMonth",
+            "confidence": "low"
+          },
+          "notes": "Potential face monthly base rent per exclusive leasable pyeong for ordinary 2F+ office/neighborhood-service space; same exclusions as 1F; excludes basement and rooftop. Broad offline demo estimate; no source observation supports these exact endpoints."
+        },
+        "vacancyRate": {
+          "id": "jongno.vacancyRate",
+          "range": {
+            "min": 0.08,
+            "max": 0.18
+          },
+          "unit": "ratio",
+          "sourceIds": [
+            "kreb",
+            "broker-quotes"
+          ],
+          "sourceNames": [
+            "한국부동산원 상업용부동산 임대동향조사",
+            "현지 공인중개사 확인 / 거래별 중개보수 견적"
+          ],
+          "sourceRole": "verification_candidates_only",
+          "tag": "reference/approximate - verify",
+          "confidence": "low",
+          "verificationStatus": "not_verified",
+          "provenance": {
+            "kind": "assumption",
+            "assumptionId": "jongno.vacancyRate",
+            "confidence": "low"
+          },
+          "notes": "Vacant exclusive leasable area / total exclusive leasable area at a point in time; synthetic physical vacancy, not credit loss, annual rent loss or an official district statistic. Broad offline demo estimate; no source observation supports these exact endpoints."
+        },
+        "capRate": {
+          "id": "jongno.capRate",
+          "range": {
+            "min": 0.028,
+            "max": 0.043
+          },
+          "unit": "ratio/year",
+          "sourceIds": [
+            "rsquare",
+            "jll-korea",
+            "cbre-korea",
+            "broker-quotes"
+          ],
+          "sourceNames": [
+            "알스퀘어 (RSQUARE)",
+            "JLL Korea",
+            "CBRE Korea",
+            "현지 공인중개사 확인 / 거래별 중개보수 견적"
+          ],
+          "sourceRole": "verification_candidates_only",
+          "tag": "reference/approximate - verify",
+          "confidence": "low",
+          "verificationStatus": "not_verified",
+          "provenance": {
+            "kind": "assumption",
+            "assumptionId": "jongno.capRate",
+            "confidence": "low"
+          },
+          "notes": "Year-1 forward unlevered NOI / whole-property purchase price before acquisition costs; NOI after vacancy and owner operating expenses, before financing, income taxes and capex. Broad offline demo estimate; no source observation supports these exact endpoints."
+        }
+      }
+    },
+    {
+      "id": "jung",
+      "nameKo": "중구",
+      "neighborhoods": [
+        "을지로 일대",
+        "명동"
+      ],
+      "scope": "Selected example neighborhoods; bands are not measured gu-wide statistics or matched observations.",
+      "sharedRefIds": [
+        "seoul.loan_interest_rate",
+        "seoul.typical_ltv",
+        "seoul.deposit_to_monthly_rent_months"
+      ],
+      "metrics": {
+        "landPricePerPyeong": {
+          "id": "jung.landPricePerPyeong",
+          "range": {
+            "min": 50000000,
+            "max": 180000000
+          },
+          "unit": "KRW/pyeong_land",
+          "sourceIds": [
+            "molit",
+            "seoul-open-data",
+            "rsquare"
+          ],
+          "sourceNames": [
+            "국토교통부 실거래가 공개시스템 (MOLIT)",
+            "서울 열린데이터광장 (Seoul Open Data Plaza)",
+            "알스퀘어 (RSQUARE)"
+          ],
+          "sourceRole": "verification_candidates_only",
+          "tag": "reference/approximate - verify",
+          "confidence": "low",
+          "verificationStatus": "not_verified",
+          "provenance": {
+            "kind": "assumption",
+            "assumptionId": "jung.landPricePerPyeong",
+            "confidence": "low"
+          },
+          "notes": "Whole-property purchase consideration / land area in pyeong; includes building consideration, excludes acquisition costs and separately payable VAT. Broad offline demo estimate; no source observation supports these exact endpoints."
+        },
+        "gfaPricePerPyeong": {
+          "id": "jung.gfaPricePerPyeong",
+          "range": {
+            "min": 15000000,
+            "max": 50000000
+          },
+          "unit": "KRW/pyeong_gfa",
+          "sourceIds": [
+            "molit",
+            "seoul-open-data",
+            "rsquare"
+          ],
+          "sourceNames": [
+            "국토교통부 실거래가 공개시스템 (MOLIT)",
+            "서울 열린데이터광장 (Seoul Open Data Plaza)",
+            "알스퀘어 (RSQUARE)"
+          ],
+          "sourceRole": "verification_candidates_only",
+          "tag": "reference/approximate - verify",
+          "confidence": "low",
+          "verificationStatus": "not_verified",
+          "provenance": {
+            "kind": "assumption",
+            "assumptionId": "jung.gfaPricePerPyeong",
+            "confidence": "low"
+          },
+          "notes": "Same whole-property purchase consideration / total registered gross floor area in pyeong, including basement; not building-only construction value. Broad offline demo estimate; no source observation supports these exact endpoints."
+        },
+        "retail1fRentPerPyeongMonth": {
+          "id": "jung.retail1fRentPerPyeongMonth",
+          "range": {
+            "min": 120000,
+            "max": 450000
+          },
+          "unit": "KRW/pyeong_exclusive/month",
+          "sourceIds": [
+            "kreb",
+            "broker-quotes"
+          ],
+          "sourceNames": [
+            "한국부동산원 상업용부동산 임대동향조사",
+            "현지 공인중개사 확인 / 거래별 중개보수 견적"
+          ],
+          "sourceRole": "verification_candidates_only",
+          "tag": "reference/approximate - verify",
+          "confidence": "low",
+          "verificationStatus": "not_verified",
+          "provenance": {
+            "kind": "assumption",
+            "assumptionId": "jung.retail1fRentPerPyeongMonth",
+            "confidence": "low"
+          },
+          "notes": "Potential face monthly base rent per exclusive leasable pyeong for ordinary 1F retail; excludes deposit conversion, VAT, management fees, key money and incentives. Broad offline demo estimate; no source observation supports these exact endpoints."
+        },
+        "upperFloorRentPerPyeongMonth": {
+          "id": "jung.upperFloorRentPerPyeongMonth",
+          "range": {
+            "min": 40000,
+            "max": 110000
+          },
+          "unit": "KRW/pyeong_exclusive/month",
+          "sourceIds": [
+            "kreb",
+            "broker-quotes"
+          ],
+          "sourceNames": [
+            "한국부동산원 상업용부동산 임대동향조사",
+            "현지 공인중개사 확인 / 거래별 중개보수 견적"
+          ],
+          "sourceRole": "verification_candidates_only",
+          "tag": "reference/approximate - verify",
+          "confidence": "low",
+          "verificationStatus": "not_verified",
+          "provenance": {
+            "kind": "assumption",
+            "assumptionId": "jung.upperFloorRentPerPyeongMonth",
+            "confidence": "low"
+          },
+          "notes": "Potential face monthly base rent per exclusive leasable pyeong for ordinary 2F+ office/neighborhood-service space; same exclusions as 1F; excludes basement and rooftop. Broad offline demo estimate; no source observation supports these exact endpoints."
+        },
+        "vacancyRate": {
+          "id": "jung.vacancyRate",
+          "range": {
+            "min": 0.08,
+            "max": 0.22
+          },
+          "unit": "ratio",
+          "sourceIds": [
+            "kreb",
+            "broker-quotes"
+          ],
+          "sourceNames": [
+            "한국부동산원 상업용부동산 임대동향조사",
+            "현지 공인중개사 확인 / 거래별 중개보수 견적"
+          ],
+          "sourceRole": "verification_candidates_only",
+          "tag": "reference/approximate - verify",
+          "confidence": "low",
+          "verificationStatus": "not_verified",
+          "provenance": {
+            "kind": "assumption",
+            "assumptionId": "jung.vacancyRate",
+            "confidence": "low"
+          },
+          "notes": "Vacant exclusive leasable area / total exclusive leasable area at a point in time; synthetic physical vacancy, not credit loss, annual rent loss or an official district statistic. Broad offline demo estimate; no source observation supports these exact endpoints."
+        },
+        "capRate": {
+          "id": "jung.capRate",
+          "range": {
+            "min": 0.025,
+            "max": 0.04
+          },
+          "unit": "ratio/year",
+          "sourceIds": [
+            "rsquare",
+            "jll-korea",
+            "cbre-korea",
+            "broker-quotes"
+          ],
+          "sourceNames": [
+            "알스퀘어 (RSQUARE)",
+            "JLL Korea",
+            "CBRE Korea",
+            "현지 공인중개사 확인 / 거래별 중개보수 견적"
+          ],
+          "sourceRole": "verification_candidates_only",
+          "tag": "reference/approximate - verify",
+          "confidence": "low",
+          "verificationStatus": "not_verified",
+          "provenance": {
+            "kind": "assumption",
+            "assumptionId": "jung.capRate",
+            "confidence": "low"
+          },
+          "notes": "Year-1 forward unlevered NOI / whole-property purchase price before acquisition costs; NOI after vacancy and owner operating expenses, before financing, income taxes and capex. Broad offline demo estimate; no source observation supports these exact endpoints."
+        }
+      }
+    },
+    {
+      "id": "yeongdeungpo",
+      "nameKo": "영등포구",
+      "neighborhoods": [
+        "여의도동",
+        "문래동"
+      ],
+      "scope": "Selected example neighborhoods; bands are not measured gu-wide statistics or matched observations.",
+      "sharedRefIds": [
+        "seoul.loan_interest_rate",
+        "seoul.typical_ltv",
+        "seoul.deposit_to_monthly_rent_months"
+      ],
+      "metrics": {
+        "landPricePerPyeong": {
+          "id": "yeongdeungpo.landPricePerPyeong",
+          "range": {
+            "min": 30000000,
+            "max": 85000000
+          },
+          "unit": "KRW/pyeong_land",
+          "sourceIds": [
+            "molit",
+            "seoul-open-data",
+            "rsquare"
+          ],
+          "sourceNames": [
+            "국토교통부 실거래가 공개시스템 (MOLIT)",
+            "서울 열린데이터광장 (Seoul Open Data Plaza)",
+            "알스퀘어 (RSQUARE)"
+          ],
+          "sourceRole": "verification_candidates_only",
+          "tag": "reference/approximate - verify",
+          "confidence": "low",
+          "verificationStatus": "not_verified",
+          "provenance": {
+            "kind": "assumption",
+            "assumptionId": "yeongdeungpo.landPricePerPyeong",
+            "confidence": "low"
+          },
+          "notes": "Whole-property purchase consideration / land area in pyeong; includes building consideration, excludes acquisition costs and separately payable VAT. Broad offline demo estimate; no source observation supports these exact endpoints."
+        },
+        "gfaPricePerPyeong": {
+          "id": "yeongdeungpo.gfaPricePerPyeong",
+          "range": {
+            "min": 10000000,
+            "max": 28000000
+          },
+          "unit": "KRW/pyeong_gfa",
+          "sourceIds": [
+            "molit",
+            "seoul-open-data",
+            "rsquare"
+          ],
+          "sourceNames": [
+            "국토교통부 실거래가 공개시스템 (MOLIT)",
+            "서울 열린데이터광장 (Seoul Open Data Plaza)",
+            "알스퀘어 (RSQUARE)"
+          ],
+          "sourceRole": "verification_candidates_only",
+          "tag": "reference/approximate - verify",
+          "confidence": "low",
+          "verificationStatus": "not_verified",
+          "provenance": {
+            "kind": "assumption",
+            "assumptionId": "yeongdeungpo.gfaPricePerPyeong",
+            "confidence": "low"
+          },
+          "notes": "Same whole-property purchase consideration / total registered gross floor area in pyeong, including basement; not building-only construction value. Broad offline demo estimate; no source observation supports these exact endpoints."
+        },
+        "retail1fRentPerPyeongMonth": {
+          "id": "yeongdeungpo.retail1fRentPerPyeongMonth",
+          "range": {
+            "min": 80000,
+            "max": 200000
+          },
+          "unit": "KRW/pyeong_exclusive/month",
+          "sourceIds": [
+            "kreb",
+            "broker-quotes"
+          ],
+          "sourceNames": [
+            "한국부동산원 상업용부동산 임대동향조사",
+            "현지 공인중개사 확인 / 거래별 중개보수 견적"
+          ],
+          "sourceRole": "verification_candidates_only",
+          "tag": "reference/approximate - verify",
+          "confidence": "low",
+          "verificationStatus": "not_verified",
+          "provenance": {
+            "kind": "assumption",
+            "assumptionId": "yeongdeungpo.retail1fRentPerPyeongMonth",
+            "confidence": "low"
+          },
+          "notes": "Potential face monthly base rent per exclusive leasable pyeong for ordinary 1F retail; excludes deposit conversion, VAT, management fees, key money and incentives. Broad offline demo estimate; no source observation supports these exact endpoints."
+        },
+        "upperFloorRentPerPyeongMonth": {
+          "id": "yeongdeungpo.upperFloorRentPerPyeongMonth",
+          "range": {
+            "min": 35000,
+            "max": 80000
+          },
+          "unit": "KRW/pyeong_exclusive/month",
+          "sourceIds": [
+            "kreb",
+            "broker-quotes"
+          ],
+          "sourceNames": [
+            "한국부동산원 상업용부동산 임대동향조사",
+            "현지 공인중개사 확인 / 거래별 중개보수 견적"
+          ],
+          "sourceRole": "verification_candidates_only",
+          "tag": "reference/approximate - verify",
+          "confidence": "low",
+          "verificationStatus": "not_verified",
+          "provenance": {
+            "kind": "assumption",
+            "assumptionId": "yeongdeungpo.upperFloorRentPerPyeongMonth",
+            "confidence": "low"
+          },
+          "notes": "Potential face monthly base rent per exclusive leasable pyeong for ordinary 2F+ office/neighborhood-service space; same exclusions as 1F; excludes basement and rooftop. Broad offline demo estimate; no source observation supports these exact endpoints."
+        },
+        "vacancyRate": {
+          "id": "yeongdeungpo.vacancyRate",
+          "range": {
+            "min": 0.07,
+            "max": 0.17
+          },
+          "unit": "ratio",
+          "sourceIds": [
+            "kreb",
+            "broker-quotes"
+          ],
+          "sourceNames": [
+            "한국부동산원 상업용부동산 임대동향조사",
+            "현지 공인중개사 확인 / 거래별 중개보수 견적"
+          ],
+          "sourceRole": "verification_candidates_only",
+          "tag": "reference/approximate - verify",
+          "confidence": "low",
+          "verificationStatus": "not_verified",
+          "provenance": {
+            "kind": "assumption",
+            "assumptionId": "yeongdeungpo.vacancyRate",
+            "confidence": "low"
+          },
+          "notes": "Vacant exclusive leasable area / total exclusive leasable area at a point in time; synthetic physical vacancy, not credit loss, annual rent loss or an official district statistic. Broad offline demo estimate; no source observation supports these exact endpoints."
+        },
+        "capRate": {
+          "id": "yeongdeungpo.capRate",
+          "range": {
+            "min": 0.032,
+            "max": 0.048
+          },
+          "unit": "ratio/year",
+          "sourceIds": [
+            "rsquare",
+            "jll-korea",
+            "cbre-korea",
+            "broker-quotes"
+          ],
+          "sourceNames": [
+            "알스퀘어 (RSQUARE)",
+            "JLL Korea",
+            "CBRE Korea",
+            "현지 공인중개사 확인 / 거래별 중개보수 견적"
+          ],
+          "sourceRole": "verification_candidates_only",
+          "tag": "reference/approximate - verify",
+          "confidence": "low",
+          "verificationStatus": "not_verified",
+          "provenance": {
+            "kind": "assumption",
+            "assumptionId": "yeongdeungpo.capRate",
+            "confidence": "low"
+          },
+          "notes": "Year-1 forward unlevered NOI / whole-property purchase price before acquisition costs; NOI after vacancy and owner operating expenses, before financing, income taxes and capex. Broad offline demo estimate; no source observation supports these exact endpoints."
+        }
+      }
+    },
+    {
+      "id": "gwangjin",
+      "nameKo": "광진구",
+      "neighborhoods": [
+        "화양동",
+        "자양동",
+        "구의동"
+      ],
+      "scope": "Selected example neighborhoods; bands are not measured gu-wide statistics or matched observations.",
+      "sharedRefIds": [
+        "seoul.loan_interest_rate",
+        "seoul.typical_ltv",
+        "seoul.deposit_to_monthly_rent_months"
+      ],
+      "metrics": {
+        "landPricePerPyeong": {
+          "id": "gwangjin.landPricePerPyeong",
+          "range": {
+            "min": 35000000,
+            "max": 90000000
+          },
+          "unit": "KRW/pyeong_land",
+          "sourceIds": [
+            "molit",
+            "seoul-open-data",
+            "rsquare"
+          ],
+          "sourceNames": [
+            "국토교통부 실거래가 공개시스템 (MOLIT)",
+            "서울 열린데이터광장 (Seoul Open Data Plaza)",
+            "알스퀘어 (RSQUARE)"
+          ],
+          "sourceRole": "verification_candidates_only",
+          "tag": "reference/approximate - verify",
+          "confidence": "low",
+          "verificationStatus": "not_verified",
+          "provenance": {
+            "kind": "assumption",
+            "assumptionId": "gwangjin.landPricePerPyeong",
+            "confidence": "low"
+          },
+          "notes": "Whole-property purchase consideration / land area in pyeong; includes building consideration, excludes acquisition costs and separately payable VAT. Broad offline demo estimate; no source observation supports these exact endpoints."
+        },
+        "gfaPricePerPyeong": {
+          "id": "gwangjin.gfaPricePerPyeong",
+          "range": {
+            "min": 11000000,
+            "max": 30000000
+          },
+          "unit": "KRW/pyeong_gfa",
+          "sourceIds": [
+            "molit",
+            "seoul-open-data",
+            "rsquare"
+          ],
+          "sourceNames": [
+            "국토교통부 실거래가 공개시스템 (MOLIT)",
+            "서울 열린데이터광장 (Seoul Open Data Plaza)",
+            "알스퀘어 (RSQUARE)"
+          ],
+          "sourceRole": "verification_candidates_only",
+          "tag": "reference/approximate - verify",
+          "confidence": "low",
+          "verificationStatus": "not_verified",
+          "provenance": {
+            "kind": "assumption",
+            "assumptionId": "gwangjin.gfaPricePerPyeong",
+            "confidence": "low"
+          },
+          "notes": "Same whole-property purchase consideration / total registered gross floor area in pyeong, including basement; not building-only construction value. Broad offline demo estimate; no source observation supports these exact endpoints."
+        },
+        "retail1fRentPerPyeongMonth": {
+          "id": "gwangjin.retail1fRentPerPyeongMonth",
+          "range": {
+            "min": 80000,
+            "max": 220000
+          },
+          "unit": "KRW/pyeong_exclusive/month",
+          "sourceIds": [
+            "kreb",
+            "broker-quotes"
+          ],
+          "sourceNames": [
+            "한국부동산원 상업용부동산 임대동향조사",
+            "현지 공인중개사 확인 / 거래별 중개보수 견적"
+          ],
+          "sourceRole": "verification_candidates_only",
+          "tag": "reference/approximate - verify",
+          "confidence": "low",
+          "verificationStatus": "not_verified",
+          "provenance": {
+            "kind": "assumption",
+            "assumptionId": "gwangjin.retail1fRentPerPyeongMonth",
+            "confidence": "low"
+          },
+          "notes": "Potential face monthly base rent per exclusive leasable pyeong for ordinary 1F retail; excludes deposit conversion, VAT, management fees, key money and incentives. Broad offline demo estimate; no source observation supports these exact endpoints."
+        },
+        "upperFloorRentPerPyeongMonth": {
+          "id": "gwangjin.upperFloorRentPerPyeongMonth",
+          "range": {
+            "min": 35000,
+            "max": 75000
+          },
+          "unit": "KRW/pyeong_exclusive/month",
+          "sourceIds": [
+            "kreb",
+            "broker-quotes"
+          ],
+          "sourceNames": [
+            "한국부동산원 상업용부동산 임대동향조사",
+            "현지 공인중개사 확인 / 거래별 중개보수 견적"
+          ],
+          "sourceRole": "verification_candidates_only",
+          "tag": "reference/approximate - verify",
+          "confidence": "low",
+          "verificationStatus": "not_verified",
+          "provenance": {
+            "kind": "assumption",
+            "assumptionId": "gwangjin.upperFloorRentPerPyeongMonth",
+            "confidence": "low"
+          },
+          "notes": "Potential face monthly base rent per exclusive leasable pyeong for ordinary 2F+ office/neighborhood-service space; same exclusions as 1F; excludes basement and rooftop. Broad offline demo estimate; no source observation supports these exact endpoints."
+        },
+        "vacancyRate": {
+          "id": "gwangjin.vacancyRate",
+          "range": {
+            "min": 0.07,
+            "max": 0.16
+          },
+          "unit": "ratio",
+          "sourceIds": [
+            "kreb",
+            "broker-quotes"
+          ],
+          "sourceNames": [
+            "한국부동산원 상업용부동산 임대동향조사",
+            "현지 공인중개사 확인 / 거래별 중개보수 견적"
+          ],
+          "sourceRole": "verification_candidates_only",
+          "tag": "reference/approximate - verify",
+          "confidence": "low",
+          "verificationStatus": "not_verified",
+          "provenance": {
+            "kind": "assumption",
+            "assumptionId": "gwangjin.vacancyRate",
+            "confidence": "low"
+          },
+          "notes": "Vacant exclusive leasable area / total exclusive leasable area at a point in time; synthetic physical vacancy, not credit loss, annual rent loss or an official district statistic. Broad offline demo estimate; no source observation supports these exact endpoints."
+        },
+        "capRate": {
+          "id": "gwangjin.capRate",
+          "range": {
+            "min": 0.03,
+            "max": 0.045
+          },
+          "unit": "ratio/year",
+          "sourceIds": [
+            "rsquare",
+            "jll-korea",
+            "cbre-korea",
+            "broker-quotes"
+          ],
+          "sourceNames": [
+            "알스퀘어 (RSQUARE)",
+            "JLL Korea",
+            "CBRE Korea",
+            "현지 공인중개사 확인 / 거래별 중개보수 견적"
+          ],
+          "sourceRole": "verification_candidates_only",
+          "tag": "reference/approximate - verify",
+          "confidence": "low",
+          "verificationStatus": "not_verified",
+          "provenance": {
+            "kind": "assumption",
+            "assumptionId": "gwangjin.capRate",
+            "confidence": "low"
+          },
+          "notes": "Year-1 forward unlevered NOI / whole-property purchase price before acquisition costs; NOI after vacancy and owner operating expenses, before financing, income taxes and capex. Broad offline demo estimate; no source observation supports these exact endpoints."
+        }
+      }
+    }
+  ],
+  "citywide": {
+    "loanInterestRate": {
+      "id": "seoul.loan_interest_rate",
+      "range": {
+        "min": 0.04,
+        "max": 0.07
+      },
+      "demoDefault": 0.05,
+      "unit": "ratio/year",
+      "sourceIds": [
+        "lender-quotes"
+      ],
+      "sourceNames": [
+        "거래 금융기관의 개별 대출조건서"
+      ],
+      "sourceRole": "verification_candidates_only",
+      "tag": "reference/approximate - verify",
+      "confidence": "low",
+      "verificationStatus": "not_verified",
+      "provenance": {
+        "kind": "assumption",
+        "assumptionId": "seoul.loan_interest_rate",
+        "confidence": "low"
+      },
+      "notes": "Nominal annual interest for illustrative secured senior commercial-building debt; 2024-2026 context only. Not a quote or a current November 2026 rate. Excludes fees, bridge/project loans and distress."
+    },
+    "typicalLtv": {
+      "id": "seoul.typical_ltv",
+      "range": {
+        "min": 0.4,
+        "max": 0.6
+      },
+      "demoDefault": 0.5,
+      "unit": "ratio",
+      "sourceIds": [
+        "lender-quotes"
+      ],
+      "sourceNames": [
+        "거래 금융기관의 개별 대출조건서"
+      ],
+      "sourceRole": "verification_candidates_only",
+      "tag": "reference/approximate - verify",
+      "confidence": "low",
+      "verificationStatus": "not_verified",
+      "provenance": {
+        "kind": "assumption",
+        "assumptionId": "seoul.typical_ltv",
+        "confidence": "low"
+      },
+      "notes": "Illustrative loan / purchase-price funding ratio, subject to valuation, tenant-deposit deductions and debt-service approval. Not a regulatory maximum or lending entitlement."
+    },
+    "depositToMonthlyRentMonths": {
+      "id": "seoul.deposit_to_monthly_rent_months",
+      "range": {
+        "min": 10,
+        "max": 20
+      },
+      "demoDefault": 10,
+      "unit": "months_of_monthly_base_rent",
+      "sourceIds": [
+        "broker-quotes"
+      ],
+      "sourceNames": [
+        "현지 공인중개사 확인 / 거래별 중개보수 견적"
+      ],
+      "sourceRole": "verification_candidates_only",
+      "tag": "reference/approximate - verify",
+      "confidence": "low",
+      "verificationStatus": "not_verified",
+      "provenance": {
+        "kind": "assumption",
+        "assumptionId": "seoul.deposit_to_monthly_rent_months",
+        "confidence": "low"
+      },
+      "notes": "Demo convention: refundable security deposit = contracted monthly base rent x months. Negotiated actual deposits vary. This is not a legal deposit-to-rent conversion interest rate."
+    },
+    "acquisitionTaxRate": {
+      "id": "seoul.acquisition_tax_rate",
+      "value": 0.046,
+      "unit": "ratio_of_purchase_price",
+      "sourceIds": [
+        "wetax"
+      ],
+      "sourceNames": [
+        "위택스 (Wetax) / 관할 지방자치단체 세무부서"
+      ],
+      "sourceRole": "verification_candidates_only",
+      "tag": "reference/approximate - verify",
+      "confidence": "low",
+      "verificationStatus": "not_verified",
+      "provenance": {
+        "kind": "assumption",
+        "assumptionId": "seoul.acquisition_tax_rate",
+        "confidence": "low"
+      },
+      "notes": "Aggregate demo acquisition-related tax allowance of 4.6% as requested by PLAN. Not a verified statutory rate; legal basis, taxable base, surcharges, exemptions and purchaser/use-specific treatment are UNKNOWN."
+    },
+    "acquisitionBrokerageFeeRate": {
+      "id": "seoul.acquisition_brokerage_fee_rate",
+      "range": {
+        "min": 0.003,
+        "max": 0.009
+      },
+      "demoDefault": 0.005,
+      "unit": "ratio_of_purchase_price",
+      "sourceIds": [
+        "broker-quotes"
+      ],
+      "sourceNames": [
+        "현지 공인중개사 확인 / 거래별 중개보수 견적"
+      ],
+      "sourceRole": "verification_candidates_only",
+      "tag": "reference/approximate - verify",
+      "confidence": "low",
+      "verificationStatus": "not_verified",
+      "provenance": {
+        "kind": "assumption",
+        "assumptionId": "seoul.acquisition_brokerage_fee_rate",
+        "confidence": "low"
+      },
+      "notes": "Illustrative negotiated acquisition brokerage fee allowance before any service VAT; upper endpoint is a scenario input, not a statement of the legal fee cap."
+    },
+    "acquisitionMiscCostRate": {
+      "id": "seoul.acquisition_misc_cost_rate",
+      "range": {
+        "min": 0.001,
+        "max": 0.005
+      },
+      "demoDefault": 0.003,
+      "unit": "ratio_of_purchase_price",
+      "sourceIds": [
+        "broker-quotes",
+        "wetax"
+      ],
+      "sourceNames": [
+        "현지 공인중개사 확인 / 거래별 중개보수 견적",
+        "위택스 (Wetax) / 관할 지방자치단체 세무부서"
+      ],
+      "sourceRole": "verification_candidates_only",
+      "tag": "reference/approximate - verify",
+      "confidence": "low",
+      "verificationStatus": "not_verified",
+      "provenance": {
+        "kind": "assumption",
+        "assumptionId": "seoul.acquisition_misc_cost_rate",
+        "confidence": "low"
+      },
+      "notes": "Budget allowance for registration, legal/scrivener work, diligence and similar closing costs; excludes acquisition tax, brokerage, financing fees, capex and separately applicable VAT. Itemized quote UNKNOWN."
+    },
+    "loanOriginationFeeRate": {
+      "id": "seoul.loan_origination_fee_rate",
+      "range": {
+        "min": 0.002,
+        "max": 0.01
+      },
+      "demoDefault": 0.005,
+      "unit": "ratio_of_initial_loan",
+      "sourceIds": [
+        "lender-quotes"
+      ],
+      "sourceNames": [
+        "거래 금융기관의 개별 대출조건서"
+      ],
+      "sourceRole": "verification_candidates_only",
+      "tag": "reference/approximate - verify",
+      "confidence": "low",
+      "verificationStatus": "not_verified",
+      "provenance": {
+        "kind": "assumption",
+        "assumptionId": "seoul.loan_origination_fee_rate",
+        "confidence": "low"
+      },
+      "notes": "Illustrative upfront lender/appraisal/arrangement allowance applied once to initial loan principal; not an annual interest charge. No verified lender schedule."
+    },
+    "saleBrokerageFeeRate": {
+      "id": "seoul.sale_brokerage_fee_rate",
+      "range": {
+        "min": 0.003,
+        "max": 0.009
+      },
+      "demoDefault": 0.005,
+      "unit": "ratio_of_exit_price",
+      "sourceIds": [
+        "broker-quotes"
+      ],
+      "sourceNames": [
+        "현지 공인중개사 확인 / 거래별 중개보수 견적"
+      ],
+      "sourceRole": "verification_candidates_only",
+      "tag": "reference/approximate - verify",
+      "confidence": "low",
+      "verificationStatus": "not_verified",
+      "provenance": {
+        "kind": "assumption",
+        "assumptionId": "seoul.sale_brokerage_fee_rate",
+        "confidence": "low"
+      },
+      "notes": "Optional future exit brokerage allowance, before applicable service VAT. Excludes capital-gains taxes, prepayment charges and other exit costs."
+    }
+  },
+  "unknowns": [
+    {
+      "id": "unknown.current_market_as_of",
+      "value": "UNKNOWN",
+      "unit": "date",
+      "sourceIds": [
+        "molit",
+        "kreb",
+        "lender-quotes"
+      ],
+      "sourceNames": [
+        "국토교통부 실거래가 공개시스템 (MOLIT)",
+        "한국부동산원 상업용부동산 임대동향조사",
+        "거래 금융기관의 개별 대출조건서"
+      ],
+      "sourceRole": "verification_candidates_only",
+      "tag": "reference/approximate - verify",
+      "confidence": "low",
+      "verificationStatus": "not_verified",
+      "provenance": {
+        "kind": "assumption",
+        "assumptionId": "unknown.current_market_as_of",
+        "confidence": "low"
+      },
+      "notes": "Actual transaction, rent, vacancy and loan observation dates/current November 2026 levels were not retrieved."
+    },
+    {
+      "id": "unknown.deposit_conversion_rate",
+      "value": "UNKNOWN",
+      "unit": "ratio/year",
+      "sourceIds": [
+        "broker-quotes"
+      ],
+      "sourceNames": [
+        "현지 공인중개사 확인 / 거래별 중개보수 견적"
+      ],
+      "sourceRole": "verification_candidates_only",
+      "tag": "reference/approximate - verify",
+      "confidence": "low",
+      "verificationStatus": "not_verified",
+      "provenance": {
+        "kind": "assumption",
+        "assumptionId": "unknown.deposit_conversion_rate",
+        "confidence": "low"
+      },
+      "notes": "Actual negotiated or legally applicable deposit/rent conversion rate is not supplied. Do not infer an annual yield from the deposit-month multiple."
+    },
+    {
+      "id": "unknown.vat_treatment",
+      "value": "UNKNOWN",
+      "unit": "tax_treatment",
+      "sourceIds": [
+        "nts"
+      ],
+      "sourceNames": [
+        "국세청 (National Tax Service)"
+      ],
+      "sourceRole": "verification_candidates_only",
+      "tag": "reference/approximate - verify",
+      "confidence": "low",
+      "verificationStatus": "not_verified",
+      "provenance": {
+        "kind": "assumption",
+        "assumptionId": "unknown.vat_treatment",
+        "confidence": "low"
+      },
+      "notes": "Building/land VAT allocation, service VAT, business-transfer treatment and recoverability depend on the actual deal; not modeled by the simple acquisition allowance."
+    },
+    {
+      "id": "unknown.transaction_specific_tax_rate",
+      "value": "UNKNOWN",
+      "unit": "ratio_of_taxable_base",
+      "sourceIds": [
+        "wetax"
+      ],
+      "sourceNames": [
+        "위택스 (Wetax) / 관할 지방자치단체 세무부서"
+      ],
+      "sourceRole": "verification_candidates_only",
+      "tag": "reference/approximate - verify",
+      "confidence": "low",
+      "verificationStatus": "not_verified",
+      "provenance": {
+        "kind": "assumption",
+        "assumptionId": "unknown.transaction_specific_tax_rate",
+        "confidence": "low"
+      },
+      "notes": "Actual taxable base and combined tax rate depend on purchaser, property/use and applicable law; 4.6% remains only a demo allowance."
+    },
+    {
+      "id": "unknown.itemized_owner_opex",
+      "value": "UNKNOWN",
+      "unit": "KRW/year",
+      "sourceIds": [
+        "broker-quotes"
+      ],
+      "sourceNames": [
+        "현지 공인중개사 확인 / 거래별 중개보수 견적"
+      ],
+      "sourceRole": "verification_candidates_only",
+      "tag": "reference/approximate - verify",
+      "confidence": "low",
+      "verificationStatus": "not_verified",
+      "provenance": {
+        "kind": "assumption",
+        "assumptionId": "unknown.itemized_owner_opex",
+        "confidence": "low"
+      },
+      "notes": "Actual property tax, insurance, repairs, management and nonrecoverable operating expenses require property evidence. Do not reverse-engineer an asserted rent roll from the cap-rate band."
+    },
+    {
+      "id": "unknown.basement_rent",
+      "value": "UNKNOWN",
+      "unit": "KRW/pyeong_exclusive/month",
+      "sourceIds": [
+        "broker-quotes"
+      ],
+      "sourceNames": [
+        "현지 공인중개사 확인 / 거래별 중개보수 견적"
+      ],
+      "sourceRole": "verification_candidates_only",
+      "tag": "reference/approximate - verify",
+      "confidence": "low",
+      "verificationStatus": "not_verified",
+      "provenance": {
+        "kind": "assumption",
+        "assumptionId": "unknown.basement_rent",
+        "confidence": "low"
+      },
+      "notes": "No district-level basement rent assumption supplied; 1F and upper-floor bands must not silently fill B1."
+    },
+    {
+      "id": "unknown.exclusive_to_gfa_ratio",
+      "value": "UNKNOWN",
+      "unit": "ratio",
+      "sourceIds": [
+        "seoul-open-data",
+        "broker-quotes"
+      ],
+      "sourceNames": [
+        "서울 열린데이터광장 (Seoul Open Data Plaza)",
+        "현지 공인중개사 확인 / 거래별 중개보수 견적"
+      ],
+      "sourceRole": "verification_candidates_only",
+      "tag": "reference/approximate - verify",
+      "confidence": "low",
+      "verificationStatus": "not_verified",
+      "provenance": {
+        "kind": "assumption",
+        "assumptionId": "unknown.exclusive_to_gfa_ratio",
+        "confidence": "low"
+      },
+      "notes": "Building-specific exclusive leasable area / total GFA is not supplied. Do not multiply exclusive-area rent directly by GFA."
+    }
+  ]
+}
