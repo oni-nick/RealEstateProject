@@ -382,3 +382,50 @@ All Node commands used `C:\Users\nicho\AppData\Local\OpenAI\Codex\runtimes\cua_n
 - Actual market observation dates/levels, verified rent/lease/deposit/expense records, lender underwriting, transaction-specific taxes/VAT, construction/permit feasibility and real customer outcomes. All seven reference UNKNOWNs remain unresolved.
 - Final browser rendering, native interactions, accessibility output, console and device latency. No actual customer, owner, tenant or lot-level records were accessed.
 
+## Step 9 — One-click proposal (2026-11-12)
+
+### Done
+
+- Replaced the proposal placeholder with `#/building/<id>/proposal?for=buyer|seller`, preserving the global proposal picker and selected-building entry. Both audiences load the actual synthetic detailed rent roll/opex/deposits where available; summary-only buildings explicitly disclose missing detailed leases. Added proposal loading status and retained route/error/stale-view handling.
+- Built five document sections: cover; executive summary/key numbers/risks; scenarios and charts; synthetic comps and asking-price explanation; printable evidence appendix, assumptions, seven UNKNOWNs and `면책 고지`. A4 portrait print rules hide the shell/controls, start each section on a fresh page, repeat table headings and allow content to flow without fixed-height clipping. Section footers include the example-data warning, broker name and section index.
+- Buyer: engine-derived recommended bid range from conservative/base exact max-price ceilings, capped at ask. Conservative assumptions are rate +1%p, rent-weighted vacancy/loss +5%p, zero annual rent growth and exit cap +0.5%p. Both ceilings enforce target IRR and full-hold minimum DSCR; unavailable/bounded/unsupported prices never become a range. Non-positive initial equity at ask suppresses a recommendation even if a higher-price solver domain is feasible. Price-ceiling displays round downward.
+- Seller: asking-price land-pyeong comparison against the connected synthetic comp min/median/max, median premium/discount, unadjusted subject-area price range, buyer IRR and minimum DSCR at ask. Explicitly states that raw synthetic comps do not substantiate an actual asking price; time/location/use/condition adjustments and real evidence are required.
+- Five independently calculated scenarios at the same asking price: baseline, conservative financing/vacancy, lease-up, remodel and use change. Show first-year NOI, buyer IRR, execution budget and recruiting/shutdown months. Two accessible native SVG charts show first-year scenario NOI and baseline annual cashflows with separate initial/operating/net-sale amounts. Existing engine arithmetic and synthetic inventory were unchanged; ambiguous/no-solution IRRs stay unavailable.
+- Added buyer/seller links, editable `중개사명` (default `예시 중개사`) and `인쇄` calling `window.print()` once. Broker input is rendered as literal text, reflected immediately in printable cover/footers, retained across audience changes in session, and defaults visibly when blank. View destruction disables its handlers. PLAN.md does not actually prescribe Korean literals for broker default/print/disclaimer; these labels are implementation choices, with the required `예시 데이터 · 실제 매물 아님` and `검증 필요` retained.
+- Appendix includes visible formulas, actual inputs/costs/deposit/exit treatment, source file/record identities, low confidence and unconsulted-reference warnings. Dotted key metrics retain shared evidence inspection. Current Radar LTV/target IRR are disclosed; bid/value-up page edits do not propagate and this is stated in the report.
+
+### Files
+
+- New: `web-v2/js/proposal.js`, `web-v2/js/ui/proposal-view.js`, `web-v2/js/ui/proposal-charts.js`, `web-v2/css/proposal.css`.
+- Updated: `web-v2/js/views.js`, `web-v2/js/app.js`, `web-v2/index.html`, `web-v2/css/print.css`.
+- Tests: `tests/proposal.test.mjs`, `tests/proposal-view.test.mjs`.
+- Documentation: `docs/context/step09-implementation-plan.md`, `docs/PROGRESS.md`.
+- Verification-only: `verify/step09-check.mjs` (gitignored). No screenshots, PDFs, images or other binaries created.
+
+### Commands and results
+
+All Node commands used `C:\Users\nicho\AppData\Local\OpenAI\Codex\runtimes\cua_node\6ef99b3d04073aa7\bin\node.exe`.
+
+- Read PLAN first, supplied Step 0 analysis/progress and relevant local engine/UI/data code. Initial read-only `git status --short` was clean. No excluded files, linked main-tree documents, real records or secrets were opened.
+- Requested `node --test tests/`: exit 1, sandbox child-process `spawn EPERM`; no successful directory-form run is claimed.
+- Full suite: PowerShell collected all eleven `tests/*.test.mjs` paths and passed them to `node --test --test-isolation=none` → **110 passed, 0 failed**, final run exit 0. Initial full run before the additional equity-domain regression passed 109/109. Focused proposal run after its repair passed **10/10**.
+- New module tests first failed with expected missing-module errors. A high-deposit/high-income regression then reproduced a capped-at-ask recommendation with invalid equity; the guard repaired it and the regression/full suite passed. Two initial test-only expectations were corrected to the existing `noiAnnualKrw` schema and literal blank-input session storage.
+- Tests cover exact range statuses/caps/ordering, independently recalculated endpoint IRR/DSCR, comp median and land-pyeong units, engine-at-ask equality, deep deposits, scenario costs/downtime, input immutability, null IRRs, summary/no-debt/no-comp cases, and the invalid-equity recommendation guard. Minimal-DOM integration covers both audiences, section/chart construction, literal broker edits, session retention/default/disposal, one print dispatch, source inspection, picker/selected/missing buildings, load failure and invalid-funding wording. CSS assertions check A4, section breaks, hidden controls and repeating headings. These are not native browser/print rendering tests.
+- `node verify/step09-check.mjs`: **400 buildings / 25 detailed records / 2,000 scenarios**, all baseline NOIs reconciled, all 400 default bid ranges satisfied their endpoint IRR/full-period DSCR checks. Scenario IRR statuses: **1,079 ok / 492 no_solution / 429 ambiguous**. Every unavailable IRR remained null. Representative Node proposal-analysis timing: median **43.4 ms**, max **67.5 ms**; not browser/device latency.
+- Same check served **72 assets** under `/demo/` with HTTP 200, byte-identical content, correct JS MIME, valid UTF-8/no BOM and every asset below 1 MB. Temporary loopback server closed in `finally` and reported `serverClosed: true`.
+- Independent read-only review found no confirmed Critical/Important/Minor findings. It explicitly declined actual A4 pagination, clipping, font rendering and browser-specific printing without a browser. Author added and repaired the invalid-equity adversarial test afterward; final suite verified the change.
+- Final post-fix inventory/HTTP rerun retained **400 exact valid ranges, 2,000 scenarios with identical IRR status counts and 72 passing assets**; server closed. Node timing varied to median **41.7 ms**, max **90.1 ms**. Final PowerShell/.NET byte audit of all **13 changed/verification text files** confirmed valid UTF-8, no BOM, each below 1 MB and resolved paths within this worktree.
+- Computer Use browser inventory returned `The browser access host is unavailable` with no browser tabs. No native app was controlled; no screenshots, console checks, visual responsive-layout or actual print-dialog verification is claimed.
+- `git diff --check` passed with LF/CRLF normalization warnings. All work stayed inside this worktree; no git mutation commands, installs, external network resources or persistent servers. Runner owns commits.
+
+### Known issues
+
+- Actual A4 fit/pagination, fonts, clipping, native print dialog, browser console, keyboard/screen-reader behavior and responsive rendering remain unverified because browser access is unavailable. Sections have explicit print breaks and flowing content; physical page count can vary with browser/printer settings. Section indexes do not claim physical page numbers.
+- Proposals use their disclosed baseline plus current Radar LTV/target, not unsaved bid/value-up edits. Broker name persists only during the application session; there is no immutable report storage/version snapshot or file export beyond native printing.
+- Comparison and recommended ranges are disclosed demo conventions, not real appraisals, seller acceptance predictions or investment recommendations. Existing conservative IRR handling, generic summary assumptions and engine exclusions remain in force.
+
+### UNKNOWNs
+
+- Actual market dates/levels, verified rent/leases/deposits/expenses, lender underwriting/deposit deductions, transaction-specific taxes/VAT, building condition, executable construction budgets/delays, tenant consent and permitted uses. All seven reference UNKNOWNs remain unresolved.
+- Actual browser/printer layout, native interactions, accessibility output, console and device latency. No real customer, owner, tenant or lot-level records were accessed.
+

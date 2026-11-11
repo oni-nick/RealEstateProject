@@ -1,6 +1,6 @@
 import { DEFAULT_FILTERS, filterBuildings, updateFilters } from './store.js';
 import { calculate, inputFromBuilding } from './engine/index.js';
-import { h, badge, button, emptyState, evidenceNumber, kpiCard, linkButton, table, toast } from './ui/components.js';
+import { h, badge, button, emptyState, evidenceNumber, kpiCard, linkButton, table } from './ui/components.js';
 import { createSeoulMap } from './ui/map.js';
 import { eok, manwon, number, percent } from './ui/format.js';
 import { selectComps } from './building-analysis.js';
@@ -10,17 +10,6 @@ const buildingHref = (b) => `#/building/${b.id}`;
 const heading = (eyebrow, title, description, actions) => h('div', { className: 'page-heading' }, h('div', {}, h('div', { className: 'eyebrow' }, eyebrow), h('h1', {}, title), h('p', {}, description)), actions);
 const section = (title, body, detail) => h('section', { className: 'card section-card' }, h('div', { className: 'section-heading' }, h('h2', {}, title), detail && h('small', {}, detail)), body);
 const resetFilters = () => updateFilters(DEFAULT_FILTERS);
-const sortedBuildings = (buildings) => buildings.toSorted((a, b) => Number(Boolean(b.deepPath)) - Number(Boolean(a.deepPath)) || a.askingPriceKrw - b.askingPriceKrw);
-
-function buildingCard(b, { href = buildingHref(b), selected = false } = {}) {
-  return h('a', { className: `card building-card${selected ? ' is-selected' : ''}`, href, 'data-card-id': b.id },
-    h('div', { className: 'building-card-top' }, badge(b.deepPath ? '상세 임대차' : '요약 데이터', b.deepPath ? 'accent' : ''), badge(b.statusKo, 'outline')),
-    h('h3', {}, b.nameKo), h('p', { className: 'location' }, `${b.neighborhood} · ${b.stationNameKo} 도보 ${b.walkMinutes}분`),
-    h('div', { className: 'price-row' }, h('span', { className: 'price numeric' }, eok(b.askingPriceKrw), h('small', {}, '억')), h('span', {}, `Cap ${percent(b.capRate)}`)),
-    h('div', { className: 'building-facts' }, h('span', {}, `대지 ${number(b.landAreaM2 * 121 / 400)}평`), h('span', {}, `임대율 ${percent(b.occupancy)}`), h('span', {}, `${b.builtYear}년`)),
-  );
-}
-
 export function homeView(context) {
   const { data } = context;
   const map = createSeoulMap({ geography: data.geography, buildings: data.buildings, compact: true, onOpen: (id) => { location.hash = `#/building/${id}`; } });
@@ -160,22 +149,4 @@ export async function buildingView(context, route) {
   return { element, selectId: building.id };
 }
 
-export async function proposalView(context, route) {
-  const id = route.id || context.store.getState().selectedId;
-  if (!id) return { element: h('div', { className: 'page' }, heading('WORKSPACE / PROPOSAL', '고객과 함께 볼 한 장', '가상 건물을 선택하면 핵심 수치와 확인할 가정을 요약합니다.', linkButton('전체 매물에서 선택', '#/listings')),
-    h('div', { className: 'notice', style: 'margin-bottom:24px' }, '현재는 건물 요약 제안서입니다. 매수 제안가·매도 호가 근거·시나리오 비교는 후속 단계에서 추가합니다.'),
-    h('div', { className: 'value-grid' }, sortedBuildings(context.data.buildings.filter((b) => b.deepPath && b.statusKo !== '거래완료 참고')).slice(0, 3).map((b) => buildingCard(b, { href: `#/building/${b.id}/proposal?for=buyer` })))) };
-  const building = context.data.buildings.find((b) => b.id === id);
-  if (!building) return { element: emptyState('가상 건물을 찾을 수 없습니다', '다른 예시를 선택해 주세요.', linkButton('매물 목록', '#/listings')) };
-  const result = calculate(inputFromBuilding(building));
-  const seller = route.params.get('for') === 'seller';
-  const element = h('div', { className: 'page proposal-page' }, heading('WORKSPACE / PROPOSAL', '건물 요약 제안서', '검토할 숫자와 가정을 한 화면에 정리합니다.', h('div', { className: 'actions' }, linkButton('건물 개요', buildingHref(building)), linkButton(seller ? '매수자용' : '매도자용', `#/building/${id}/proposal?for=${seller ? 'buyer' : 'seller'}`), button('인쇄', () => { toast('인쇄 대화상자에서 A4와 배경 그래픽 설정을 확인하세요.'); window.print(); }, 'primary'))),
-    h('article', { className: 'card proposal-sheet' }, h('div', { className: 'proposal-title' }, h('p', { className: 'eyebrow' }, `PLOT OS / ${seller ? 'SELLER' : 'BUYER'} BRIEF`), h('h2', {}, building.nameKo), h('p', { className: 'muted' }, building.addressKo), h('div', { className: 'actions', style: 'margin-top:16px' }, badge('예시 데이터 · 실제 매물 아님', 'accent'), badge(`예시 스냅샷 ${context.data.metadata.snapshotDate}`))),
-      buildingKpis(context, building, result),
-      h('section', {}, h('h3', {}, '01 / 건물의 기본 조건'), buildingFacts(building, context)),
-      h('section', {}, h('h3', {}, '02 / 숫자를 읽는 조건'), h('p', { className: 'notice' }, `호가 기준 레버리지 IRR ${percent(result.metrics.leveredIrr.value)}. 보유 10년, LTV 50%, 금리 연 5%, 임대료 상승 연 2%, 매각 Cap rate 4.5%의 가정입니다. 취득 비용과 반환할 보증금을 반영합니다. 이는 매수 권고나 매도 적정가가 아닙니다.`)),
-      h('section', {}, h('h3', {}, '03 / 다음 대화에서 확인할 것'), h('p', { className: 'hint' }, '임대차·보증금 및 만기 / 실증 운영비 / 건물 상태와 공사비 / 대출 조건 / 거래별 세금·VAT / 실제 비교 거래'), h('p', { className: 'notice', style: 'margin-top:16px' }, '건물 요약 단계입니다. 매수 제안가·매도 호가 근거·시나리오 비교 및 상세 근거 부록은 아직 포함하지 않습니다.')),
-      h('p', { className: 'proposal-disclaimer' }, `예시 데이터 · 실제 매물 아님. 모든 건물·임대차·위치는 가상이며 신뢰도는 낮음, 검증 필요입니다. 시장 출처는 조회하지 않았습니다. VAT·소득세·양도세·재융자 등은 모델에서 제외합니다. 실제 매매·대출·세무 판단에 사용할 수 없습니다. / ${result.engineVersion}`)),
-  );
-  return { element, selectId: building.id };
-}
+export { proposalView } from './ui/proposal-view.js';

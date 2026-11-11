@@ -1,0 +1,69 @@
+.proposal-page { max-width: 1400px; }
+.proposal-toolbar { display: flex; align-items: center; flex-wrap: wrap; gap: 18px; padding: 16px 20px; margin-bottom: 10px; }
+.proposal-toolbar label { display: flex; align-items: center; gap: 10px; margin-left: auto; font-size: 12px; }
+.proposal-toolbar input { width: 220px; }
+.proposal-toolbar [aria-current="page"] { color: var(--accent); background: var(--accent-soft); border-color: var(--accent); }
+.proposal-print-hint { font-size: 11px; color: var(--muted); margin: 10px 0 24px; }
+.proposal-document { display: grid; gap: 28px; }
+.proposal-document .proposal-sheet { display: flex; flex-direction: column; width: 210mm; max-width: 100%; min-height: 297mm; margin: 0 auto; padding: 15mm 16mm; border-radius: 3px; font-size: 12px; line-height: 1.65; overflow-wrap: anywhere; }
+.proposal-sheet-header, .proposal-sheet-footer { display: flex; justify-content: space-between; align-items: center; gap: 12px; color: var(--muted); font-size: 9px; }
+.proposal-sheet-header { padding-bottom: 14px; margin-bottom: 26px; border-bottom: 1px solid var(--line); letter-spacing: .04em; }
+.proposal-sheet-footer { margin-top: auto; padding-top: 16px; border-top: 1px solid var(--line); }
+.proposal-sheet-body { padding-bottom: 24px; }
+.proposal-sheet-body > h2 { font-size: 25px; line-height: 1.35; margin-bottom: 16px; }
+.proposal-sheet-body > p { margin-bottom: 16px; }
+.proposal-block { margin-top: 22px; }
+.proposal-sheet .proposal-block h3 { font-size: 14px; margin-bottom: 10px; }
+.proposal-block > p + p { margin-top: 8px; }
+.proposal-sheet .notice { margin: 18px 0; font-size: 10px; padding: 12px; }
+.proposal-sheet .hint { font-size: 10px; color: var(--muted); }
+.proposal-cover-brand { font-size: 38px; font-weight: 800; letter-spacing: -.04em; margin: 12px 0 60px; }
+.proposal-cover-brand span { font-weight: 400; color: var(--accent); }
+.proposal-sheet-body > .proposal-cover-title { font-size: 38px; margin: 12px 0 26px; letter-spacing: -.04em; }
+.proposal-cover-name { font-size: 23px; font-weight: 600; }
+.proposal-cover .actions { margin: 24px 0 34px; }
+.proposal-decision { padding: 22px 24px; margin: 26px 0; background: var(--accent-soft); border-left: 3px solid var(--accent); }
+.proposal-decision-value { font-size: 29px; line-height: 1.4; font-weight: 700; margin: 10px 0; font-variant-numeric: tabular-nums; letter-spacing: -.04em; }
+.proposal-decision .evidence-number { font: inherit; letter-spacing: inherit; }
+.proposal-decision p { margin: 6px 0; }
+.proposal-facts { display: grid; grid-template-columns: 1fr 1fr; margin: 16px 0; border-top: 1px solid var(--line); }
+.proposal-facts > div { min-width: 0; padding: 12px 10px 12px 0; border-bottom: 1px solid var(--line); }
+.proposal-facts dt { font-size: 10px; color: var(--muted); margin-bottom: 4px; }
+.proposal-facts dd { margin: 0; font-weight: 600; font-variant-numeric: tabular-nums; }
+.proposal-cover-note { margin-top: 36px; color: var(--muted); font-size: 11px; }
+.proposal-kpis { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0; border: 1px solid var(--line); }
+.proposal-kpis > div { padding: 12px; min-width: 0; border-bottom: 1px solid var(--line); }
+.proposal-kpis p { color: var(--muted); font-size: 10px; }
+.proposal-kpis strong { display: block; font-size: 20px; font-weight: 650; margin: 8px 0; letter-spacing: -.04em; }
+.proposal-kpis .evidence-number { font: inherit; letter-spacing: inherit; }
+.proposal-kpis small { display: block; color: var(--muted); font-size: 9px; }
+.proposal-risks { padding-left: 20px; margin: 0; }
+.proposal-risks li + li { margin-top: 8px; }
+.proposal-sheet .table-wrap { margin: 16px 0; }
+.proposal-sheet .data-table { font-size: 10px; width: 100%; }
+.proposal-sheet .data-table th, .proposal-sheet .data-table td { padding: 9px 7px; white-space: normal; }
+.proposal-sheet .data-table .subtext { font-size: 9px; }
+.proposal-sheet .data-table .evidence-number { font: inherit; }
+.proposal-chart { width: 100%; display: block; height: auto; font-family: var(--font); font-size: 12px; fill: var(--ink); font-variant-numeric: tabular-nums; }
+.proposal-chart-axis { stroke: #b4c1ca; stroke-width: .8; }
+.proposal-bar-accent { fill: #087e75; }
+.proposal-bar-base { fill: #253c55; }
+.proposal-bar-funding { fill: #8a96a4; }
+.proposal-appendix { font-size: 11px; }
+.proposal-appendix .proposal-facts { grid-template-columns: 1fr; }
+.proposal-appendix .proposal-facts > div { display: grid; grid-template-columns: 110px 1fr; gap: 12px; padding: 6px 0; }
+.proposal-appendix .proposal-facts dd { font-weight: 400; font-size: 10px; }
+.proposal-appendix .proposal-block > p, .proposal-appendix .data-table { font-size: 9px; }
+.proposal-appendix .proposal-disclaimer { margin: 0; padding: 0; border: 0; font-size: 10px; }
+@media (max-width: 850px) {
+  .proposal-document .proposal-sheet { min-height: 0; padding: 24px; }
+  .proposal-toolbar label { margin-left: 0; }
+  .proposal-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .proposal-cover .proposal-cover-title { font-size: 30px; }
+}
+@media (max-width: 520px) {
+  .proposal-facts { grid-template-columns: 1fr; }
+  .proposal-toolbar input { width: 180px; }
+  .proposal-decision { padding: 16px; }
+  .proposal-decision-value { font-size: 24px; }
+}

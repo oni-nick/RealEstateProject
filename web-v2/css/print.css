@@ -28,3 +28,46 @@ h2, h3 { break-after: avoid; }
 .content-grid > * { margin-bottom: 16pt; }
 .radar-workspace { display: block; }
 .filter-panel, .radar-results { display: none; }
+
+/* A4 proposal: section breaks, flowing content, no fixed/clipped page heights. */
+.proposal-toolbar, .proposal-print-hint { display: none !important; }
+.proposal-document { display: block; }
+.proposal-document .proposal-sheet { display: block; width: auto; max-width: none; min-height: 0; margin: 0; padding: 0; border: 0; border-radius: 0; font-size: 9pt; line-height: 1.5; }
+.proposal-sheet + .proposal-sheet { break-before: page; page-break-before: always; }
+.proposal-sheet-header { margin-bottom: 13pt; padding-bottom: 7pt; font-size: 7pt; }
+.proposal-sheet-footer { margin-top: 14pt; padding-top: 8pt; font-size: 7pt; break-inside: avoid; }
+.proposal-sheet-body { padding-bottom: 0; }
+.proposal-sheet-body > h2 { font-size: 22pt; margin-bottom: 10pt; }
+.proposal-sheet-body > p { margin-bottom: 9pt; }
+.proposal-cover-brand { margin: 12pt 0 50pt; font-size: 32pt; }
+.proposal-sheet-body > .proposal-cover-title { font-size: 32pt; margin: 10pt 0 20pt; }
+.proposal-cover-name { font-size: 20pt; }
+.proposal-cover .actions { margin: 18pt 0 24pt; }
+.proposal-decision { margin: 20pt 0; padding: 14pt 16pt; break-inside: avoid; }
+.proposal-decision-value { font-size: 26pt; }
+.proposal-cover-note { margin-top: 35pt; }
+.proposal-block { margin-top: 13pt; }
+.proposal-sheet .proposal-block h3 { font-size: 11pt; margin-bottom: 6pt; }
+.proposal-sheet .hint, .proposal-sheet .notice { font-size: 7.5pt; }
+.proposal-sheet .notice { margin: 10pt 0; padding: 8pt; }
+.proposal-kpis { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.proposal-kpis > div { padding: 8pt; break-inside: avoid; }
+.proposal-kpis p, .proposal-facts dt { font-size: 7.5pt; }
+.proposal-kpis strong { font-size: 17pt; margin: 5pt 0; }
+.proposal-kpis small { font-size: 7pt; }
+.proposal-facts { grid-template-columns: 1fr 1fr; margin: 10pt 0; }
+.proposal-facts > div { padding: 7pt 6pt 7pt 0; break-inside: avoid; }
+.proposal-risks li { break-inside: avoid; }
+.proposal-risks li + li { margin-top: 5pt; }
+.proposal-sheet .table-wrap { overflow: visible; margin: 10pt 0; }
+.proposal-sheet .data-table { width: 100%; min-width: 0; table-layout: fixed; font-size: 7.5pt; }
+.proposal-sheet .data-table th, .proposal-sheet .data-table td { padding: 6pt 4pt; white-space: normal; overflow-wrap: anywhere; }
+.proposal-sheet .data-table .subtext { font-size: 6.5pt; }
+.proposal-sheet .data-table .evidence-number { white-space: normal; }
+.proposal-chart { max-width: 100%; break-inside: avoid; }
+.proposal-appendix .proposal-facts { grid-template-columns: 1fr; }
+.proposal-appendix .proposal-facts > div { grid-template-columns: 82pt 1fr; padding: 4pt 0; }
+.proposal-appendix .proposal-facts dd { font-size: 7.5pt; }
+.proposal-appendix .proposal-block > p, .proposal-appendix .data-table { font-size: 7pt; }
+.proposal-appendix .proposal-disclaimer { font-size: 7.5pt; }
+.proposal-sheet .evidence-number { padding: 0; text-decoration: none; }

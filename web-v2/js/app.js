@@ -58,8 +58,10 @@ async function start() {
       } else if (route.name === 'valueup') {
         main.replaceChildren(h('div', { className: 'state-screen', role: 'status' }, h('p', {}, '실행안별 수익과 비용을 계산하고 있습니다.')));
         view = await valueUpView(context, route);
-      } else if (route.name === 'proposal') view = await proposalView(context, route);
-      else view = { element: h('div', { className: 'state-screen' }, h('p', { className: 'eyebrow' }, 'PLOT OS / 404'), h('h1', {}, '아직 준비되지 않은 페이지입니다'), h('p', {}, '딜 레이더에서 가상 건물을 선택해 살펴보세요.'), linkButton('딜 레이더로 이동', '#/radar', 'primary')) };
+      } else if (route.name === 'proposal') {
+        main.replaceChildren(h('div', { className: 'state-screen', role: 'status' }, h('p', {}, '제안서의 수익·가격 한도·비교 거래를 계산하고 있습니다.')));
+        view = await proposalView(context, route);
+      } else view = { element: h('div', { className: 'state-screen' }, h('p', { className: 'eyebrow' }, 'PLOT OS / 404'), h('h1', {}, '아직 준비되지 않은 페이지입니다'), h('p', {}, '딜 레이더에서 가상 건물을 선택해 살펴보세요.'), linkButton('딜 레이더로 이동', '#/radar', 'primary')) };
       if (requestId !== renderId) { view.destroy?.(); return; }
       currentView = view;
       if (view.selectId) store.setState({ selectedId: view.selectId });
