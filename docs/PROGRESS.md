@@ -94,3 +94,58 @@ All Node commands used `C:\Users\nicho\AppData\Local\OpenAI\Codex\runtimes\cua_n
 - The seven existing reference UNKNOWNs remain unresolved, including VAT/tax treatment, deposit conversion rate, current market date, real owner opex, basement rents and exclusive/GFA ratios. Explicit synthetic building assumptions supplement the demo without replacing those UNKNOWNs.
 - Actual lease renewal behavior, permitted use changes, lender underwriting and intervention feasibility require later verified evidence; no real customer, owner or tenant records were accessed.
 
+## Step 3 — Calculation engine and tests (2026-11-12)
+
+### Done
+
+- Implemented a pure, zero-dependency native ES module API in `web-v2/js/engine/`, with a local `type: module` declaration for browser/Node compatibility. No DOM, network, clock, random inputs, storage or external packages.
+- Added configurable monthly cashflows (10 years by default): potential/collected rent, separate vacancy and credit loss, management income, owner opex, annual growth, recurring/upfront/intervention capex, inherited deposits, bank debt service and exit. Interest-only and constant-payment amortizing loans include zero-rate handling, principal roll-forward and remaining-balance sale repayment.
+- Itemized the existing demo acquisition tax, brokerage, miscellaneous and loan-fee budgets. Deposits reduce initial equity, remain outside NOI and are settled at exit. Non-positive equity is flagged; income-based exit value is explicitly floored at zero for non-positive forward NOI, with a warning.
+- Added evidence-wrapped NOI, cap rate, cash-on-cash, equity required, first-year/minimum holding-period DSCR, levered/unlevered annualized monthly IRR, equity multiple including future capital calls, and month-end payback. Numeric results remain unrounded. Evidence contains formula text, assumptions/source provenance, calculation dependencies, engine version, low confidence and verification flags.
+- Implemented Newton IRR in log-rate space with bracketed bisection fallback, scaled evaluation, zero-period trimming, explicit no-solution/bounds/convergence states, and conservative ambiguity handling. Multiple cashflow sign changes never silently select a root. Historical annual benchmark (~0.63005% IRR and 1.03 multiple), monthly compounding, forced fallback, negative returns and sparse 50-year cases are tested.
+- Added max purchase prices at target IRR and minimum DSCR with fixed-LTV re-sizing, bisection to the feasible side, funding-domain checks, combined binding constraint, achieved metrics and explicit infeasible/unsupported/search-bound states. DSCR uses the worst annual holding bucket, including a final partial year.
+- Added five-lever tornado and two-dimensional grids, recomputing IRR and combined max price at every endpoint/cell. Added lease-up, remodel and use-change comparisons with capex timing, affected-share downtime, rent uplift, deposit refunds/restoration/new liabilities, same-date before/after NOI/value, full-horizon IRR and timeline metadata.
+- Added Step 2 summary/deep adapters with rent-weighted vacancy and explicit management-income gross-up assumptions. All 400 summaries and all 25 detailed records reproduce original NOI/cap/funding without double vacancy deductions. Historical capex remains excluded.
+- Documented the public API, defaults, formulas, evidence contract, units, accounting decisions, scenario conventions, example calls, solver bounds and omissions in `docs/context/step03-engine-contract.md`.
+
+### Files
+
+- `web-v2/js/engine/index.js`
+- `web-v2/js/engine/evidence.js`
+- `web-v2/js/engine/irr.js`
+- `web-v2/js/engine/model.js`
+- `web-v2/js/engine/pricing.js`
+- `web-v2/js/engine/sensitivity.js`
+- `web-v2/js/engine/scenarios.js`
+- `web-v2/js/engine/adapters.js`
+- `web-v2/js/engine/package.json`
+- `tests/engine.test.mjs`
+- `docs/context/step03-engine-contract.md`
+- `docs/PROGRESS.md` (this appended section)
+
+### Commands and results
+
+All Node commands used the exact bundled executable from PLAN.md:
+`C:\Users\nicho\AppData\Local\OpenAI\Codex\runtimes\cua_node\6ef99b3d04073aa7\bin\node.exe`.
+
+- Read `docs/PLAN.md`, `docs/context/step00-analysis.md`, `docs/PROGRESS.md`, Step 2's data contract, data-source assumptions, existing tests and fictional data inside this worktree. Read-only git status confirmed `demo/plot-os-v2` with no initial changes. No historical main-tree links were opened.
+- Exact requested `node --test tests/`: blocked by sandbox child-process creation (`spawn EPERM`), exit 1; no isolated tests completed. Used the already-documented equivalent explicit in-process test invocation.
+- `node --test --test-isolation=none tests/market-refs.test.mjs tests/data.test.mjs tests/engine.test.mjs`: final **57 passed, 0 failed** (41 engine tests plus all 16 existing tests), exit 0. Earlier implementation runs also passed at 51 and 55 tests as edge-case coverage was expanded.
+- Checks include independent IRR/DSCR/amortization benchmarks, funding example, deposits/exit settlement, monthly timing/growth, zero/negative inputs and returns, missing/UNKNOWN rejection, payback/multiple, price monotonicity, target-price IRR within 1e-8, analytic DSCR price within 1 KRW, tied/infeasible constraints, 100% LTV with capex equity, bounded/ambiguous results, sensitivity endpoints/orientation, intervention costs/downtime/deposits, deterministic/input-preserving behavior and all-data reconciliation.
+- `git diff --check`, read-only final status, and a Node built-in inspection of all Step 3 files: passed. Inspection verified UTF-8 without BOM/replacement characters, every file below 1,000,000 bytes and all changed/untracked paths within the Step 3 worktree scope.
+- No git write commands, installations, web requests, servers, excluded files, secrets, real customer data or real owner records were used.
+
+### Known issues
+
+- Standard isolated test mode remains sandbox-blocked; the complete suite passes in-process. This engine-only step did not wire or browser-test the later UI.
+- IRRs with more than one cashflow sign change are deliberately withheld as `ambiguous`, even if one numerical root might be valid. The diagnostic scan is not complete root enumeration; price recommendations requiring a unique IRR are unavailable for such flows. Target-rate NPV boundaries are diagnostic only in these cases.
+- Fixed-LTV price solving does not represent actual lender underwriting. The computational ceiling is explicitly a lower-bound-only result when reached. DSCR is undefined without scheduled debt service and never displayed as infinity.
+- Management income follows rent-weighted occupancy; owner opex persists during downtime. Scenario inputs are simplified whole-building/affected-share projections, not unit-level lease-expiry or construction schedules. An incomplete-at-sale intervention warns about assumed future completion in exit NOI.
+- Defaults are unverified budgets: acquisition tax is approximate; VAT, income/capital-gains taxes, prepayment penalties, refinancing and detailed renewal/credit behavior are excluded. Unlevered returns remove bank financing while retaining refundable tenant liabilities. All conventions are explicit in the contract and warnings.
+
+### UNKNOWNs
+
+- Actual market observations, property/rent-roll evidence, lender terms, deposit deductions/negotiations, transaction-specific taxes/VAT and management-fee recoverability.
+- Lease renewal/collection behavior, construction costs/duration, feasible rent uplift and permitted use changes. No actual asset, tenant, owner or customer evidence was accessed.
+- The seven reference UNKNOWNs remain unresolved. Engine defaults and synthetic building inputs are separate modeling assumptions, never substitutes for verified evidence.
+
