@@ -244,3 +244,52 @@ All Node commands used `C:\Users\nicho\AppData\Local\OpenAI\Codex\runtimes\cua_n
 - Actual current market prices/rents, verified leases and renewal/collection behavior, expenses, building condition, lender underwriting/deposit deductions, transaction-specific taxes/VAT, owner-occupation benefits and intervention feasibility. The seven reference UNKNOWNs remain unresolved.
 - Final browser appearance, console state, interaction responsiveness and A4 page count. No real customer, owner, tenant or actual lot-level records were accessed.
 
+## Step 6 — Max-bid calculator (2026-11-12)
+
+### Done
+
+- Implemented `#/building/<id>/bid` with route title, active navigation, loading/error handling and links from the existing building overview. All 400 buildings use the existing monthly engine; the 25 deep records use their unit rent rolls, deposits and owner expenses. The page identifies detailed versus summary inputs and keeps the example-data label visible.
+- Added seven stable native sliders: current purchase price, loan rate, LTV, rent-weighted vacancy/loss, rent growth, exit cap and holding years. Core IRR, minimum holding-bucket DSCR (plus first-year DSCR), initial equity and equity multiple update synchronously on input. No-debt DSCR is explicitly not applicable; unavailable IRR and invalid equity do not produce BUY guidance.
+- Added editable target IRR, minimum IRR floor and minimum DSCR policies. Target/LTV inherit Radar; default floor is target minus 3 percentage points with a zero floor for nonnegative targets and a −99% bound for negative targets; DSCR defaults to 1.20. Crossing target/floor adjusts the companion field with an explanation; empty/out-of-range input preserves the last valid value. Reset restores initial assumptions.
+- BUY solves the combined target-IRR/minimum-DSCR ceiling; WALK-AWAY solves the combined IRR-floor/same-DSCR ceiling. Both use fixed LTV with re-sized debt and transaction costs. The SVG price ruler includes ask, current price and both available ceilings on separate rows, including coincident/outside-slider values. Each ceiling identifies its binding constraint and individual IRR/DSCR limits. Unavailable or computational-bound outcomes are withheld as exact lines.
+- Added Korean negotiation guidance: target achieved, target-price negotiation, walk-away/reprice and unavailable-result states. It compares current realized metrics and price ceilings, states the BUY-vs-ask adjustment and WALK-AWAY boundary, and distinguishes closed reference records. Monetary proposal ceilings are floored to 0.1억 for display; chart positions and percentage comparisons retain the raw solved values. All are explicitly example policies, not investment advice or lender approval.
+- Added accessible local SVG annual cashflow chart with separate initial funding, operating distributions/calls and net sale settlement, including negative cashflows; expandable annual numeric table conserves monthly totals. Funding/settlement summary exposes engine evidence and describes acquisition costs, deposits and final debt repayment.
+- Added sensitivity tornado for rate, vacancy, rent growth, exit cap and initial capex, with signed IRR changes and an expandable endpoint/IRR/BUY table. Added a 3×3 rate-column × exit-cap-row grid with IRR and combined BUY ceiling in every cell; the center identifies current assumptions. Sensitivity clears stale output and recomputes after 180 ms of quiet input; route destruction cancels pending work. No interpolation or linear return approximation.
+- Key metrics, ceilings, funding and sensitivity values open the existing evidence panel. Input overrides carry explicit low-confidence assumption provenance; rent-roll and summary source lineage is retained. No new dependencies, external data, assets or network resources.
+
+### Files
+
+- `web-v2/js/bid.js`
+- `web-v2/js/ui/bid-view.js`, `web-v2/js/ui/bid-charts.js`
+- `web-v2/js/app.js`, `web-v2/css/components.css`
+- `tests/bid.test.mjs`, `tests/smoke.test.mjs`
+- `docs/context/step06-implementation-plan.md`, `docs/PROGRESS.md`
+- Verification-only `verify/step06-check.mjs` (gitignored); no screenshots or binary artifacts created.
+
+### Commands and results
+
+All Node commands used `C:\Users\nicho\AppData\Local\OpenAI\Codex\runtimes\cua_node\6ef99b3d04073aa7\bin\node.exe`.
+
+- Read `docs/PLAN.md` first, Step 0 analysis/progress, existing engine/UI contracts and relevant code/mock data within this worktree. Initial read-only status was clean. No historical main-tree links or excluded data were opened.
+- Exact requested `node --test tests/`: sandbox exit 1 (`spawn EPERM`). Retried with approved local process execution outside the sandbox: exit 1 (`MODULE_NOT_FOUND` for `tests`). Node v24.22.1 treats this explicit directory argument as a module path; this invocation is not a successful suite run.
+- Explicit-file in-process full suite (`--test --test-isolation=none` plus all seven test files): **83 passed, 0 failed** before final regression. Final focused in-process bid/smoke run: **19 passed, 0 failed**. New tests were observed failing before implementations/fixes.
+- Final full suite with normal isolated workers outside sandbox: `node --test tests/market-refs.test.mjs tests/data.test.mjs tests/engine.test.mjs tests/radar.test.mjs tests/building-overview.test.mjs tests/bid.test.mjs tests/smoke.test.mjs` → **84 passed, 0 failed**, exit 0. This resolves the prior worker-blocking limitation for explicit-file execution; no test-directory command pass is claimed.
+- Added seven analytical tests covering all-building/deep adaptation, engine-equivalent ceilings, DSCR binding/coincident limits, cash financing, invalid equity/loss cases, realized guidance gates, annual cashflow conservation/partial year, grid orientation/center and ruler domains. Final review identified Radar's supported negative targets; pure and DOM regressions failed before the fix and pass after it.
+- Extended minimal-DOM smoke verifies deep/summary/missing-building bid views, three SVGs, all seven input-to-engine updates, stable control identity, policy crossing/empty input, cash/no-service display, full-vacancy unavailable state, reset, evidence lineage, inherited negative targets and pending-timer cancellation. This verifies DOM construction/logic, not actual rendering or native browser input.
+- `node verify/step06-check.mjs`: **400 full bid analyses / 25 deep**, NOI reconciled, all default BUY/WALK-AWAY ceilings exact and ordered. All default BUY constraints are target IRR. A separate engine-status count confirms **273 current asking-price IRRs are `ok`, 127 are `no_solution`**, so guidance correctly withholds a recommendation for those 127 even though a lower-price ceiling can be solved. Representative final Node timings: median core analysis **9.18 ms**, max **63.84 ms**, representative sensitivity **165.46 ms**; these are Node timings, not browser latency claims.
+- The same check served **62 assets** under `/demo/`: HTTP 200, byte-identical content, correct JavaScript MIME, valid UTF-8/no BOM and each below 1 MB. Ephemeral loopback server closed in `finally`; verified `serverClosed: true`. No server left running.
+- Fresh focused code review reported no Critical/Important findings; separate own review found and repaired the negative-target integration issue. Browser inventory reported `The browser access host is unavailable`; native Chrome fallback stopped because the current URL could not be established confidently. Computer Use ended there; no screenshot, browser-console, focus, responsive rendering or print-preview verification is claimed.
+- `git diff --check`: passed with LF/CRLF normalization warnings. Final Node inspection of all ten changed/verification text files confirmed valid UTF-8, no BOM and each below 1 MB. No git mutation commands, installations, real records, secret reads or changes outside this worktree.
+
+### Known issues
+
+- Browser appearance, actual native slider/focus/screen-reader behavior, console state and responsive performance remain unverified due to browser automation availability/policy constraints. The implemented responsive styles and DOM checks are not visual QA.
+- Bid edits are local to the mounted page and reset after navigation/reload; Radar target/LTV are inherited again on entry. No saved-scenario/proposal propagation was added in this step. Value-up and complete proposal work remain later steps.
+- Sensitivity runs on the main thread after the disclosed debounce; large endpoint models may cause a pause on slower devices. Charts allow horizontal scrolling on narrow screens. Cashflow tables are expandable. Native browser performance has not been measured.
+- Engine return/price limitations remain: non-conventional cashflows may withhold IRR; exact price ceilings require a demonstrably unique IRR; this demo's fixed-LTV policy is not lender underwriting. Refundable deposits stay fixed when changing vacancy; actual lease/deposit negotiation is not modeled. Costs/taxes are unverified allowances and exclusions remain explicit.
+
+### UNKNOWNs
+
+- Real current market observations, verified leases/deposits/expenses, collection and renewal behavior, lender terms and underwriting, transaction-specific taxes/VAT, building condition/capex, seller willingness to negotiate and exit market conditions. The seven reference UNKNOWNs remain unresolved.
+- Final browser rendering, console behavior, native interactions, screen-reader output and device latency. No actual customer, owner, tenant or lot-level address data was accessed.
+
