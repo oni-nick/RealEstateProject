@@ -42,3 +42,55 @@
 - Deposit/rent conversion interest rate, VAT treatment, itemized owner operating costs, basement rents and building-specific exclusive-area/GFA ratios.
 - Real transaction, rent-roll, customer and owner evidence was not accessed or included. Subsequent steps need explicit building assumptions or verified inputs; UNKNOWN must not silently become zero.
 
+## Step 2 — Deterministic mock data (2026-11-12)
+
+### Done
+
+- Built `scripts/generate-data.mjs` with a fixed string seed, FNV-1a/Mulberry32 PRNG, fixed snapshot date, Node built-ins only, and no network, clock-dependent inputs or external records. It reads the existing `market_refs.json` and writes only the named generated files under `web-v2/data/`.
+- Generated **400 buildings** (40 per gu), **25 deep records**, **150 fictional comparable transactions** and **10 schematic gu polygons plus a rough Han river line**. All selected neighborhoods are represented. Asking prices span **30.03–149.98억 KRW**, land is 100–500 m², construction years are 1985–2022, and buildings have 3–8 above-ground floors with zero or one basement.
+- Summaries include mock masked block addresses, explicitly fictional names, use mix, zoning, station association/walking time, status, days on market, motivation, area-weighted occupancy, operating income/expenses, refundable deposits, NOI, derived cap rate, illustrative income value band and deep-file links.
+- Each deep file includes unit areas in m²/pyeong, potential and contracted rent, management fees, refundable deposits, tenant categories, lease dates, vacancy and renewal risk; five owner opex categories; two historical capex events; 5–8 nearby same-gu comp links with schematic distances; and three value-up notes with explicit budgets/downtime/uplift assumptions.
+- Every numeric JSON leaf has an exact same-key provenance object on its containing record: kind, refId/formulaId/assumptionId and low confidence. `generation.json` documents units, formulas, synthetic assumptions, reference dependencies, file paths, accounting conventions and all seven unresolved reference UNKNOWNs. All files carry `예시 데이터 · 실제 매물 아님` and unverified status.
+- NOI is derived from occupied contract rents plus collected management fees less owner expenses, without a second vacancy deduction. Deposits and historical capex are excluded from recurring NOI. Asking/comp prices satisfy the intersection of demo, land-price and GFA-price bounds; cap-rate bands do not manufacture rent or NOI.
+- Added the consumer/schema contract in `docs/context/step02-data-contract.md` and eight behavior tests in `tests/data.test.mjs`. A separate read-only reviewer found no Critical or Important defects and independently confirmed price-band consistency.
+
+### Files
+
+- `scripts/generate-data.mjs`
+- `tests/data.test.mjs`
+- `web-v2/data/buildings.json`
+- `web-v2/data/comps.json`
+- `web-v2/data/districts.json`
+- `web-v2/data/generation.json`
+- `web-v2/data/deep/bld-*.json` (25 files)
+- `docs/context/step02-data-contract.md`
+- `docs/PROGRESS.md` (this appended section)
+
+### Commands and results
+
+All Node commands used `C:\Users\nicho\AppData\Local\OpenAI\Codex\runtimes\cua_node\6ef99b3d04073aa7\bin\node.exe`.
+
+- `node --test --test-isolation=none tests/data.test.mjs` before implementation: failed with the expected `ERR_MODULE_NOT_FOUND`. New regression assertions subsequently reproduced fractional rounding tails and summary/rent-roll use disagreement; both passed after correction.
+- `node scripts/generate-data.mjs`: exit 0; 400 buildings, 25 deep files, 150 comps, 10 gu; asking range 30.03–149.98억.
+- Exact requested `node --test tests/`: blocked by sandbox child-process creation (`spawn EPERM`); no tests completed in isolated mode.
+- `node --test --test-isolation=none tests/`: this runtime rejects the directory argument (`ERR_UNSUPPORTED_DIR_IMPORT`).
+- `node --test --test-isolation=none tests/market-refs.test.mjs tests/data.test.mjs`: **16 passed, 0 failed**. Covers schema/counts, numeric ranges/units/provenance resolution, privacy/mock labels, polygon containment, rent/area/expense/NOI/deposit consistency, comp links/distances, fixed-seed byte identity, different-seed variation, input immutability and malformed/infeasible reference rejection, plus all existing reference tests.
+- Independent Node built-in byte/hash inspection: all **29 generated JSON files** exactly match a fresh in-memory run. Largest is `buildings.json`: **991,431 bytes**; `comps.json`: **154,295 bytes**; `districts.json`: **18,373 bytes**; `generation.json`: **12,931 bytes**; deep files **11,452–23,159 bytes**. Every output is strictly below 1,000,000 bytes and UTF-8 without BOM.
+- Five additional seeds (`a` through `e`) serialized successfully; summary sizes were 990,832–991,692 bytes. Serializer checks all file sizes before the CLI writes any outputs.
+- `git diff --check`: passed. Read-only `git status` confirmed this is `demo/plot-os-v2`; no git write commands, installs, services, excluded data or main-tree paths were used.
+
+### Known issues
+
+- All data is fictional and low-confidence. Reference sources remain unconsulted verification candidates, not evidence supporting actual properties or transactions. Checks establish demo data integrity, not market accuracy.
+- Geometry is deliberately schematic. Coordinates are jittered within the gu sketch; neighborhood/station associations and walk times are illustrative, not measured routes or real building locations. Only the ten selected gu are represented.
+- Suite-level vacancy is discrete; realized area vacancy can differ from the reference envelope. Derived cap rates can fall outside reference cap bands; this is explicit and is not corrected by reverse-engineering rent. Value bands are unverified income illustrations, not appraisals.
+- `buildings.json` is compact JSON to meet the size limit. Future schema expansion may require sharding; serialization rejects oversized output before writing.
+- Standard isolated test mode is sandbox-blocked; the equivalent full set of test files passes in-process. No browser/visual verification was needed for this data-only step.
+- Final review minor (deferred): automated tests cover global price bounds and NOI/cap arithmetic, but do not directly assert each district land/GFA band or the estimated-value formula. The reviewer independently checked all district price bands and found zero violations; the current value formula was reviewed in code. These optional assertions can be added with later engine/data-contract work.
+
+### UNKNOWNs
+
+- Current verified market observations, actual transaction/lease evidence, real floor areas/condition, routing distances, owner expenses and capex quotes.
+- The seven existing reference UNKNOWNs remain unresolved, including VAT/tax treatment, deposit conversion rate, current market date, real owner opex, basement rents and exclusive/GFA ratios. Explicit synthetic building assumptions supplement the demo without replacing those UNKNOWNs.
+- Actual lease renewal behavior, permitted use changes, lender underwriting and intervention feasibility require later verified evidence; no real customer, owner or tenant records were accessed.
+
