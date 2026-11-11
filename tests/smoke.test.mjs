@@ -209,6 +209,7 @@ test('views construct with real mock data; filters, map activation and cleanup w
   try {
     const { homeView, radarView, listingsView, buildingView, proposalView } = await import('../web-v2/js/views.js');
     const { bidView } = await import('../web-v2/js/ui/bid-view.js');
+    const { valueUpView } = await import('../web-v2/js/ui/valueup-view.js');
     const { h } = await import('../web-v2/js/ui/components.js');
     const loader = createDataLoader(async (url) => ({ ok: true, json: async () => JSON.parse(readFileSync(fileURLToPath(url), 'utf8')) }));
     const data = await loader.loadCore();
@@ -341,6 +342,50 @@ test('views construct with real mock data; filters, map activation and cleanup w
     const destroyedText = bid.element.textContent;
     await new Promise((resolve) => setTimeout(resolve, 230));
     assert.equal(bid.element.textContent, destroyedText, 'destroy cancels pending sensitivity work');
+    const valueup = await valueUpView(context, parseRoute('#/building/bld-gangnam-001/valueup')); views.push(valueup);
+    assert.equal(valueup.selectId, 'bld-gangnam-001');
+    assert.ok(valueup.element.textContent.includes('예시 데이터 · 실제 매물 아님'));
+    assert.ok(valueup.element.textContent.includes('현재 층별 임대차'));
+    assert.equal(valueup.element.querySelectorAll('svg').length, 3, 'two comparisons and downtime timeline');
+    assert.equal(valueup.element.querySelectorAll('[data-heat-unit]').length, 10);
+    const planButton = (type) => valueup.element.querySelectorAll('[data-valueup-plan]').find((el) => el.dataset.valueupPlan === type);
+    const vuControl = (key) => valueup.element.querySelectorAll('[data-valueup-control]').find((el) => el.dataset.valueupControl === key);
+    const vuResult = () => valueup.element.querySelector('[data-valueup-results]').textContent;
+    assert.equal(planButton('lease-up').getAttribute('aria-pressed'), 'true');
+    planButton('lease-up').dispatchEvent(new Event('click'));
+    assert.ok(vuResult().includes('실행안 꺼짐'));
+    assert.equal(vuControl('capexKrw').disabled, true);
+    planButton('remodel').dispatchEvent(new Event('click'));
+    assert.equal(planButton('remodel').getAttribute('aria-pressed'), 'true');
+    assert.equal(planButton('lease-up').getAttribute('aria-pressed'), 'false');
+    for (const [key, value] of [['capexKrw', '2'], ['downtimeMonths', '6'], ['rentUpliftRate', '40'], ['affectedShare', '60'], ['startMonth', '3']]) {
+      const control = vuControl(key), before = vuResult();
+      control.value = value; control.dispatchEvent(new Event('input'));
+      assert.equal(vuControl(key), control, 'value-up controls remain mounted during adjustment');
+      assert.notEqual(vuResult(), before, `${key} changes the displayed model results`);
+    }
+    const vuEvidence = valueup.element.querySelectorAll('button').find((el) => el.getAttribute('aria-label')?.startsWith('개선 후 연 NOI'));
+    vuEvidence.dispatchEvent(new Event('click'));
+    assert.equal(inspected.evidence.inputs.intervention.capexKrw, 2e8);
+    assert.equal(inspected.evidence.inputs.intervention.downtimeMonths, 6);
+    assert.equal(inspected.evidence.inputs.intervention.startMonth, 3);
+    assert.ok(inspected.source.includes('deep/'));
+    assert.ok(vuResult().includes('산출 불가'));
+    planButton('use-change').dispatchEvent(new Event('click'));
+    assert.ok(vuResult().includes('인허가'));
+    planButton('remodel').dispatchEvent(new Event('click'));
+    assert.equal(Number(vuControl('capexKrw').value), 2, 'each plan retains its edits until reset');
+    valueup.element.querySelectorAll('button').find((el) => el.textContent === '실행안 초기화').dispatchEvent(new Event('click'));
+    assert.equal(planButton('lease-up').getAttribute('aria-pressed'), 'true');
+    const valueupSummary = await valueUpView(context, parseRoute(`#/building/${summaryBuilding.id}/valueup`)); views.push(valueupSummary);
+    assert.ok(valueupSummary.element.textContent.includes('층별 임대차 없음'));
+    assert.equal(valueupSummary.element.querySelectorAll('[data-heat-unit]').length, 0);
+    const missingValueup = await valueUpView(context, parseRoute('#/building/bld-gangnam-999/valueup')); views.push(missingValueup);
+    assert.ok(missingValueup.element.textContent.includes('찾을 수 없습니다'));
+    valueup.destroy();
+    const vuDestroyed = vuResult();
+    planButton('remodel').dispatchEvent(new Event('click'));
+    assert.equal(vuResult(), vuDestroyed, 'destroyed view stops handling edits');
     const picker = await proposalView(context, parseRoute('#/proposal')); views.push(picker);
     assert.equal(picker.element.querySelectorAll('[data-card-id]').length, 3);
     const proposal = await proposalView(context, parseRoute('#/building/bld-gangnam-001/proposal?for=seller')); views.push(proposal);

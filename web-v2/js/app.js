@@ -4,6 +4,7 @@ import { store } from './store.js';
 import { h, button, linkButton, badge, sidePanel, toast, evidenceNumber } from './ui/components.js';
 import { homeView, radarView, listingsView, buildingView, proposalView } from './views.js';
 import { bidView } from './ui/bid-view.js';
+import { valueUpView } from './ui/valueup-view.js';
 
 const loader = createDataLoader();
 let activePanel;
@@ -63,14 +64,14 @@ async function start() {
     },
   };
   let currentView, renderId = 0;
-  const titles = { home: '딜의 다음 한 수', radar: '딜 레이더', listings: '매물 탐색', building: '건물 개요', bid: '매수 한도가', proposal: '제안서', 'not-found': '페이지를 찾을 수 없습니다' };
+  const titles = { home: '딜의 다음 한 수', radar: '딜 레이더', listings: '매물 탐색', building: '건물 개요', bid: '매수 한도가', valueup: '밸류업 시뮬레이터', proposal: '제안서', 'not-found': '페이지를 찾을 수 없습니다' };
   createRouter(async (route) => {
     const requestId = ++renderId;
     activePanel?.close();
     currentView?.destroy?.();
     currentView = null;
     for (const nav of document.querySelectorAll('[data-nav]')) {
-      const active = nav.dataset.nav === route.name || (['building', 'bid'].includes(route.name) && nav.dataset.nav === 'listings');
+      const active = nav.dataset.nav === route.name || (['building', 'bid', 'valueup'].includes(route.name) && nav.dataset.nav === 'listings');
       if (active) nav.setAttribute('aria-current', 'page'); else nav.removeAttribute('aria-current');
     }
     document.title = `PLOT OS · ${titles[route.name] || '데모'}`;
@@ -86,6 +87,9 @@ async function start() {
       } else if (route.name === 'bid') {
         main.replaceChildren(h('div', { className: 'state-screen', role: 'status' }, h('p', {}, '임대차와 매수 한도를 계산하고 있습니다.')));
         view = await bidView(context, route);
+      } else if (route.name === 'valueup') {
+        main.replaceChildren(h('div', { className: 'state-screen', role: 'status' }, h('p', {}, '실행안별 수익과 비용을 계산하고 있습니다.')));
+        view = await valueUpView(context, route);
       } else if (route.name === 'proposal') view = await proposalView(context, route);
       else view = { element: h('div', { className: 'state-screen' }, h('p', { className: 'eyebrow' }, 'PLOT OS / 404'), h('h1', {}, '아직 준비되지 않은 페이지입니다'), h('p', {}, '딜 레이더에서 가상 건물을 선택해 살펴보세요.'), linkButton('딜 레이더로 이동', '#/radar', 'primary')) };
       if (requestId !== renderId) { view.destroy?.(); return; }

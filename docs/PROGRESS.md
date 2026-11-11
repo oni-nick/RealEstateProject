@@ -293,3 +293,51 @@ All Node commands used `C:\Users\nicho\AppData\Local\OpenAI\Codex\runtimes\cua_n
 - Real current market observations, verified leases/deposits/expenses, collection and renewal behavior, lender terms and underwriting, transaction-specific taxes/VAT, building condition/capex, seller willingness to negotiate and exit market conditions. The seven reference UNKNOWNs remain unresolved.
 - Final browser rendering, console behavior, native interactions, screen-reader output and device latency. No actual customer, owner, tenant or lot-level address data was accessed.
 
+## Step 7 — Value-up simulator (2026-11-12)
+
+### Done
+
+- Implemented `#/building/<id>/valueup`, with route title, active navigation, loading/error handling, existing overview/bid entry links and persistent example-data labeling. All 400 buildings use the existing monthly engine/adapter; 25 detailed records retain their rent-roll, deposit and owner-expense inputs. No engine arithmetic or mock inventory was changed.
+- Added three toggleable execution plans: lease-up of vacant income, remodel and use change. One plan is active at a time; clicking it again restores existing operations. Each plan retains edits locally until reset/navigation. Deep synthetic notes seed cost/downtime/uplift; summaries disclose generic defaults. Controls adjust vacancy lease-up fraction, affected potential-rent share, execution capex, start month, downtime and rent uplift. Native controls stay mounted during synchronous recalculation.
+- Added two accessible local SVG before/after bars for stabilized annual NOI and gross income value, plus levered IRR and percentage-point delta with evidence buttons. Both bars use the same stabilization-date 12 months and common cap rate; negative NOI is chartable, nonpositive NOI yields zero income value, and unavailable/ambiguous IRRs remain unavailable. Gross value is before execution costs; the additional cost-subtraction figure is explicitly not profit or NPV.
+- Added a relative-month SVG downtime timeline with start/cost-payment month, leasing or partial closure, completion and improved operation. Cost diagnostics show execution capex and holding-period NOI lost during downtime. Existing engine cashflows retain continuing opex/debt service, refund/restoration of the affected deposit share and final deposit/debt settlement. No future lease deposit benefit or additional construction borrowing is invented.
+- Added plain Korean explanations of vacant-income recovery, rent uplift, unchanged vacancy for physical works, costs/downtime, financial defaults, zero income value and use-change permitting uncertainty. One-plan comparisons and bulk affected-rent share are explicit; this does not pretend to allocate works to specific tenants/floors or forecast renewal/eviction dates.
+- Added floor-by-floor current rent-roll heat strips for all 25 detailed records, with independent vacancy, below-reference rent and 12-month/overdue expiry flags, labels and evidence. Low-rent screening compares occupied contract rent per exclusive pyeong with 90% of the district/floor reference midpoint; references are unverified examples, not observed market values. Basement reference and missing/invalid comparisons or expiries remain unknown. Summary-only buildings show a missing-floor-data state and a detailed-example link.
+
+### Files
+
+- `web-v2/js/valueup.js`
+- `web-v2/js/ui/valueup-view.js`, `web-v2/js/ui/valueup-charts.js`
+- `web-v2/js/app.js`, `web-v2/css/components.css`
+- `tests/valueup.test.mjs`, `tests/smoke.test.mjs`
+- `docs/context/step07-implementation-plan.md`, `docs/PROGRESS.md`
+- Verification-only `verify/step07-check.mjs` (gitignored); no screenshots or binary artifacts created.
+
+### Commands and results
+
+All Node commands used `C:\Users\nicho\AppData\Local\OpenAI\Codex\runtimes\cua_node\6ef99b3d04073aa7\bin\node.exe`.
+
+- Read PLAN first, Step 0 analysis/progress and relevant engine/UI/data contracts and code within this worktree. Initial read-only status was clean. No excluded files, historical main-tree links or real records were opened.
+- Requested `node --test tests/`: exit 1, sandbox worker `spawn EPERM`. No directory-invocation pass is claimed.
+- Full explicit-file suite: PowerShell collected all eight `tests/*.test.mjs` files and passed them to `node --test --test-isolation=none` → **91 passed, 0 failed**, exit 0. Focused scenario/DOM run before final review: 18 passed. New modules first produced missing-module failures; the final invalid-numeric regression failed before its repair and passed in the final full suite.
+- Seven scenario tests cover independent lease-up arithmetic (+38.4m KRW/year NOI), partial construction (+28.8m/year NOI, 38.4m downtime loss, 576m gross value increase at 5% cap), deposit refunds/restoration, capex, annual-growth date alignment, zero downtime, toggle-off identity, paid no-op, null/ambiguous IRR, negative/zero chart domains, vacancy/reference/expiry boundaries, invalid dates/numerics, deep presets and summary/deep adaptation.
+- Extended minimal-DOM smoke verifies all three plans and toggle-off/reset, stable live controls and engine evidence, retained per-plan edits, IRR unavailable state, permitting disclosure, 10-unit representative heat strip, summary/missing fallbacks and destruction. This checks DOM construction/events, not native browser rendering or pointer input.
+- `node verify/step07-check.mjs`: **1,200 analyses / 400 buildings / 25 detailed records**, reconciled baseline NOI and all intervention capex payments, stabilized deltas and zero invented new deposits. Heat strips cover **157 floors / 314 units**, including 38 vacancies, 116 below-reference flags, 11 expiring units and 34 units with unknown basement reference. Default post-plan IRRs: lease-up 344 ok / 56 no-solution; remodel 186 ok / 214 ambiguous; use change 185 ok / 215 ambiguous. Deltas stay null whenever either return is unavailable.
+- Representative Node scenario timings: median 2.15 ms, max 37.16 ms across 1,200 analyses. These are Node timings, not native browser latency claims. The same check served **65 assets** under `/demo/` with HTTP 200, byte-identical responses, correct JS MIME and UTF-8/no-BOM/sub-1MB checks. Ephemeral loopback server closed in `finally`; `serverClosed: true`.
+- Separate read-only code review found no Critical/Important issues. Both minor findings were fixed: invalid rent/area no longer yields a low-rent flag, and the Korean value explanation now states the zero-NOI floor/land-value exclusion. No deferred review findings.
+- Final PowerShell/.NET inspection confirmed valid UTF-8, no BOM and sizes below 1 MB for all ten changed/verification text files. An initial inline `node -e` audit failed because Windows argument quoting removed JavaScript quotes; the direct byte audit above replaced it. Final inventory recheck retained identical scenario/status counts and 65 valid HTTP assets; observed Node timing varied to median 3.48 ms/max 165.77 ms, reinforcing that browser latency is unverified.
+- Browser inventory returned `The browser access host is unavailable`. Native blank-Chrome inspection was stopped because the current browser URL could not be established confidently for policy enforcement. No further UI automation, screenshots, console checks, responsive rendering or print verification is claimed.
+- `git diff --check` passed with LF/CRLF normalization warnings. No git mutation commands, installations, external resources or edits outside this dedicated worktree. Runner owns integration.
+
+### Known issues
+
+- Actual browser appearance, focus/slider/screen-reader behavior, console and responsive/device performance remain unverified due to the browser automation blocker. DOM/HTTP checks do not establish visual QA.
+- Compare one execution plan at a time; simultaneous/overlapping interventions and unit-specific construction allocation are not modeled. Floor flags describe the current snapshot, not an after-work rent roll. Value-up edits reset on navigation/reload and do not propagate into proposals.
+- Existing conservative IRR policy withholds all multiple-sign-change returns, including potentially solvable individual cases; no approximate delta substitutes for an unavailable return. NOI/value comparisons remain available and the screen states the reason. Gross income value excludes execution/sale costs and taxes; the simple cost subtraction is not a discounted return.
+- Assumed affected-share deposit refunds/restoration and zero new lease deposits are illustrative. Continuing expenses stay unchanged; rent-free incentives, permitting failures, additional use-change opex, tax/VAT and capex overruns need separate real inputs. The underlying engine exclusions remain in force.
+
+### UNKNOWNs
+
+- Actual rent/lease terms, market reference calibration, tenant consent and renewal/eviction timing, achievable lease-up/uplift, construction quotes and delays, physical condition, permitted use/building/fire compliance, lender underwriting and transaction-specific taxes/VAT. All seven reference UNKNOWNs remain unresolved.
+- Browser layout/console/native interaction behavior and device latency. No actual customer, owner, tenant or lot-level records were accessed.
+
