@@ -4,3 +4,12 @@ dist/
 *.log
 .DS_Store
 Thumbs.db
+
+# PLOT OS v2 runner
+verify/
+node_modules/
+.env
+.env.*
+*.png
+*.pdf
+
