@@ -1,3 +1,5 @@
+import { evidenceConfidence } from '../evidence-trace.js';
+
 let sequence = 0;
 export function h(tag, attributes = {}, ...children) {
   const node = document.createElement(tag);
@@ -60,6 +62,7 @@ export function toast(message) {
   region.replaceChildren(h('div', { className: 'toast' }, message));
   toastTimer = setTimeout(() => region.replaceChildren(), 4200);
 }
-export function evidenceNumber({ text, label, onClick }) {
-  return h('button', { type: 'button', className: 'evidence-number', 'aria-label': `${label} ${text} · 근거 보기`, onClick }, text);
+export function evidenceNumber({ text, label, onClick, evidence }) {
+  return h('button', { type: 'button', className: 'evidence-number', 'data-confidence': evidenceConfidence(evidence),
+    'aria-haspopup': 'dialog', 'aria-label': `${label} ${text} · 근거 보기`, onClick }, text);
 }

@@ -23,8 +23,8 @@ export async function valueUpView(context, route) {
   const results = h('div', { className: 'stack', 'data-valueup-results': '' });
   const status = h('p', { className: 'sr-only', role: 'status', 'aria-live': 'polite' });
   const source = `${deep ? `data/${building.deepPath} · 상세 임대차` : 'data/buildings.json · 요약 수익 데이터'} · ${building.id}`;
-  const inspect = (evidence, label, format = amount, from = source) => evidenceNumber({ label, text: format(evidence.value),
-    onClick: () => context.inspect({ label, text: format(evidence.value), evidence, source: from }) });
+  const inspect = (evidence, label, format = amount, from = source) => evidenceNumber({ label, text: format(evidence.value), evidence,
+    onClick: () => context.inspect({ label, text: format(evidence.value), evidence, building, deep, source: from }) });
 
   function range(key, label, min, max, step, scale, format, applies = 'all') {
     const wrapper = slider({ label, min, max, step, value: settings[selected][key] * scale, format,
@@ -111,9 +111,10 @@ export async function valueUpView(context, route) {
       h('div', { className: 'valueup-heat' }, floors.map((floor) => h('div', { className: 'valueup-floor' }, h('strong', {}, floor.floor), h('div', { className: 'valueup-units' }, floor.units.map((unit) => {
         const flags = [unit.vacant ? '□ 공실' : '임대 중', unit.belowMarket === true && '▼ 저임대료', unit.expiring && (unit.overdue ? '◷ 만기 경과' : '◷ 12개월 내 만기'),
           unit.expiryUnknown && '만기 미확인', unit.referenceRentKrw === null && '참고 임대료 미확인', unit.belowMarket === null && '임대료 비교 미확인'].filter(Boolean);
-        return h('button', { type: 'button', className: `valueup-unit${unit.vacant ? ' is-vacant' : ''}${unit.belowMarket ? ' is-below' : ''}${unit.expiring ? ' is-expiring' : ''}`,
+        return h('button', { type: 'button', className: `valueup-unit evidence-number${unit.vacant ? ' is-vacant' : ''}${unit.belowMarket ? ' is-below' : ''}${unit.expiring ? ' is-expiring' : ''}`,
+          'data-confidence': 'low', 'aria-haspopup': 'dialog',
           'data-heat-unit': unit.unit, 'aria-label': `${floor.floor} ${unit.unit} · ${flags.join(' · ')} · 월세 ${manwon(unit.monthlyRentKrw)}만원 · 근거 보기`,
-          onClick: () => context.inspect({ label: `${unit.unit} · 임대료 참고 비교`, text: unit.referenceRentKrw === null ? '참고 임대료 UNKNOWN' : `현재 ${manwon(unit.rentPerPyeongKrw)}만원/평 · 참고 ${manwon(unit.referenceRentKrw)}만원/평`, evidence: unit.referenceEvidence,
+          onClick: () => context.inspect({ label: `${unit.unit} · 임대료 참고 비교`, text: unit.referenceRentKrw === null ? '참고 임대료 UNKNOWN' : `현재 ${manwon(unit.rentPerPyeongKrw)}만원/평 · 참고 ${manwon(unit.referenceRentKrw)}만원/평`, evidence: unit.referenceEvidence, building, deep,
             source: `${source} · data/market_refs.json · 기준 ${context.data.metadata.snapshotDate} · 만기 ${unit.leaseEnd ?? 'UNKNOWN'} (공실 제외)` }) },
         h('strong', {}, unit.unit), h('span', {}, flags.join(' · ')), h('span', {}, `월세 ${manwon(unit.monthlyRentKrw)}만원 · ${unit.vacant ? '미임대' : `만기 ${unit.leaseEnd ?? 'UNKNOWN'}`}`));
       }))))),

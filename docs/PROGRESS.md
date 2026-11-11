@@ -341,3 +341,44 @@ All Node commands used `C:\Users\nicho\AppData\Local\OpenAI\Codex\runtimes\cua_n
 - Actual rent/lease terms, market reference calibration, tenant consent and renewal/eviction timing, achievable lease-up/uplift, construction quotes and delays, physical condition, permitted use/building/fire compliance, lender underwriting and transaction-specific taxes/VAT. All seven reference UNKNOWNs remain unresolved.
 - Browser layout/console/native interaction behavior and device latency. No actual customer, owner, tenant or lot-level records were accessed.
 
+## Step 8 — Evidence trace (2026-11-12)
+
+### Done
+
+- Implemented a shared navigable evidence side panel for Radar, building overview, bid and value-up. Dotted numeric buttons open the displayed value, original engine/generator formula, individually clickable inputs, source lineage, confidence badge and the exact `검증 필요` label. Raw values, engine status and provenance remain available in an expandable section; null/UNKNOWN never becomes zero.
+- Inputs drill into calculation assumptions, monthly cashflows, intervention inputs, reference ranges and metadata, summary records, individual synthetic rent-roll units and owner expenses. Source links resolve actual `market_refs.json` rows and generator definitions; rent-roll rent/area dependencies retain their exact values and floor-specific reference ids. Summary prices resolve the district land/GFA reference envelopes. Radar aggregate member ids open their synthetic building snapshots.
+- Preserved edited bid assumptions and current engine outputs. An edited rate displays its `bid.input.*` identity rather than claiming it was observed in a market reference. Deep source records load on demand through the existing cached loader; loading/error states remain explicit, missing detailed records are never fabricated, and late completions cannot reopen a closed panel.
+- Added Back navigation within one native dialog, dynamic input headings/focus, existing close/return-focus behavior and route-change cleanup. Each evidence button identifies a dialog and carries confidence metadata. The top-bar `근거 모드` toggle immediately synchronizes existing session state and highlights only low-confidence numbers; filter/route updates preserve it. All current mock numbers remain low confidence.
+- Extended evidence coverage to Radar asking prices, score and all four KPI counts/medians; overview areas, occupancy and rent-roll area/deposit/rent/management fees; existing bid metrics, ceilings, funding and sensitivity; and existing value-up comparisons, deltas, costs and unit heat-strip evidence.
+- Included the `data-sources.md` caution inline in every evidence view and added a relative, offline-readable deployment note under `web-v2/data/`. It identifies unverified model assumptions, candidate institutions rather than consulted sources, units, deposit liabilities, exclusions and UNKNOWNs. No market observations, formulas in the calculation engine, generated inventory or dependencies were changed.
+
+### Files
+
+- New: `web-v2/js/evidence-trace.js`, `web-v2/js/ui/evidence-panel.js`, `web-v2/data/data-sources.md`, `tests/evidence.test.mjs`.
+- Updated: `web-v2/js/app.js`, `web-v2/js/ui/components.js`, `web-v2/js/ui/radar-view.js`, `web-v2/js/views.js`, `web-v2/js/ui/bid-view.js`, `web-v2/js/ui/valueup-view.js`, `web-v2/css/components.css`, `web-v2/index.html`, `docs/PROGRESS.md`.
+- Verification-only: `verify/step08-check.mjs` (gitignored). No screenshots, binaries or images created.
+
+### Commands and results
+
+All Node commands used `C:\Users\nicho\AppData\Local\OpenAI\Codex\runtimes\cua_node\6ef99b3d04073aa7\bin\node.exe`.
+
+- Read `docs/PLAN.md` first, Step 0 analysis/progress, `docs/data-sources.md` and relevant local UI/engine/data contracts. Initial read-only status was clean. No excluded files, linked main-tree documents, real records or secrets were opened.
+- Requested `node --test tests/`: exit 1, sandbox child-process `spawn EPERM`. No successful directory-command run is claimed.
+- Full explicit-file suite: PowerShell collected all nine `tests/*.test.mjs` paths and passed them to `node --test --test-isolation=none` → **100 passed, 0 failed**, exit 0. Before adding evidence tests the existing suite passed 91/91. Final evidence-only run passed 9/9; preceding evidence/smoke run passed 20/20. Initial evidence tests exposed an incorrect test expectation (`bid.user.*`); it was corrected to the existing adapter contract `bid.input.*`.
+- Nine evidence regressions check exact edited/default values, unit formatting, source-row ids/tag/candidate role, deep suite rent → floor reference traversal, missing-deep/UNKNOWN behavior, BUY/scenario wrappers, weakest-input confidence, modal/back/close/focus behavior, stale-async cleanup, lazy-load errors, global toggle state/disposal and real shared-control integration across all four requested scenes. These are pure/minimal-DOM tests, not native browser rendering or Escape/focus-trap verification.
+- `node verify/step08-check.mjs` → **68 assets** served under `/demo/`, HTTP 200 with byte-identical content, correct JavaScript MIME, valid UTF-8, no BOM and every asset below 1 MB. The deployed data-source note and its market-reference link exist. Ephemeral loopback server closed in `finally`; reported `serverClosed: true`.
+- `git diff --check`: passed with LF/CRLF normalization warnings. Final PowerShell/.NET byte audit of all **14 changed/verification text files** confirmed valid UTF-8, no BOM and each below 1 MB.
+- Computer Use browser inventory again returned `The browser access host is unavailable`; no browser tab was available. No native app was controlled and no screenshots, console checks, responsive-layout or actual browser interaction verification is claimed.
+- One exploratory inline `node -e` read failed because Windows command quoting removed JavaScript quotes; PowerShell JSON inspection replaced it. No installs, external network resources, long-running services or git mutation commands were used. All edits stayed inside this dedicated worktree; runner owns commits.
+
+### Known issues
+
+- Browser layout, real keyboard/focus-trap/Escape behavior, console and device responsiveness remain unverified because the browser access host is unavailable. Native dialog semantics and responsive styles are implemented; minimal-DOM/HTTP tests do not establish visual QA.
+- Numeric chart labels duplicate nearby clickable metric/table values; the SVG labels themselves are not separate evidence controls. Evidence mode and edited assumptions are session/page state, with the existing route-reset behavior unchanged. The source-note file is a deployment summary of the authoritative `docs/data-sources.md` and must be kept aligned when the source policy changes.
+- The exact requested directory-form test command remains blocked by sandbox process execution; the complete explicit-file in-process suite passed. Existing engine conservatism, synthetic-data limitations and financial exclusions remain in force.
+
+### UNKNOWNs
+
+- Actual market observation dates/levels, verified rent/lease/deposit/expense records, lender underwriting, transaction-specific taxes/VAT, construction/permit feasibility and real customer outcomes. All seven reference UNKNOWNs remain unresolved.
+- Final browser rendering, native interactions, accessibility output, console and device latency. No actual customer, owner, tenant or lot-level records were accessed.
+

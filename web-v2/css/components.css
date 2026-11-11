@@ -64,7 +64,7 @@ button.chip:hover { border-color: var(--accent); color: var(--accent); }
 .notice { padding: 14px 16px; border-left: 3px solid #99adaf; border-radius: 0 7px 7px 0; background: var(--surface-soft); color: var(--muted); font-size: 11px; line-height: 1.9; }
 .evidence-number { font: inherit; color: inherit; font-variant-numeric: tabular-nums; padding: 0 0 1px; border: 0; border-bottom: 1px dotted #9daab7; background: transparent; text-align: inherit; line-height: inherit; }
 .evidence-number:hover { color: var(--accent); border-color: var(--accent); }
-.evidence-mode .evidence-number { background: var(--accent-soft); color: var(--accent); border-bottom-color: var(--accent); border-radius: 3px; }
+.evidence-mode .evidence-number[data-confidence="low"] { background: #fff0cd; color: #754c00; border-bottom-color: #a87916; border-radius: 3px; box-shadow: 0 0 0 2px #fff0cd; }
 .kpi-accent .evidence-number:hover { color: #fff; }
 .panel-dialog { position: fixed; inset: 0 0 0 auto; width: min(480px, 100%); max-width: 100%; height: 100dvh; max-height: 100dvh; margin: 0; border: 0; border-left: 1px solid var(--line); padding: 0; color: var(--ink); background: #fff; box-shadow: var(--shadow-float); }
 .panel-dialog::backdrop { background: #111e3073; }
@@ -77,6 +77,17 @@ button.chip:hover { border-color: var(--accent); color: var(--accent); }
 .evidence-field h3 { font-size: 12px; margin-bottom: 8px; }
 .evidence-field p { color: var(--muted); font-size: 12px; overflow-wrap: anywhere; }
 .evidence-code { padding: 12px; background: var(--surface-soft); border: 1px solid var(--line); font: 11px/1.8 var(--mono); white-space: pre-wrap; overflow-wrap: anywhere; border-radius: 6px; max-height: 320px; overflow: auto; }
+.evidence-navigation { display: grid; gap: 8px; margin-bottom: 18px; }
+.evidence-navigation .button { justify-self: start; }
+.evidence-navigation .hint { overflow-wrap: anywhere; }
+.evidence-current { font-size: 14px; margin-bottom: 8px; overflow-wrap: anywhere; }
+.evidence-value { overflow-wrap: anywhere; font-size: clamp(22px, 3vw, 36px); }
+.evidence-links { display: grid; gap: 7px; margin-top: 10px; }
+.evidence-input { width: 100%; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 11px 12px; border: 1px solid var(--line); border-radius: 6px; background: var(--surface-soft); color: var(--ink); text-align: left; font: inherit; font-size: 11px; overflow-wrap: anywhere; }
+.evidence-input:hover { border-color: var(--accent); background: var(--accent-soft); }
+.evidence-input strong { text-align: right; font-variant-numeric: tabular-nums; font-weight: 600; }
+.evidence-formula { white-space: pre-wrap; }
+.evidence-field .text-link { display: inline-block; margin-top: 9px; font-size: 12px; }
 .toast-region { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); z-index: 100; width: max-content; max-width: calc(100% - 32px); pointer-events: none; }
 .toast { padding: 12px 20px; color: #fff; background: var(--navy); border: 1px solid #405269; border-radius: 8px; box-shadow: var(--shadow-float); font-size: 12px; }
 .loading-mark { width: 30px; height: 30px; border: 2px solid var(--line); border-top-color: var(--accent); border-radius: 50%; animation: loading 1s linear infinite; }

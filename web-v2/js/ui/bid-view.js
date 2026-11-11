@@ -28,8 +28,8 @@ export async function bidView(context, route) {
   const metricsStatus = h('p', { className: 'sr-only', role: 'status', 'aria-live': 'polite' });
   const policyStatus = h('p', { className: 'hint', role: 'status', 'aria-live': 'polite' });
 
-  const inspectNumber = (evidence, label, format, source = '') => evidenceNumber({ text: format(evidence.value), label,
-    onClick: () => context.inspect({ label, text: format(evidence.value), evidence,
+  const inspectNumber = (evidence, label, format, source = '') => evidenceNumber({ text: format(evidence.value), label, evidence,
+    onClick: () => context.inspect({ label, text: format(evidence.value), evidence, building, deep,
       source: `${deep ? `data/${building.deepPath} · 상세 임대차` : 'data/buildings.json · 요약 수익 데이터'} · ${building.id} · ${source || '월별 엔진 계산'}` }) });
 
   function policyFields() {

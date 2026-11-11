@@ -1,6 +1,6 @@
 import { DEFAULT_FILTERS, filterBuildings, updateFilters } from '../store.js';
 import { RADAR_PRESETS, createRadarMatcher, radarStats, sortRadarRows } from '../radar.js';
-import { h, badge, button, chip, emptyState, kpiCard, linkButton, slider } from './components.js';
+import { h, badge, button, chip, emptyState, evidenceNumber, kpiCard, linkButton, slider } from './components.js';
 import { createSeoulMap } from './map.js';
 import { eok, manwon, number, percent } from './format.js';
 
@@ -81,12 +81,12 @@ function criteriaPanel(context) {
 
 function candidateCard(row, context, map) {
   const b = row.building;
-  const score = button(`${row.score}점`, () => context.inspect({ label: '조건 적합도', text: `${row.score}점`, evidence: { value: row.score, formula: SCORE_EXPLANATION, inputs: { checks: row.checks, irr: row.irr, equityKrw: row.equityKrw, criteria: context.store.getState().filters }, provenance: { kind: 'derived', confidence: 'low' } }, source: '가상 후보 · 규칙 기반 점수' }));
+  const score = evidenceNumber({ label: '조건 적합도', text: `${row.score}점`, onClick: () => context.inspect({ label: '조건 적합도', text: `${row.score}점`, building: b, evidence: { value: row.score, formula: SCORE_EXPLANATION, inputs: { checks: row.checks, irr: row.metrics.leveredIrr, equityKrw: row.metrics.equityRequired, criteria: context.store.getState().filters }, provenance: { kind: 'derived', confidence: 'low' } }, source: '가상 후보 · 규칙 기반 점수' }) });
   score.className = 'evidence-number match-score';
   const card = h('article', { className: `card building-card radar-card${row.matches ? '' : ' is-near-miss'}`, 'data-card-id': b.id },
     h('div', { className: 'building-card-top' }, badge(row.matches ? '조건 일치' : '조건 외', row.matches ? 'accent' : 'outline'), score),
     h('a', { className: 'candidate-link', href: `#/building/${b.id}` }, h('h3', {}, b.nameKo), h('p', { className: 'location' }, `${b.neighborhood} · ${b.stationNameKo} 도보 ${b.walkMinutes}분`)),
-    h('div', { className: 'price-row' }, h('span', { className: 'price numeric' }, eok(b.askingPriceKrw), h('small', {}, '억')), badge(b.deepPath ? '상세 임대차' : '요약')),
+    h('div', { className: 'price-row' }, h('span', { className: 'price numeric' }, context.summaryNumber(b, 'askingPriceKrw', '매도 호가', eok), h('small', {}, '억')), badge(b.deepPath ? '상세 임대차' : '요약')),
     h('div', { className: 'radar-financials' }, h('div', {}, h('span', {}, '레버리지 IRR'), context.metricNumber(row, 'leveredIrr', '레버리지 IRR', percent)), h('div', {}, h('span', {}, '필요 자기자본'), context.metricNumber(row, 'equityRequired', '필요 자기자본', (v) => `${eok(v)}억`))),
     h('details', { className: 'match-reasons', open: row.matches }, h('summary', {}, '왜 맞는지', h('span', {}, `${row.checks.filter((c) => c.passed).length}/6 조건`)),
       h('ul', {}, row.checks.map((c) => h('li', { className: c.passed ? 'check-pass' : 'check-fail' }, h('span', { 'aria-hidden': 'true' }, c.passed ? '✓ ' : '× '), c.text))),
@@ -124,14 +124,16 @@ export function radarView(context) {
     rows = matcher.evaluate(data.buildings, filters);
     const stats = radarStats(rows), matches = rows.filter((r) => r.matches);
     const aggregate = (label, value, text, formula) => {
-      const control = button(text, () => context.inspect({ label, text, evidence: { value, formula, inputs: { criteria: filters, buildingIds: matches.map((r) => r.building.id) }, provenance: { kind: 'derived', confidence: 'low' } }, source: '가상 후보 · 일치 건물 중앙값' }));
-      control.className = 'evidence-number'; return control;
+      return evidenceNumber({ label, text, onClick: () => context.inspect({ label, text, evidence: { value, formula, inputs: { criteria: filters, buildingIds: matches.map((r) => r.building.id) }, provenance: { kind: 'derived', confidence: 'low' } }, source: '가상 후보 · 조건별 집계' }) });
     };
     kpis.replaceChildren(
-      kpiCard({ label: '조건 일치', value: number(stats.count, 0), unit: '개', note: `전체 ${data.buildings.length}개 · 거래완료 제외`, accent: true }),
+      kpiCard({ label: '조건 일치', value: aggregate('조건 일치', stats.count, number(stats.count, 0), 'count(buildings passing every physical, equity and IRR gate; closed records excluded)'), unit: '개', note: `전체 ${data.buildings.length}개 · 거래완료 제외`, accent: true }),
       kpiCard({ label: '중앙값 IRR', value: aggregate('중앙값 IRR', stats.medianIrr, percent(stats.medianIrr), 'median(matching buildings: engine monthly levered IRR, annualized)'), note: `호가 · LTV ${filters.ltvPct}% · 10년 보유` }),
       kpiCard({ label: '중앙값 대지 평당가', value: aggregate('중앙값 대지 평당가', stats.medianPricePerPyeong, manwon(stats.medianPricePerPyeong), 'median(askingPrice / (landAreaM2 * 121 / 400))'), unit: '만원/평', note: '대지 기준 · 호가 / 대지 평수' }),
-      kpiCard({ label: 'IRR 산출 불가', value: number(rows.filter((r) => r.irr === null).length, 0), unit: '개', note: '전체 건물 중 · 목표 충족에서 제외' }),
+      kpiCard({ label: 'IRR 산출 불가', value: evidenceNumber({ label: 'IRR 산출 불가', text: number(rows.filter((r) => r.irr === null).length, 0),
+        onClick: () => context.inspect({ label: 'IRR 산출 불가', text: `${rows.filter((r) => r.irr === null).length}개`,
+          evidence: { value: rows.filter((r) => r.irr === null).length, formula: 'count(all inventory rows where engine levered IRR is null)',
+            inputs: { criteria: filters, buildingIds: rows.filter((r) => r.irr === null).map((r) => r.building.id) }, provenance: { kind: 'derived', confidence: 'low' } }, source: '전체 가상 건물 · 월별 IRR 계산' }) }), unit: '개', note: '전체 건물 중 · 목표 충족에서 제외' }),
     );
     map.update({ matchingIds: new Set(matches.map((r) => r.building.id)), activeDistricts: filters.districts });
     renderList();

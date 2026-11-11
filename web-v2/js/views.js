@@ -1,6 +1,6 @@
 import { DEFAULT_FILTERS, filterBuildings, updateFilters } from './store.js';
 import { calculate, inputFromBuilding } from './engine/index.js';
-import { h, badge, button, emptyState, kpiCard, linkButton, table, toast } from './ui/components.js';
+import { h, badge, button, emptyState, evidenceNumber, kpiCard, linkButton, table, toast } from './ui/components.js';
 import { createSeoulMap } from './ui/map.js';
 import { eok, manwon, number, percent } from './ui/format.js';
 import { selectComps } from './building-analysis.js';
@@ -92,21 +92,21 @@ function buildingKpis(context, building, result) {
   );
 }
 
-function buildingFacts(building) {
+function buildingFacts(building, context) {
   return h('dl', { className: 'info-grid' }, [
-    ['가상 블록', building.addressKo], ['용도', building.useKo], ['대지 면적', `${number(building.landAreaM2)} m² · ${number(building.landAreaM2 * 121 / 400)}평`], ['연면적', `${number(building.gfaM2)} m²`],
-    ['규모 / 준공', `지하 ${building.floorsBelow}층 · 지상 ${building.floorsAbove}층 / ${building.builtYear}년`], ['용도지역', building.zoningKo], ['역 접근성 (가정)', `${building.stationNameKo} · 도보 ${building.walkMinutes}분`], ['임대율 (면적 기준)', percent(building.occupancy)],
+    ['가상 블록', building.addressKo], ['용도', building.useKo], ['대지 면적', context.summaryNumber(building, 'landAreaM2', '대지 면적', (v) => `${number(v)} m² · ${number(v * 121 / 400)}평`)], ['연면적', context.summaryNumber(building, 'gfaM2', '연면적', (v) => `${number(v)} m²`)],
+    ['규모 / 준공', `지하 ${building.floorsBelow}층 · 지상 ${building.floorsAbove}층 / ${building.builtYear}년`], ['용도지역', building.zoningKo], ['역 접근성 (가정)', `${building.stationNameKo} · 도보 ${building.walkMinutes}분`], ['임대율 (면적 기준)', context.summaryNumber(building, 'occupancy', '면적 기준 임대율', percent)],
   ].map(([label, value]) => h('div', {}, h('dt', {}, label), h('dd', {}, value))));
 }
 
 function compNumber(context, comp, key, label, format) {
   const text = format(comp[key]);
-  const control = button(text, () => context.inspect({ label, text,
+  const control = evidenceNumber({ label, text, evidence: { provenance: comp.provenance[key] }, onClick: () => context.inspect({ label, text,
     evidence: { value: comp[key], provenance: comp.provenance[key],
       inputs: { compId: comp.id, transactionDate: comp.transactionDate, priceKrw: comp.priceKrw, landAreaM2: comp.landAreaM2, gfaM2: comp.gfaM2 },
       formula: key === 'priceKrw' ? '합성 거래가: 가상 데이터 생성 규칙 f.ask' : `${key === 'landPricePerPyeong' ? '대지' : '연면적'} 평당가 = 가상 거래가 / (면적 m² × 121 / 400)` },
     source: `data/comps.json · ${comp.id} · ${key} · 공적 실거래 기록 아님`,
-  }));
+  }) });
   control.className = 'evidence-number'; control.setAttribute('aria-label', `${label} ${text} · 근거 보기`);
   return control;
 }
@@ -119,14 +119,18 @@ export async function buildingView(context, route) {
   const result = calculate(inputFromBuilding(building, deep, { ltv: ltvPct / 100 }));
   const comps = selectComps(building, deep, inventory.comps);
   const proposalId = route.id;
+  const unitNumber = (unit, key, label, format) => evidenceNumber({ label, text: format(unit[key]), evidence: { provenance: unit.provenance[key] },
+    onClick: () => context.inspect({ label: `${unit.unit} · ${label}`, text: format(unit[key]), building, deep,
+      evidence: { value: unit[key], provenance: unit.provenance[key], inputs: { ...unit } },
+      source: `data/${building.deepPath} · rentRoll · ${unit.unit} · ${key}` }) });
   const rentRoll = deep ? table({ caption: `${building.nameKo} — 가상 임대차 내역`, rows: deep.rentRoll, columns: [
     { label: '층 / 호실', render: (u) => h('div', {}, u.floor, h('span', { className: 'subtext' }, u.unit)) },
     { label: '임차 업종', render: (u) => u.status === 'vacant' ? '공실' : u.tenantCategoryKo },
     { label: '용도 / 상태', render: (u) => h('div', {}, u.useKo, h('span', { className: 'subtext' }, u.status === 'vacant' ? '공실' : '임대 중')) },
-    { label: '면적 (평)', numeric: true, render: (u) => number(u.areaPyeong) },
-    { label: '보증금 (만원)', numeric: true, render: (u) => manwon(u.depositKrw) },
-    { label: '월 임대료 (만원)', numeric: true, render: (u) => manwon(u.monthlyRentKrw) },
-    { label: '월 관리비 (만원)', numeric: true, render: (u) => manwon(u.mgmtFeeKrw) },
+    { label: '면적 (평)', numeric: true, render: (u) => unitNumber(u, 'areaPyeong', '전용 면적', number) },
+    { label: '보증금 (만원)', numeric: true, render: (u) => unitNumber(u, 'depositKrw', '보증금', manwon) },
+    { label: '월 임대료 (만원)', numeric: true, render: (u) => unitNumber(u, 'monthlyRentKrw', '월 임대료', manwon) },
+    { label: '월 관리비 (만원)', numeric: true, render: (u) => unitNumber(u, 'mgmtFeeKrw', '월 관리비', manwon) },
     { label: '계약 시작', render: (u) => u.status === 'vacant' ? '—' : u.leaseStart },
     { label: '만기', render: (u) => u.status === 'vacant' ? '—' : u.leaseEnd },
     { label: '갱신 위험 (가정)', render: (u) => u.status === 'vacant' ? '해당 없음' : ({ low: '낮음', medium: '보통', high: '높음' }[u.renewalRisk] ?? 'UNKNOWN') },
@@ -138,7 +142,7 @@ export async function buildingView(context, route) {
   const element = h('div', { className: 'page' }, h('div', { className: 'breadcrumb' }, h('a', { href: '#/radar' }, '딜 레이더'), ' / ', h('a', { href: '#/listings' }, '매물 탐색'), ' / ', building.nameKo),
     heading('PROPERTY / OVERVIEW', building.nameKo, `${building.addressKo} · ${building.statusKo}`, h('div', { className: 'actions' }, badge('예시 데이터 · 실제 매물 아님', 'accent'), linkButton('매수 한도가', `#/building/${proposalId}/bid`), linkButton('밸류업', `#/building/${proposalId}/valueup`), linkButton('요약 제안서  ↗', `#/building/${proposalId}/proposal?for=buyer`, 'primary'))),
     buildingKpis(context, building, result),
-    h('div', { className: 'content-grid' }, h('div', { className: 'stack' }, section('건물 개요', buildingFacts(building), building.id), section('임대차 현황', rentRoll, deep ? `${deep.rentRoll.length}개 가상 호실 · 금액 만원` : '요약만 보유'),
+    h('div', { className: 'content-grid' }, h('div', { className: 'stack' }, section('건물 개요', buildingFacts(building, context), building.id), section('임대차 현황', rentRoll, deep ? `${deep.rentRoll.length}개 가상 호실 · 금액 만원` : '요약만 보유'),
       section('임대차 만기 워터폴', deep ? leaseWaterfall(deep) : h('p', { className: 'notice' }, '요약 데이터에는 호실별 만기가 없습니다. 만기 노출은 상세 임대차 보유 건물에서만 확인할 수 있습니다.'), '월세 노출 · 확정 공실 예측 아님'),
       section('가상 비교 거래', h('div', {}, h('p', { className: 'notice' }, '예시 데이터 · 실제 매물 아님. 아래 거래는 모두 합성 예시이며 공적 실거래 기록이 아닙니다. 가격의 시점·면적·용도 차이를 보정하지 않았습니다.'),
         comps.length ? table({ caption: `${building.nameKo} — 가상 비교 거래`, rows: comps, columns: [
@@ -168,7 +172,7 @@ export async function proposalView(context, route) {
   const element = h('div', { className: 'page proposal-page' }, heading('WORKSPACE / PROPOSAL', '건물 요약 제안서', '검토할 숫자와 가정을 한 화면에 정리합니다.', h('div', { className: 'actions' }, linkButton('건물 개요', buildingHref(building)), linkButton(seller ? '매수자용' : '매도자용', `#/building/${id}/proposal?for=${seller ? 'buyer' : 'seller'}`), button('인쇄', () => { toast('인쇄 대화상자에서 A4와 배경 그래픽 설정을 확인하세요.'); window.print(); }, 'primary'))),
     h('article', { className: 'card proposal-sheet' }, h('div', { className: 'proposal-title' }, h('p', { className: 'eyebrow' }, `PLOT OS / ${seller ? 'SELLER' : 'BUYER'} BRIEF`), h('h2', {}, building.nameKo), h('p', { className: 'muted' }, building.addressKo), h('div', { className: 'actions', style: 'margin-top:16px' }, badge('예시 데이터 · 실제 매물 아님', 'accent'), badge(`예시 스냅샷 ${context.data.metadata.snapshotDate}`))),
       buildingKpis(context, building, result),
-      h('section', {}, h('h3', {}, '01 / 건물의 기본 조건'), buildingFacts(building)),
+      h('section', {}, h('h3', {}, '01 / 건물의 기본 조건'), buildingFacts(building, context)),
       h('section', {}, h('h3', {}, '02 / 숫자를 읽는 조건'), h('p', { className: 'notice' }, `호가 기준 레버리지 IRR ${percent(result.metrics.leveredIrr.value)}. 보유 10년, LTV 50%, 금리 연 5%, 임대료 상승 연 2%, 매각 Cap rate 4.5%의 가정입니다. 취득 비용과 반환할 보증금을 반영합니다. 이는 매수 권고나 매도 적정가가 아닙니다.`)),
       h('section', {}, h('h3', {}, '03 / 다음 대화에서 확인할 것'), h('p', { className: 'hint' }, '임대차·보증금 및 만기 / 실증 운영비 / 건물 상태와 공사비 / 대출 조건 / 거래별 세금·VAT / 실제 비교 거래'), h('p', { className: 'notice', style: 'margin-top:16px' }, '건물 요약 단계입니다. 매수 제안가·매도 호가 근거·시나리오 비교 및 상세 근거 부록은 아직 포함하지 않습니다.')),
       h('p', { className: 'proposal-disclaimer' }, `예시 데이터 · 실제 매물 아님. 모든 건물·임대차·위치는 가상이며 신뢰도는 낮음, 검증 필요입니다. 시장 출처는 조회하지 않았습니다. VAT·소득세·양도세·재융자 등은 모델에서 제외합니다. 실제 매매·대출·세무 판단에 사용할 수 없습니다. / ${result.engineVersion}`)),
