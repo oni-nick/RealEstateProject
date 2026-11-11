@@ -4,7 +4,7 @@ import { eok, median, percent } from './ui/format.js';
 
 export const RADAR_PRESETS = Object.freeze([
   { id: 'equity30', label: '자기자본 30억 · IRR 8%', note: '전 지역 · 자기자본 30억 이내', filters: DEFAULT_FILTERS },
-  { id: 'gangnam-office', label: '강남 사옥용', note: '강남구 · 업무시설 포함 · 도보 10분. 사옥 전환·자가 사용은 별도 검토', filters: { ...DEFAULT_FILTERS, districts: ['gangnam'], equityEok: 80, targetIrrPct: 0, maxWalk: 10, useKo: '업무시설' } },
+  { id: 'gangnam-office', label: '강남 사옥용', note: '강남구 · 업무시설 포함 · 도보 12분. 사옥 전환·자가 사용은 별도 검토', filters: { ...DEFAULT_FILTERS, districts: ['gangnam'], equityEok: 80, targetIrrPct: 0, maxWalk: 12, useKo: '업무시설' } },
   { id: 'seongsu-valueup', label: '성수 밸류업', note: '성수동 가상 후보 · 현 임대수익 기준. 밸류업 효과·공사비는 미반영', filters: { ...DEFAULT_FILTERS, districts: ['seongdong'], equityEok: 50, targetIrrPct: 0, maxWalk: 12 } },
 ]);
 

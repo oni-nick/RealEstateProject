@@ -1,5 +1,5 @@
 import { h, table } from './components.js';
-import { eok, number, percent } from './format.js';
+import { bidAmount, eok, number, percent } from './format.js';
 import { exactPrice, priceRulerDomain } from '../bid.js';
 
 const NS = 'http://www.w3.org/2000/svg';
@@ -22,13 +22,13 @@ export function priceRuler(analysis, askingPriceKrw) {
   const buy = exactPrice(analysis.buy), walk = exactPrice(analysis.walk), price = analysis.result.assumptions.purchasePriceKrw;
   const domain = priceRulerDomain([askingPriceKrw, price, buy, walk]);
   const x = (value) => 240 + (value - domain.min) / (domain.max - domain.min) * 570;
-  const svg = chart('호가·검토가·BUY·WALK-AWAY 가격 눈금자', `단위 억원. 호가 ${eok(askingPriceKrw)}, 현재 검토가 ${eok(price)}, BUY ${eok(buy)}, WALK-AWAY ${eok(walk)}. 미산출 선은 표시하지 않습니다.`, 270);
+  const svg = chart('호가·검토가·BUY·WALK-AWAY 가격 눈금자', `단위 억원. 호가 ${eok(askingPriceKrw)}, 현재 검토가 ${eok(price)}, BUY ${bidAmount(buy)}, WALK-AWAY ${bidAmount(walk)}. 한도가 숫자는 0.1억 단위 내림. 미산출 선은 표시하지 않습니다.`, 270);
   if (buy !== null) svg.append(svgNode('rect', { x: 240, y: 36, width: Math.max(0, x(buy) - 240), height: 180, class: 'bid-ruler-zone' }));
   if (buy !== null && walk !== null) svg.append(svgNode('rect', { x: x(buy), y: 36, width: Math.max(0, x(walk) - x(buy)), height: 180, class: 'bid-ruler-zone-negotiation' }));
   [['매도 호가', askingPriceKrw, 'ask'], ['현재 검토가', price, 'current'], ['BUY', buy, 'buy'], ['WALK-AWAY', walk, 'walk']].forEach(([label, value, tone], i) => {
     const y = 60 + i * 45;
     svg.append(svgNode('text', { x: 15, y: y + 5, class: 'bid-chart-label' }, label),
-      svgNode('text', { x: 217, y: y + 5, 'text-anchor': 'end', class: 'bid-chart-value' }, value === null ? '산출 불가' : `${eok(value)}억`));
+      svgNode('text', { x: 217, y: y + 5, 'text-anchor': 'end', class: 'bid-chart-value' }, ['buy', 'walk'].includes(tone) ? bidAmount(value) : `${eok(value)}억`));
     if (value === null) return;
     svg.append(svgNode('line', { x1: 240, x2: 810, y1: y, y2: y, class: 'bid-chart-grid' }),
       svgNode('line', { x1: x(value), x2: x(value), y1: y, y2: 226, class: `bid-ruler-guide bid-${tone}` }),

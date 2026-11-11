@@ -429,3 +429,47 @@ All Node commands used `C:\Users\nicho\AppData\Local\OpenAI\Codex\runtimes\cua_n
 - Actual market dates/levels, verified rent/leases/deposits/expenses, lender underwriting/deposit deductions, transaction-specific taxes/VAT, building condition, executable construction budgets/delays, tenant consent and permitted uses. All seven reference UNKNOWNs remain unresolved.
 - Actual browser/printer layout, native interactions, accessibility output, console and device latency. No real customer, owner, tenant or lot-level records were accessed.
 
+## Step 10 — Integrated verification and fixes (2026-11-12)
+
+### Done
+
+- Reviewed the integrated shell/router, data loading, scene entry links, native ES-module imports, local resource paths, Korean copy, responsive/print styles and numerical conventions. No dependency, generated inventory or calculation-engine formula changes were needed.
+- Fixed an empty `강남 사옥용` preset: its 10-minute walking limit excluded every positive-return eligible example. The preset now visibly specifies 12 minutes, yielding two candidates while preserving the 80억 equity budget, 0% target IRR, Gangnam/use gates and the full matching logic. Default and Seongsu presets retain three and one matches respectively. Synthetic prices/rents were not changed to produce matches.
+- Fixed inconsistent BUY/WALK-AWAY labels: the price ruler rounded a 19.6685억 ceiling to 19.7억 while the ceiling card showed 19.6억. Both now use a shared 0.1억 round-down formatter, including the SVG description. Chart positions and comparison percentages retain full calculation precision; the Korean explanation distinguishes positions from labels. Proposal ceilings keep their disclosed 0.01억 round-down precision.
+- Added durable cross-scene checks for all 25 detailed buildings at 0%, 50% and 80% LTV: Radar summary funding/IRR versus detailed bid inputs, proposal baseline/BUY equality, all three default value-up/proposal scenarios, capex/downtime and recommended endpoint IRR/DSCR. Preset checks prevent a dead-end demo; the real bid-view smoke test checks ruler/card agreement.
+- Wrote `docs/DEMO_SCRIPT.md`: Korean **9-minute-15-second** order, local launch instructions, exact route shortcuts, verified sample values, presenter wording, assumption/rounding explanations, audience switching/printing and fallback paths. The main detailed example is `bld-songpa-003`, intentionally introduced through `조건 외도 보기` because its at-ask IRR misses the 8% target.
+
+### Files
+
+- `web-v2/js/radar.js`
+- `web-v2/js/ui/format.js`, `web-v2/js/ui/bid-charts.js`, `web-v2/js/ui/bid-view.js`
+- `tests/integration.test.mjs`, `tests/smoke.test.mjs`
+- `docs/DEMO_SCRIPT.md`, `docs/PROGRESS.md`
+- Verification-only, gitignored: `verify/step10-check.mjs`, `verify/step10-diagnose.mjs`, `verify/step10-demo-numbers.mjs` and small text/empty DOM files from the server/Edge attempt. No screenshots, images, PDFs or other deliverable binaries were created.
+
+### Commands and results
+
+All Node commands used `C:\Users\nicho\AppData\Local\OpenAI\Codex\runtimes\cua_node\6ef99b3d04073aa7\bin\node.exe`.
+
+- Read `docs/PLAN.md` first, Step 0 analysis and progress; inspected only relevant code/contracts in this worktree. Initial `git status --short` was clean. No excluded files, historical main-tree links, real records or secrets were opened.
+- Requested `node --test tests/`: **exit 1, `spawn EPERM`** from the sandbox worker restriction. This command did not pass.
+- Full alternative: `$testFiles = @(Get-ChildItem -LiteralPath tests -Filter '*.test.mjs' -File | ForEach-Object { $_.FullName }); & '<bundled-node-path>' --test --test-isolation=none @testFiles` → **112 passed, 0 failed**, exit 0 across all **12 test files**. Initial baseline was 110/110. The new preset test failed with `gangnam-office` before its repair; the bid-view regression failed with `'19.7억' !== '19.6억'` before the shared formatter fix. Focused post-fix integration/Radar run passed 7/7; smoke run passed 12/12.
+- `node verify/step10-check.mjs`: actual app module bootstrapped in a minimal DOM harness and checked **179 normal route/view cases**, four missing-building routes, unknown-route fallback, **181 distinct generated links**, all 25 detailed records and one summary-only record per district across overview/bid/value-up/buyer/seller views. Also verified stale async-route suppression, a 503 deep-load failure followed by the actual Retry button, evidence-toggle persistence and cached local data requests. **72 web assets** passed UTF-8/no-BOM/sub-1MB checks. This is in-process integration, not a native browser or rendering test. An initial harness assertion expected a route title rather than the actual value-up heading; only the harness expectation was corrected.
+- `node verify/step09-check.mjs`: **400 buildings / 25 detailed records / 2,000 scenarios**; all 400 default proposal ranges passed endpoint IRR/full-period DSCR checks, all baseline NOIs reconciled and unavailable IRRs remained null. IRR statuses remained **1,079 ok / 492 no_solution / 429 ambiguous**. Node analysis timings were median 44.5 ms/max 153.1 ms during concurrent verification; not browser/device latency claims.
+- The same asset check served **72 assets under `/demo/`**, each HTTP 200, byte-identical content, correct JavaScript MIME and valid UTF-8/no BOM/below 1 MB. Its ephemeral loopback server closed in `finally`, reporting `serverClosed: true`.
+- Started the explicitly supplied runner helper in a hidden background process: `node C:\Users\nicho\Dev\RealEstate-v2-run\serve.mjs web-v2 4199`. Root HTTP request returned **200**. Tried installed Edge with `--headless --disable-gpu --dump-dom --virtual-time-budget=10000` for `#/`, `#/radar` and `bld-gangnam-001` bid/value-up/buyer-proposal routes. All five DOM outputs were empty. Edge stderr reported **Windows access denied (0x5), fatal Mojo platform-channel initialization and Crashpad failures**; no successful page rendering is claimed. The server was stopped; final checks confirmed the original server PID absent and **no listener on port 4199**.
+- `git diff --check` passed (only LF/CRLF normalization warnings). No git mutation commands, installs, external resource dependencies or intentional edits outside this dedicated worktree. Runner owns commits.
+- Independent read-only code review found no confirmed Critical, Important or Minor findings. The reviewer reconciled the 3/2/1 preset counts, demo baseline metrics, BUY ceiling, proposal range, intervention defaults and route/label flow; its focused integration/smoke run passed **14/14**, exit 0. It retained native browser/console/print QA as UNKNOWN.
+- Final byte/path audit checked all **eight deliverable files plus three verification scripts**: every resolved path stayed inside this worktree, valid UTF-8, no BOM/replacement characters and each file below 1 MB. Largest changed file was this progress log, approximately 74 KB.
+
+### Known issues
+
+- Native browser layout, JS console/runtime behavior, keyboard/focus/screen-reader behavior, A4 pagination/clipping and print dialog remain **UNKNOWN** because Edge could not initialize under the sandbox. Static CSS, minimal-DOM and HTTP checks do not establish visual correctness. No console-error-free or browser-performance claim is made.
+- Bid/value-up edits remain page-local and do not propagate to proposals; proposals use current Radar LTV/target plus disclosed baseline assumptions. The demo script explicitly resets edited scenes and explains this limitation. No immutable report storage, CSV import/edit workflow or backend persistence was added.
+- All prices, leases, comps, coordinates and reference bands remain synthetic/unverified. Some operating scenarios legitimately have unavailable/ambiguous IRRs; no fabricated numeric substitutes were added. Existing conservative IRR policy, fixed-LTV underwriting assumptions and tax/financing exclusions remain in force.
+
+### UNKNOWNs
+
+- Native browser/print rendering, console state, real input-device/accessibility behavior and device performance.
+- Real market observation dates/levels, verified leases/deposits/expenses, lender underwriting, transaction-specific taxes/VAT, achievable construction costs/delays, tenant consent, permitted uses and actual deal outcomes. The seven reference UNKNOWNs remain unresolved. No real customer, owner, tenant or lot-level address data was accessed.
+

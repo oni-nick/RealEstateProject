@@ -2,6 +2,8 @@ const decimal = new Intl.NumberFormat('ko-KR', { maximumFractionDigits: 1 });
 const integer = new Intl.NumberFormat('ko-KR', { maximumFractionDigits: 0 });
 export const number = (value, digits = 1) => Number.isFinite(value) ? (digits === 0 ? integer : decimal).format(value) : '—';
 export const eok = (value) => Number.isFinite(value) ? number(value / 1e8) : '—';
+// A displayed maximum must never round above its solved price ceiling.
+export const bidAmount = (value) => Number.isFinite(value) ? `${number(Math.floor(value / 1e7) / 10)}억` : '산출 불가';
 export const manwon = (value) => Number.isFinite(value) ? integer.format(value / 1e4) : '—';
 export const percent = (value) => Number.isFinite(value) ? `${number(value * 100)}%` : '산출 불가';
 export function median(values) {

@@ -1,12 +1,11 @@
 import { createBidInput, bidAnalysis, bidSensitivity, bidGuidance, bidPolicy, exactPrice } from '../bid.js';
 import { h, badge, button, emptyState, evidenceNumber, kpiCard, linkButton, slider, table } from './components.js';
-import { eok, number, percent } from './format.js';
+import { bidAmount, eok, number, percent } from './format.js';
 import { priceRuler, cashflowChart, tornadoChart, sensitivityLabels, sensitivityValue } from './bid-charts.js';
 
 const constraintLabel = (value, floor = false) => ({ target_irr: floor ? '최소 IRR' : '목표 IRR', min_dscr: '최소 DSCR', both: 'IRR + DSCR',
   infeasible: '충족 가능한 가격 없음', unavailable: '판단 불가' }[value] ?? '판단 불가');
 const times = (v) => Number.isFinite(v) ? `${number(v)}배` : '산출 불가';
-const bidAmount = (v) => Number.isFinite(v) ? `${number(Math.floor(v / 1e7) / 10)}억` : '산출 불가';
 const section = (title, body, note = '') => h('section', { className: 'card section-card' }, h('div', { className: 'section-heading' }, h('h2', {}, title), note && h('small', {}, note)), body);
 const signedPercent = (v) => `${v > 0 ? '+' : ''}${number(v * 100)}%`;
 let sequence = 0;
@@ -194,7 +193,7 @@ export async function bidView(context, route) {
       h('div', { className: 'actions' }, badge('예시 데이터 · 실제 매물 아님', 'accent'), linkButton('건물 개요', href), linkButton('밸류업', `${href}/valueup`))),
     h('div', { className: 'bid-layout' }, controlsPanel, h('div', { className: 'stack bid-results' }, kpis, metricsStatus,
       section('호가에서 합의 가능한 가격으로', h('div', { className: 'stack' }, rulerSlot, ceilingSlot, guidanceSlot,
-        h('p', { className: 'hint' }, 'BUY = 목표 IRR과 최소 DSCR을 함께 충족하는 최대 가격. WALK-AWAY = 최소 IRR과 동일 DSCR을 함께 충족하는 최대 가격. 같은 제약이 적용되면 두 선이 겹칩니다. 한도가 표시는 0.1억 단위 내림, 차트·비교율은 원 계산값 기준입니다.'))),
+        h('p', { className: 'hint' }, 'BUY = 목표 IRR과 최소 DSCR을 함께 충족하는 최대 가격. WALK-AWAY = 최소 IRR과 동일 DSCR을 함께 충족하는 최대 가격. 같은 제약이 적용되면 두 선이 겹칩니다. 한도가 숫자는 0.1억 단위 내림, 차트 위치·비교율은 원 계산값 기준입니다.'))),
       section('보유부터 매각까지의 현금흐름', cashSlot, '월별 모델 → 연도별 합계'),
       section('자금 조달과 정산', fundingSlot, '핵심 수치를 눌러 근거 확인'))),
     h('div', { className: 'bid-sensitivity-heading' }, h('h2', {}, '가정이 바뀌면, 한도도 바뀝니다'), sensitivityStatus), sensitivitySlot,

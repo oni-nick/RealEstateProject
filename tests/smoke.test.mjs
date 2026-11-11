@@ -291,6 +291,12 @@ test('views construct with real mock data; filters, map activation and cleanup w
     assert.ok(bid.element.textContent.includes('예시 데이터 · 실제 매물 아님'));
     assert.ok(bid.element.textContent.includes('WALK-AWAY'));
     assert.equal(bid.element.querySelectorAll('svg').length, 3);
+    const rulerLabels = bid.element.querySelector('[data-bid-ruler]').querySelectorAll('text');
+    for (const label of ['BUY', 'WALK-AWAY']) {
+      const rulerAmount = rulerLabels[rulerLabels.findIndex((n) => n.textContent === label) + 1].textContent;
+      const ceilingAmount = bid.element.querySelectorAll('button').find((n) => n.getAttribute('aria-label')?.startsWith(`${label} 한도가`)).textContent;
+      assert.equal(rulerAmount, ceilingAmount, `${label} ruler must agree with the displayed price ceiling`);
+    }
     const bidControl = (name) => bid.element.querySelectorAll('[data-bid-control]').find((el) => el.dataset.bidControl === name);
     const bidKpiText = () => bid.element.querySelector('[data-bid-kpis]').textContent;
     for (const [name, value] of [['purchasePriceKrw', '70'], ['annualInterestRate', '6'], ['ltv', '60'], ['vacancyRate', '20'], ['annualRentGrowth', '3'], ['exitCapRate', '5'], ['holdYears', '7']]) {
