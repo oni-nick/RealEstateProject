@@ -473,3 +473,38 @@ All Node commands used `C:\Users\nicho\AppData\Local\OpenAI\Codex\runtimes\cua_n
 - Native browser/print rendering, console state, real input-device/accessibility behavior and device performance.
 - Real market observation dates/levels, verified leases/deposits/expenses, lender underwriting, transaction-specific taxes/VAT, achievable construction costs/delays, tenant consent, permitted uses and actual deal outcomes. The seven reference UNKNOWNs remain unresolved. No real customer, owner, tenant or lot-level address data was accessed.
 
+## Step 11 — Korean summary and fresh test results (2026-11-12)
+
+### Done
+
+- Wrote a compact Korean `docs/SUMMARY.md` covering the conclusion, verified/unverified behavior, local launch commands, linked demo order, synthetic inventory, seven reference UNKNOWNs, four partner S questions, future GitHub Pages changes and evidence paths.
+- Distinguished this step's fresh tests from Step 10's historical route/HTTP checks. Explicitly retained browser/print/accessibility/performance UNKNOWNs, page-local edits versus proposal assumptions, session-only state and missing CSV/persistence/immutable-report workflows. No application, test, data or deployment files changed.
+- Documented the exact bundled Node plus runner `serve.mjs web-v2 4173`, Python HTTP alternative, URL/server shutdown and full in-process test command. Launch commands were not executed in this documentation-only step. Runner `logs` and `out` paths are references only; their external contents were not opened or verified.
+
+### Files
+
+- `docs/SUMMARY.md` (new, Korean).
+- `docs/PROGRESS.md` (this appended section).
+
+### Commands and results
+
+All Node invocations used `C:\Users\nicho\AppData\Local\OpenAI\Codex\runtimes\cua_node\6ef99b3d04073aa7\bin\node.exe`.
+
+- Read `docs/PLAN.md` first, then the supplied Step 0 analysis and full progress record, demo script and reference UNKNOWN definitions. Initial `git status --short` was clean. `rg --files -g AGENTS.md` found only the unrelated `plot-os-demo/AGENTS.md`; no instructions under that subtree apply to these documentation files. Historical main-tree links and excluded files were not opened.
+- Required `node --test tests/`: **exit 1, `spawn EPERM`**, blocked before actual tests ran. Runner summary reports one failed directory wrapper and zero passes; this is not an assertion failure in the application suite.
+- Full alternative: `$testFiles = @(Get-ChildItem -LiteralPath tests -Filter '*.test.mjs' -File | ForEach-Object { $_.FullName }); & '<bundled-node-path>' --test --test-isolation=none @testFiles` → **12 files, 112 tests passed, 0 failed, 0 cancelled, 0 skipped, 0 todo, exit 0**, duration about 14.39 seconds. No tests or implementation were changed. Checks cover deterministic data/units, engine arithmetic and boundaries, cross-scene consistency, evidence, proposals and minimal-DOM interactions; they do not establish native browser behavior.
+- PowerShell/.NET summary audit: **PASS**, strict UTF-8/no BOM/no replacement characters, **4,889 bytes / 2,726 characters**, eight required sections, expected results/launch/evidence text and all four local linked targets present. `git diff --check` passed before this log append.
+- Final two-file byte/path audit and `git diff --check`: **PASS**, both documentation files strictly UTF-8 without BOM/replacement characters, below 1 MB and within the worktree; exactly one Step 11 section. Read-only status showed only the new summary and appended progress log.
+- No server, install, network call, git mutation, external-folder write, binary or screenshot creation. Only the two documentation paths inside this dedicated worktree were edited; runner owns commits.
+
+### Known issues
+
+- Exact directory-form test execution remains blocked by the sandbox worker restriction; the complete explicit-file suite passed in-process. No successful `node --test tests/` claim is made.
+- Native browser/console/keyboard/accessibility/device performance and A4 printing remain unverified. Step 10's 179 route cases and 72 HTTP assets are historical evidence, not this step's rerun. No Pages workflow changes or deployment were performed.
+- Summary is a compact Markdown handoff, not a rendered/paginated document; no exact physical one-page fit was verified. Runner logs/out contents and the supplied local launch alternatives were not inspected/executed this step.
+
+### UNKNOWNs
+
+- All seven reference UNKNOWNs remain: current market date/levels, deposit conversion rate, VAT, transaction-specific tax, actual owner opex, basement rent and exclusive/GFA ratio. Actual leases, lender/deposit treatment, construction cost/delay, permissions, tenant consent and commercial outcomes also require evidence.
+- Pilot brokerage, willingness to pay/pricing model, S/K responsibility and approval split, data collection/access/retention/export policy. Summary includes questions for S; this step did not resolve them or introduce real client/owner/tenant/lot-level data.
+
