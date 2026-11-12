@@ -16,3 +16,4 @@ node_modules/
 
 # Local Naver Maps Client ID (never commit)
 web-v2/local-naver-config.js
+_pages_out/
