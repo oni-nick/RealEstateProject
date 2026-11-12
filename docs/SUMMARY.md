@@ -1,56 +1,51 @@
-# PLOT OS v2 데모 요약 · 2026-11-12
+# PLOT OS v2 UI 검증 요약 · 2026-11-12
 
 ## 결론
 
-“고객이 얼마까지 제안할 수 있고, 무엇으로 설명할까?”를 후보 탐색 → 가격 한도 → 개선안 → 근거 → 제안서로 연결한 정적 데모입니다. CSV 입력·수정, DB 저장, 버전 고정 보고서는 미구현이며 업무용 P0 완성판은 아닙니다.
+후보 탐색 → 최대 매입가 → 밸류업 → 근거 추적 → 매수자·매도자 제안서가 연결된 정적 데모입니다. 서울 30–150억 상업용 빌딩 400개와 상세 임대차 25개는 **합성 데이터**이며 실제 매물이 아닙니다. **사진은 예시 이미지**로, 자체 생성한 건축 SVG 일러스트입니다. 실제 건물 사진이나 해당 건물의 외관 증거가 아닙니다. 실제 업무용 데이터 검증·저장 제품의 완성을 의미하지 않습니다.
 
-## 동작 범위와 검증 상태
+## 변경 사항
 
-- **이번 검증:** 번들 Node의 `--test tests/`는 `spawn EPERM`, 종료 1(테스트 실행 전 실패). 아래 대체 명령은 **12개 파일, 112개 통과 / 실패·취소·건너뜀 0, 종료 0**. 데이터 재현성, 월별 NOI·IRR·DSCR·보증금/대출 정산, BUY/WALK-AWAY·민감도·세 개선안·근거·양측 제안서·최소 DOM 연결을 검사했습니다.
-- **기존 기록:** Step 10의 정상 경로/뷰 179개와 하위 경로 `/demo/`의 72개 자산 HTTP 검사는 통과했으나 이번에는 재실행하지 않았습니다.
-- **미검증·제약:** 브라우저 차단으로 화면·콘솔·접근성·기기 성능·A4 배치/인쇄는 UNKNOWN. 개별 매수 한도가/밸류업 편집값은 제안서에 전달되지 않으며 제안서는 레이더 LTV·목표 IRR과 기본 가정을 사용합니다. 상태는 세션 한정이고 해 없음/모호한 IRR은 산출 불가입니다.
+- **디자인 가이드:** 지도·목록·상세 패널 구성, 색상·타이포·간격·점수·접근성·인쇄 기준을 문서화했습니다.
+- **지도:** 홈과 Deal Radar에 CDN의 MapLibre GL JS 4.7.1 및 OpenFreeMap Positron을 연결했습니다. 군집·조건 외 점·점수·호가·선택 팝업과 출처 표시를 제공합니다. 건물 좌표는 합성이며 실제 필지와 무관합니다. CDN·타일·WebGL 실패 시 안내와 재시도가 표시되고 목록으로 검토를 계속할 수 있습니다.
+- **사진:** 32개 예시 일러스트를 건물 ID로 결정적으로 배정하며, 상세 건물은 네 장을 보여 줍니다. 예시 고지·대체 텍스트·이미지 실패 처리를 포함합니다.
+- **화면 정리:** 한국어 상단 탐색·검색·조건 메뉴·사진 목록·지도·선택 상세 패널, 장면별 탭과 제안서 인쇄 스타일을 정리했습니다. 이번 단계는 실행 안내를 고치고 worktree 내부 서버 및 자산 검사를 추가했습니다.
 
-## 로컬 실행과 테스트
+## 실행 방법
 
-전용 worktree의 PowerShell에서 실행합니다. 설치·외부 인터넷은 불필요하며 `file://`는 미지원입니다.
+PowerShell에서 이 worktree로 이동한 뒤 실행합니다. 패키지 설치와 빌드는 필요하지 않습니다.
 
 ```powershell
 Set-Location 'C:\Users\nicho\Dev\RealEstate-v2'
 $plotNode = 'C:\Users\nicho\AppData\Local\OpenAI\Codex\runtimes\cua_node\6ef99b3d04073aa7\bin\node.exe'
-& $plotNode 'C:\Users\nicho\Dev\RealEstate-v2-run\serve.mjs' web-v2 4173
-# 대안: Python이 설치되어 있다면 위 서버 대신 실행
-python -m http.server 4173 --bind 127.0.0.1 --directory web-v2
+& $plotNode scripts/serve.mjs
 ```
 
-서버 하나만 실행해 `http://127.0.0.1:4173/#/`로 접속하고 `Ctrl+C`로 종료합니다. 위 실행법은 이번에 미실행이며 Step 10에는 Node helper의 4199 포트 HTTP 200 기록이 있습니다.
+`http://127.0.0.1:4173/#/`로 접속하고 홈의 **딜 레이더 열기**를 선택합니다. 종료는 `Ctrl+C`입니다. 이번 환경에서는 4173 포트가 이미 사용 중이라 직접 기동은 `EADDRINUSE`로 종료됐습니다. 기존 프로세스는 건드리지 않았으며 HTTP 검사는 임시 loopback 포트에서 통과했습니다. 실행 전 본인이 관리하는 기존 서버의 포트 점유를 확인합니다. `file://` 직접 열기는 지원하지 않습니다. 지도에는 CDN과 타일을 위한 인터넷 연결이 필요합니다. 선택적 글꼴 연결 실패 시 시스템 글꼴을 사용합니다. 로컬 데이터·일러스트·분석·목록은 외부 지도 연결 없이도 사용할 수 있습니다.
+
+## 테스트 결과
+
+번들 Node **v24.22.1**, **16개 테스트 파일: 통과 128 / 실패 0 / 취소 0 / 건너뜀 0 / TODO 0**, 종료 코드 0입니다. 실행한 전체 명령은 위 `$plotNode` 설정 후 다음과 같습니다.
 
 ```powershell
-# 위 $plotNode를 설정한 별도 터미널에서 전체 테스트 대체 실행
-$testFiles = @(Get-ChildItem -LiteralPath tests -Filter '*.test.mjs' -File | ForEach-Object { $_.FullName })
-& $plotNode --test --test-isolation=none @testFiles
+& $plotNode --test --test-isolation=none tests/bid.test.mjs tests/building-overview.test.mjs tests/data.test.mjs tests/engine.test.mjs tests/evidence.test.mjs tests/integration.test.mjs tests/market-refs.test.mjs tests/photos.test.mjs tests/preview.test.mjs tests/proposal-view.test.mjs tests/proposal.test.mjs tests/radar-map.test.mjs tests/radar.test.mjs tests/smoke.test.mjs tests/ui-restyle.test.mjs tests/valueup.test.mjs
 ```
 
-## 데모 순서
+사진 배정의 결정성·manifest 파일 존재, 좌표·GeoJSON·지도 실패 처리, 실제 장면 디스패처의 경로 렌더링을 검사했습니다. 로컬 참조 경로가 모두 존재하고 자산 34개 모두 1,000,000바이트 미만입니다. 최대 자산은 `facade-21.svg` **65,514바이트**입니다. 서버로 텍스트·SVG·자료 115개를 HTTP 200·원본 바이트·MIME 일치까지 확인했습니다. UTF-8·한국어 고지·공백 오류도 검사했습니다.
 
-[9분 15초 진행안](DEMO_SCRIPT.md): 홈 → 레이더(기본/강남/성수 일치 3/2/1개) → `bld-songpa-003` 개요 → 매수 한도가 → 밸류업 → 근거 → 매수자·매도자 제안서 → S 논의. 본 건물은 IRR 미달로 **조건 외도 보기**에서 진입합니다. 현장 화면·인쇄 미리보기 사전 확인이 필요합니다.
+## UNKNOWN
 
-## 예시 데이터와 UNKNOWN
+실제 브라우저의 화면 배치·콘솔·키보드·터치·WebGL·한국어 지도 글리프·A4 페이지 나눔은 이번에 자동 검증하지 못했습니다. 향후 CDN·타일 가용성과 일러스트의 사진 같은 현실감·사용자 수용성은 UNKNOWN입니다. 실제 시세·임대차·좌표·금융 심사·세금/VAT·공사비·인허가도 검증되지 않았습니다. HTTP 검사는 화면 렌더링 검증을 대체하지 않습니다.
 
-**예시 데이터 · 실제 매물 아님:** 건물 400개, 상세 임대차/운영비/공사 이력 25개, 비교 거래 150개, 10개 구 개략 지도·위치/도보 시간, 참고 밴드·금융/세금/공사 가정은 모두 합성·미검증입니다. 실제 고객·소유자·임차인 이름이나 필지 주소는 없고 기관명은 검증 후보입니다.
+## 검증 근거 경로
 
-일곱 기준 UNKNOWN: **시장 관측일/현재 수준, 보증금 전월세 전환율, VAT, 거래별 세율, 실제 소유자 운영비, 지하 임대료, 전용/연면적 비율**([자료 기준](data-sources.md)). 실제 계약·대출 심사/보증금 차감·공사비/기간·인허가·임차인 동의·거래 성과도 UNKNOWN입니다. 4.6% 세금 예산과 고정 LTV는 실제 세무·대출 판단을 대신하지 않습니다.
+- [설계](DESIGN_GUIDE.md), [지도 구현 기록](context/ui-step03-map.md), [시연안](DEMO_SCRIPT.md), [단계별 기록](PROGRESS.md).
+- `tests/photos.test.mjs`, `tests/radar-map.test.mjs`, `tests/smoke.test.mjs`, `tests/ui-restyle.test.mjs`, `tests/preview.test.mjs`, `scripts/serve.mjs`.
+- `web-v2/assets/photos/manifest.json`, `LICENSES.md`, `tools/gen-photos.mjs`.
+- 로컬 로그: `verify/ui-step05-tests.log`, `verify/ui-step05-audit.json`, `verify/ui-step05-preview.log` (`verify/`는 git 제외 경로이며 커밋되지 않습니다). 커밋에 남는 결과는 이 문서와 진행 기록입니다.
 
-## 파트너 S에게 확인할 질문
+## 다음 단계 제안
 
-- **파일럿 중개사:** 어느 중개사무소·지역·건물 유형과 어떤 반복 업무부터 검증할까요?
-- **가격:** 보고서 건별 과금과 중개사무소 구독 중 무엇을 우선하며, 지불 의사와 유료 전환 기준은 무엇일까요?
-- **역할 분담:** S의 현장·자료 검증/중개 실행과 K의 제품·계산/개발 책임, 최종 보고서 승인자는 누구일까요?
-- **데이터/반출 정책:** 수집 권한·고객 동의·비식별화·보관/삭제·접근권한과 제안서/CSV 반출 범위를 어떻게 정할까요?
+실제 브라우저에서 1024·1440·1920px 및 모바일·인쇄를 확인하고, 오프라인·지도 차단 상황을 점검합니다. 일러스트의 시연 적합성을 검토한 뒤 필요하면 사용권이 명확한 예시 사진을 별도 승인 범위에서 검토합니다. 실제 업무 연결 전에는 검증 가능한 임대차·운영비·대출 자료와 저장·버전 관리 범위를 정합니다.
 
-## GitHub Pages 후속 변경 · 배포 미실시
-
-업로드 경로를 `web-v2`로 바꾸고 `web-v2/**`·검사 관련 `tests/**`·`scripts/**` 트리거를 반영해야 합니다. 기존 npm 설치/빌드·캐시·작업 디렉터리 설정을 정리하고 Node 테스트를 연결합니다. Pages 권한/환경·하위 경로 상대 링크/해시 라우팅·브라우저/인쇄 확인이 남아 있습니다. workflow 수정·게시는 하지 않았습니다.
-
-## 근거 경로
-
-[진행·검증 기록](PROGRESS.md), [테스트](../tests/). 러너 경로: `C:\Users\nicho\Dev\RealEstate-v2-run\logs`, `C:\Users\nicho\Dev\RealEstate-v2-run\out`(이번 단계에서 외부 폴더 내용 미열람·미확인).
+원격으로 푸시하거나 병합하거나 배포한 내용은 없습니다.
