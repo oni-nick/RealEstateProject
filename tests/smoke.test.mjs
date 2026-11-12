@@ -15,7 +15,7 @@ const root = fileURLToPath(new URL('../web-v2/', import.meta.url));
 function walk(path) {
   return readdirSync(path, { withFileTypes: true }).flatMap((entry) => entry.isDirectory() ? walk(join(path, entry.name)) : [join(path, entry.name)]);
 }
-const files = walk(root);
+const files = walk(root).filter((file) => !/[\\/]local-naver-config[^\\/]*\.js$/.test(file));
 const json = (name) => JSON.parse(readFileSync(join(root, 'data', name), 'utf8'));
 const buildings = json('buildings.json').buildings;
 const geography = json('districts.json');

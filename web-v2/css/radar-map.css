@@ -1,6 +1,22 @@
 .radar-map-shell { position: relative; isolation: isolate; border: 1px solid var(--color-border); border-radius: var(--radius-panel); background: #edf0f2; overflow: hidden; }
 .radar-map-heading { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 6px; padding: 10px 12px; background: var(--color-surface); border-bottom: 1px solid var(--color-border); font-size: 12px; }
 .radar-map-heading span { color: var(--color-text-muted); }
+.radar-provider, .radar-map-provider { display: flex; flex-direction: column; min-width: 0; min-height: 0; }
+.radar-page .radar-provider, .radar-page .radar-map-provider { flex: 1; }
+.radar-map-provider:empty { min-height: 320px; background: #edf0f2; }
+.radar-page .radar-map-provider:empty { min-height: 0; }
+.radar-provider-notice { flex-shrink: 0; padding: 10px 12px; background: #fff8e8; border: 1px solid #dbcda8; font-size: 12px; line-height: 1.6; }
+.radar-provider-notice[hidden] { display: none; }
+.naver-marker { position: relative; display: grid; place-items: center; width: 36px; height: 36px; border: 2px solid #fff; border-radius: 50%; background: #6b6378; color: #fff; font: 700 12px var(--font-sans); box-shadow: 0 1px 4px #0004; cursor: pointer; }
+.naver-high { background: var(--map-score-high, #087e75); }
+.naver-mid { background: var(--map-score-mid, #285ea8); }
+.naver-low { background: var(--map-score-low, #586779); }
+.naver-marker small { position: absolute; top: 37px; left: 50%; transform: translateX(-50%); color: #17283b; background: #fffe; border-radius: 3px; padding: 1px 4px; white-space: nowrap; font-size: 11px; }
+.naver-context { width: 12px; height: 12px; border: 2px solid #65717e; background: #fff; box-shadow: none; }
+.naver-cluster { width: 40px; height: 40px; background: #253b53; font-size: 14px; }
+.naver-focus { outline: 3px solid #17283b; outline-offset: 2px; pointer-events: none; }
+.naver-popup { width: 260px; padding: 12px; font-family: var(--font-sans); }
+.naver-popup .naver-popup-close { width: auto; min-height: 24px; margin: 0 0 6px auto; display: block; }
 .radar-map-canvas { height: clamp(480px, 65vh, 780px); width: 100%; position: relative; }
 .radar-map-canvas .maplibregl-canvas { outline-offset: -4px; }
 .radar-map-notice { position: absolute; top: 62px; left: 12px; right: 56px; z-index: 2; padding: 12px; background: var(--color-surface); border: 1px solid var(--color-border-strong); border-radius: var(--radius-control); box-shadow: var(--shadow-panel); font-size: 12px; line-height: 1.6; }

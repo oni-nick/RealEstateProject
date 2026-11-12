@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { readFileSync } from 'node:fs';
 import { buildingCoordinates, radarGeoJSON, scoreBand } from '../web-v2/js/map/radar-geo.js';
-import { createRadarMap } from '../web-v2/js/map/radar-map.js';
+import { createRadarMap } from '../web-v2/js/map/maplibre-map.js';
 
 const buildings = JSON.parse(readFileSync(new URL('../web-v2/data/buildings.json', import.meta.url))).buildings;
 

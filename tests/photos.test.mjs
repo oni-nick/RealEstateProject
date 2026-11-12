@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync, statSync } from 'node:fs';
 import { photoFor, photosFor, EXAMPLE_PHOTO_LABEL } from '../web-v2/js/photos.js';
-import { generatePhotos } from '../tools/gen-photos.mjs';
+import { PHOTO_CATALOG } from '../web-v2/js/photo-catalog.js';
 
 const root = new URL('../web-v2/assets/photos/', import.meta.url);
 const buildings = JSON.parse(readFileSync(new URL('../web-v2/data/buildings.json', import.meta.url), 'utf8')).buildings;
@@ -31,23 +31,27 @@ test('every building has a stable primary in the manifest and deep galleries kee
   assert.equal(photoFor({ id: buildings[0].id }).id, photoFor(buildings[0]).id);
 });
 
-test('offline pool is reproducible, small, original SVG artwork with provenance', () => {
-  const generated = generatePhotos();
+test('offline pool contains small licensed photographs with matching catalog and provenance', () => {
   const data = manifest();
-  assert.ok(data.photos.length >= 24 && data.photos.length <= 40);
+  const licenses = readFileSync(new URL('LICENSES.md', root), 'utf8');
+  assert.ok(data.photos.length >= 20 && data.photos.length <= 30);
   assert.equal(data.label, EXAMPLE_PHOTO_LABEL);
-  for (const [file, content] of generated) assert.equal(readFileSync(new URL(file, root), 'utf8'), content, file);
-  assert.equal(generated.size, data.photos.length + 3);
+  assert.deepEqual(PHOTO_CATALOG, data.photos);
+  assert.equal(new Set(data.photos.map((p) => p.sourceUrl)).size, data.photos.length);
   for (const p of data.photos) {
-    assert.equal(p.kind, 'generated');
+    assert.equal(p.kind, 'photograph');
+    assert.match(p.file, /^office-\d{2}\.(jpg|webp)$/);
     assert.ok(p.licenseNotes && p.author && p.alt);
-    assert.equal(p.sourceUrl, null);
+    assert.equal(p.label, EXAMPLE_PHOTO_LABEL);
+    assert.equal(p.license, 'Unsplash License');
+    assert.equal(p.licenseUrl, 'https://unsplash.com/license');
+    assert.match(p.sourceUrl, /^https:\/\/unsplash\.com\/photos\//);
+    assert.ok(licenses.includes(p.file) && licenses.includes(p.author) && licenses.includes(p.sourceUrl));
     const bytes = readFileSync(new URL(p.file, root));
-    const svg = new TextDecoder('utf-8', { fatal: true }).decode(bytes);
-    assert.ok(bytes.length < 120_000, p.file);
-    assert.ok(!svg.includes('\ufffd'));
-    assert.match(svg, /viewBox="0 0 960 720"/);
-    assert.ok(!/<(?:image|script)\b|(?:href|src)="https?:|url\(https?:/.test(svg), 'no external artwork or scripts');
+    assert.ok(bytes.length > 10_000 && bytes.length < 250_000, p.file);
+    assert.deepEqual([...bytes.subarray(0, 3)], [0xff, 0xd8, 0xff], 'local asset is a JPEG photograph');
+    assert.equal(p.width, 800);
+    assert.equal(p.height, 600);
   }
 });
 
@@ -69,8 +73,8 @@ test('thumbnail discloses examples and a failed image keeps its frame without re
     const figure = buildingPhoto(buildings[0]);
     const frame = figure.children[0], img = frame.children.find((c) => c.tagName === 'img');
     assert.equal(img.getAttribute('loading'), 'lazy');
-    assert.equal(img.getAttribute('width'), '960');
-    assert.equal(img.getAttribute('height'), '720');
+    assert.equal(img.getAttribute('width'), '800');
+    assert.equal(img.getAttribute('height'), '600');
     assert.ok(img.getAttribute('alt').includes('\uC608\uC2DC'));
     assert.ok(figure.textContent.includes(EXAMPLE_PHOTO_LABEL));
     assert.ok(frame.textContent.includes('\uC608\uC2DC'));

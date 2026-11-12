@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url';
 
 const root = fileURLToPath(new URL('../web-v2/', import.meta.url));
 const walk = (dir) => readdirSync(dir, { withFileTypes: true }).flatMap((e) => e.isDirectory() ? walk(resolve(dir, e.name)) : [resolve(dir, e.name)]);
-const files = walk(root);
+const files = walk(root).filter((file) => !/[\\/]local-naver-config[^\\/]*\.js$/.test(file));
 
 test('local HTML, CSS, module, data and photo references resolve inside web-v2', () => {
   let checked = 0;
@@ -38,6 +38,7 @@ test('all assets including SVGs are below 1 MB and valid UTF-8 without replaceme
     assert.ok(statSync(file).size < 1_000_000, file);
     const bytes = readFileSync(file);
     assert.notDeepEqual([...bytes.subarray(0, 3)], [239, 187, 191], file);
+    if (/\.(?:jpg|jpeg|webp)$/i.test(file)) continue;
     const text = new TextDecoder('utf-8', { fatal: true }).decode(bytes);
     assert.ok(!text.includes('\ufffd'), file);
   }
@@ -48,7 +49,7 @@ test('worktree preview serves every runtime asset with correct MIME and rejects 
   const server = createPreviewServer();
   await new Promise((done, reject) => { server.once('error', reject); server.listen(0, '127.0.0.1', done); });
   const base = `http://127.0.0.1:${server.address().port}`;
-  const mime = { '.html': 'text/html', '.css': 'text/css', '.js': 'text/javascript', '.json': 'application/json', '.svg': 'image/svg+xml', '.md': 'text/plain' };
+  const mime = { '.html': 'text/html', '.css': 'text/css', '.js': 'text/javascript', '.json': 'application/json', '.svg': 'image/svg+xml', '.md': 'text/plain', '.jpg': 'image/jpeg', '.webp': 'image/webp' };
   try {
     for (const file of files.filter((f) => mime[extname(f)])) {
       const response = await fetch(`${base}/${relative(root, file).split(sep).join('/')}`);

@@ -4,7 +4,7 @@ import { extname, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const root = fileURLToPath(new URL('../web-v2/', import.meta.url));
-const mime = { '.html': 'text/html', '.css': 'text/css', '.js': 'text/javascript', '.json': 'application/json', '.svg': 'image/svg+xml', '.md': 'text/plain' };
+const mime = { '.html': 'text/html', '.css': 'text/css', '.js': 'text/javascript', '.json': 'application/json', '.svg': 'image/svg+xml', '.md': 'text/plain', '.jpg': 'image/jpeg', '.webp': 'image/webp' };
 
 // Dependency-free preview, confined to this worktree's web-v2 directory.
 export function createPreviewServer() {

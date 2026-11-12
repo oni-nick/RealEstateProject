@@ -1,3 +1,12 @@
+## Step 00 — Naver map and licensed photos (2026-11-12)
+
+Naver Dynamic Map now loads optional local runtime configuration and the new Maps SDK (`ncpKeyId`). The existing MapLibre/OpenFreeMap renderer is retained as automatic fallback, with a Korean notice on missing configuration, auth failure, or loading timeout. Filters, matching-only local clusters, context points, selection/hover, photo popups, and attribution are preserved through the public adapter.
+
+The active photo catalog contains 20 local licensed Unsplash exterior JPEGs, 800×600, each under 250 KB. Exact example disclosures and image-error fallback remain in use; source and creator details are in `web-v2/assets/photos/LICENSES.md`. Earlier SVG artwork remains unreferenced. Tests exclude private local configuration from source scanning/imports.
+
+Live Naver authentication, tile rendering, and browser visual behavior: UNKNOWN. Historical results below describe earlier steps.
+
+---
 # PLOT OS v2 UI 검증 요약 · 2026-11-12
 
 ## 결론

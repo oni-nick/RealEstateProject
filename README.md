@@ -194,3 +194,11 @@ npm run test:sites
 ## 유의사항
 
 이 저장소의 분석 결과는 제품 검증을 위한 데모입니다. 감정평가, 법률·세무 판단 또는 투자 권유가 아니며, 실제 거래에서는 공인중개사와 관련 자격 전문가의 확인이 필요합니다.
+
+## web-v2 Naver Dynamic Map (Step 00)
+
+`web-v2/` uses plain ES modules. Naver is the primary map; OpenFreeMap/MapLibre remains the automatic fallback. The optional `web-v2/local-naver-config.js` is gitignored and loaded once at runtime. Copy the tracked example locally, or generate the private file from the deployment secret. Never put a real ID in tracked files.
+
+The new Naver Cloud Maps product uses `https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=YOUR_NAVER_MAPS_CLIENT_ID`. Register the exact demo/deployment web service URL (including the localhost or 127.0.0.1 origin used for preview) in Naver Cloud. See the [official loading guide](https://navermaps.github.io/maps.js.ncp/docs/tutorial-2-Getting-Started.html). Missing config, authentication failure, or a 10-second loading timeout shows a Korean notice and switches to OpenFreeMap. Naver attribution controls remain enabled.
+
+Example exterior photographs are local licensed JPEGs, assigned deterministically and disclosed on every image. Provenance: [photo licenses](web-v2/assets/photos/LICENSES.md). They do not depict the assigned listings. Live Naver authentication, tiles, and browser visual behavior are UNKNOWN until checked with the registered demo origin.

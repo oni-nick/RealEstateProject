@@ -18,6 +18,6 @@ export function buildingGallery(building) {
   const gallery = photosFor(building);
   return h('section', { className: `building-gallery${gallery.length > 1 ? ' has-gallery' : ''}`, 'aria-label': '건물 외관 예시' },
     h('div', { className: 'photo-gallery-grid' }, gallery.map((photo) => buildingPhoto(building, { photo }))),
-    h('p', { className: 'photo-gallery-note' }, '해당 건물의 실제 사진 아님 · 생성된 건축 일러스트',
+    h('p', { className: 'photo-gallery-note' }, '해당 건물의 실제 사진 아님 · 외관 예시 사진',
       gallery.length > 1 ? ' · 서로 다른 외관 예시이며 층수·재료·시점은 건물 정보와 무관합니다.' : ' · 층수·재료는 건물 정보와 무관합니다.'));
 }
