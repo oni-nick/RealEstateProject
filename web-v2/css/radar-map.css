@@ -1,0 +1,43 @@
+.radar-map-shell { position: relative; isolation: isolate; border: 1px solid var(--color-border); border-radius: var(--radius-panel); background: #edf0f2; overflow: hidden; }
+.radar-map-heading { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 6px; padding: 10px 12px; background: var(--color-surface); border-bottom: 1px solid var(--color-border); font-size: 12px; }
+.radar-map-heading span { color: var(--color-text-muted); }
+.radar-map-canvas { height: clamp(480px, 65vh, 780px); width: 100%; position: relative; }
+.radar-map-canvas .maplibregl-canvas { outline-offset: -4px; }
+.radar-map-notice { position: absolute; top: 62px; left: 12px; right: 56px; z-index: 2; padding: 12px; background: var(--color-surface); border: 1px solid var(--color-border-strong); border-radius: var(--radius-control); box-shadow: var(--shadow-panel); font-size: 12px; line-height: 1.6; }
+.radar-map-notice[hidden], .radar-map-notice button[hidden] { display: none; }
+.radar-map-notice button { margin: 8px 0 0 8px; }
+.radar-map-legend { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; padding: 10px 12px; background: var(--color-surface); border-top: 1px solid var(--color-border); font-size: 12px; color: var(--color-text-muted); }
+.radar-map-legend span { display: inline-flex; align-items: center; gap: 5px; }
+.radar-map-legend i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; }
+.radar-legend-high { background: var(--map-score-high); }
+.radar-legend-mid { background: var(--map-score-mid); }
+.radar-legend-low { background: var(--map-score-low); }
+.radar-legend-unknown { background: var(--map-score-unknown); }
+.radar-legend-context { background: #fff; border: 1.5px solid var(--map-context); }
+.radar-map-attribution { padding: 4px 12px 6px; background: var(--color-surface); font-size: 12px; color: var(--color-text-muted); text-align: right; }
+.radar-map-attribution a, .radar-map-shell .maplibregl-ctrl-attrib a { color: var(--color-text-muted); text-decoration: underline; }
+.radar-map-shell .maplibregl-ctrl-attrib { font-size: 12px; max-width: calc(100% - 12px); }
+.radar-map-shell .maplibregl-ctrl-group button { width: 36px; height: 36px; }
+.radar-map-shell .maplibregl-popup-content { padding: 12px; border-radius: var(--radius-panel); font-family: var(--font-sans); box-shadow: var(--shadow-popover); }
+.radar-map-shell .maplibregl-popup-close-button { font-size: 22px; width: 36px; height: 36px; background: #fff; border-radius: var(--radius-control); z-index: 1; }
+.radar-map-popup { font-size: 12px; line-height: 1.6; color: var(--color-text); }
+.radar-map-popup h3 { margin: 8px 28px 2px 0; font-size: 14px; }
+.radar-map-popup p { margin: 4px 0; }
+.radar-map-popup .building-photo { width: 100%; margin: 0; }
+.radar-map-popup .photo-frame { width: 100%; aspect-ratio: 4 / 3; }
+.radar-map-popup .photo-disclosure { font-size: 12px; }
+.radar-popup-price { display: block; margin-top: 8px; font-size: 24px; font-variant-numeric: tabular-nums; }
+.radar-map-popup .button { width: 100%; margin-top: 8px; min-height: 36px; }
+.radar-card.is-selected { border-color: var(--color-primary); box-shadow: inset 3px 0 var(--color-primary); }
+.radar-card-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 10px; }
+.radar-card-actions .value-link { margin: 0; }
+@media (max-width: 760px) {
+  .radar-map-canvas { height: 460px; }
+  .radar-map-shell .maplibregl-ctrl-group button, .radar-map-shell .maplibregl-popup-close-button { width: 44px; height: 44px; }
+  .radar-card-actions .button { min-height: 44px; }
+}
+@media print {
+  .radar-map-canvas { display: none; }
+  .radar-map-notice, .radar-map-notice button { display: none; }
+  .radar-map-heading::after { content: '예시 지도 · 화면에서 확인해 주세요.'; }
+}

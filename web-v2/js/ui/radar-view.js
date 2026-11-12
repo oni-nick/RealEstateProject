@@ -1,7 +1,7 @@
 import { DEFAULT_FILTERS, filterBuildings, updateFilters } from '../store.js';
 import { RADAR_PRESETS, createRadarMatcher, radarStats, sortRadarRows } from '../radar.js';
 import { h, badge, button, chip, emptyState, evidenceNumber, kpiCard, linkButton, slider } from './components.js';
-import { createSeoulMap } from './map.js';
+import { createRadarMap } from '../map/radar-map.js';
 import { buildingPhoto } from './photo.js';
 import { eok, manwon, number, percent } from './format.js';
 
@@ -80,11 +80,12 @@ function criteriaPanel(context) {
   ), destroy: unsubscribe };
 }
 
-function candidateCard(row, context, map) {
+function candidateCard(row, context, map, selectedId) {
   const b = row.building;
   const score = evidenceNumber({ label: '조건 적합도', text: `${row.score}점`, onClick: () => context.inspect({ label: '조건 적합도', text: `${row.score}점`, building: b, evidence: { value: row.score, formula: SCORE_EXPLANATION, inputs: { checks: row.checks, irr: row.metrics.leveredIrr, equityKrw: row.metrics.equityRequired, criteria: context.store.getState().filters }, provenance: { kind: 'derived', confidence: 'low' } }, source: '가상 후보 · 규칙 기반 점수' }) });
   score.className = 'evidence-number match-score';
-  const card = h('article', { className: `card building-card radar-card${row.matches ? '' : ' is-near-miss'}`, 'data-card-id': b.id },
+  const selected = b.id === selectedId;
+  const card = h('article', { className: `card building-card radar-card${row.matches ? '' : ' is-near-miss'}${selected ? ' is-selected' : ''}`, 'data-card-id': b.id },
     h('div', { className: 'building-card-top' }, badge(row.matches ? '조건 일치' : '조건 외', row.matches ? 'accent' : 'outline'), score),
     h('div', { className: 'candidate-summary' }, buildingPhoto(b, { compact: true }),
       h('a', { className: 'candidate-link', href: `#/building/${b.id}` }, h('h3', {}, b.nameKo), h('p', { className: 'location' }, `${b.neighborhood} · ${b.stationNameKo} 도보 ${b.walkMinutes}분`))),
@@ -93,7 +94,9 @@ function candidateCard(row, context, map) {
     h('details', { className: 'match-reasons', open: row.matches }, h('summary', {}, '왜 맞는지', h('span', {}, `${row.checks.filter((c) => c.passed).length}/6 조건`)),
       h('ul', {}, row.checks.map((c) => h('li', { className: c.passed ? 'check-pass' : 'check-fail' }, h('span', { 'aria-hidden': 'true' }, c.passed ? '✓ ' : '× '), c.text))),
       !row.matches && h('p', { className: 'hint' }, '검색·상세자료·거래 상태 조건도 적용됩니다.')),
-    h('a', { className: 'value-link', href: `#/building/${b.id}` }, '건물 검토하기 →'));
+    h('div', { className: 'radar-card-actions' },
+      h('button', { className: 'button button-small', type: 'button', 'data-map-select': b.id, 'aria-pressed': String(selected), onClick: () => map.select(b.id) }, selected ? '선택됨 · 지도 보기' : '지도에서 보기'),
+      h('a', { className: 'value-link', href: `#/building/${b.id}` }, '건물 검토하기 →')));
   for (const [event, id] of [['pointerenter', b.id], ['pointerleave', null], ['focusin', b.id], ['focusout', null]]) card.addEventListener(event, () => map.highlight(id));
   return card;
 }
@@ -101,26 +104,43 @@ function candidateCard(row, context, map) {
 export function radarView(context) {
   const { data, store } = context;
   let filters = store.getState().filters, sort = 'score', page = 0, includeOutside = false, rows;
-  let timer;
+  let timer, selectedId = null;
   const size = 20, kpis = h('div', { className: 'kpi-strip' }), results = h('div', { className: 'result-list' });
   const count = h('small', { role: 'status', 'aria-live': 'polite', 'aria-atomic': 'true' }), pagination = h('div', { className: 'radar-pagination' });
-  const map = createSeoulMap({ geography: data.geography, buildings: data.buildings,
+  const map = (context.createRadarMap ?? createRadarMap)({ geography: data.geography, buildings: data.buildings,
     onOpen: (id) => { location.hash = `#/building/${id}`; },
+    onSelect: (id) => {
+      selectedId = id; store.setState({ selectedId: id });
+      const index = listCandidates().findIndex((r) => r.building.id === id);
+      if (index >= 0) page = Math.floor(index / size);
+      renderList();
+      const card = [...results.querySelectorAll('[data-card-id]')].find((el) => el.dataset.cardId === id);
+      card?.scrollIntoView?.({ block: 'nearest', behavior: 'instant' });
+    },
     onHover: (id) => { for (const card of results.querySelectorAll('[data-card-id]')) card.classList.toggle('is-hovered', card.dataset.cardId === id); },
   });
   const panel = criteriaPanel(context);
   const select = h('select', { className: 'select-field', 'aria-label': '후보 정렬', onChange(e) { sort = e.target.value; page = 0; renderList(); } },
     ...[['score', '적합도 높은 순'], ['irr', 'IRR 높은 순'], ['price', '호가 낮은 순'], ['equity', '필요 자본 낮은 순']].map(([value, label]) => h('option', { value }, label)));
   const outside = h('input', { type: 'checkbox', onChange(e) { includeOutside = e.target.checked; page = 0; renderList(); } });
-  function renderList() {
+  function listCandidates() {
     const eligible = new Set(filterBuildings(data.buildings, filters).map((b) => b.id));
     const candidates = sortRadarRows(rows.filter((r) => r.matches || (includeOutside && eligible.has(r.building.id))), sort);
+    // A context marker remains inspectable, with its explicit 조건 외 badge.
+    const selected = rows.find((r) => r.building.id === selectedId);
+    if (selected && !candidates.includes(selected)) candidates.unshift(selected);
+    return candidates;
+  }
+  function renderList() {
+    const focusedId = document.activeElement?.getAttribute('data-map-select');
+    const candidates = listCandidates();
     page = Math.max(0, Math.min(page, Math.ceil(candidates.length / size) - 1));
     count.textContent = `${rows.filter((r) => r.matches).length}개 일치 · ${candidates.length}개 표시 대상`;
-    results.replaceChildren(...(candidates.length ? candidates.slice(page * size, (page + 1) * size).map((r) => candidateCard(r, context, map)) : [emptyState('일치하는 후보가 없습니다', '자기자본·목표 IRR 또는 지역·호가·도보 조건을 조정해 보세요.', button('조건 초기화', () => updateFilters(DEFAULT_FILTERS)))]));
+    results.replaceChildren(...(candidates.length ? candidates.slice(page * size, (page + 1) * size).map((r) => candidateCard(r, context, map, selectedId)) : [emptyState('일치하는 후보가 없습니다', '자기자본·목표 IRR 또는 지역·호가·도보 조건을 조정해 보세요.', button('조건 초기화', () => updateFilters(DEFAULT_FILTERS)))]));
     const prev = button('← 이전', () => { page--; renderList(); }, 'small'); prev.disabled = page === 0;
     const next = button('다음 →', () => { page++; renderList(); }, 'small'); next.disabled = (page + 1) * size >= candidates.length;
     pagination.replaceChildren(prev, h('span', {}, `${page + 1} / ${Math.max(1, Math.ceil(candidates.length / size))}`), next);
+    if (focusedId) [...results.querySelectorAll('[data-map-select]')].find((el) => el.getAttribute('data-map-select') === focusedId)?.focus({ preventScroll: true });
   }
   function refresh() {
     rows = matcher.evaluate(data.buildings, filters);
@@ -137,7 +157,8 @@ export function radarView(context) {
           evidence: { value: rows.filter((r) => r.irr === null).length, formula: 'count(all inventory rows where engine levered IRR is null)',
             inputs: { criteria: filters, buildingIds: rows.filter((r) => r.irr === null).map((r) => r.building.id) }, provenance: { kind: 'derived', confidence: 'low' } }, source: '전체 가상 건물 · 월별 IRR 계산' }) }), unit: '개', note: '전체 건물 중 · 목표 충족에서 제외' }),
     );
-    map.update({ matchingIds: new Set(matches.map((r) => r.building.id)), activeDistricts: filters.districts });
+    if (selectedId && !matches.some((r) => r.building.id === selectedId)) { selectedId = null; store.setState({ selectedId: null }); }
+    map.update({ matchingIds: new Set(matches.map((r) => r.building.id)), rows, selected: selectedId });
     renderList();
   }
   refresh();
@@ -152,8 +173,8 @@ export function radarView(context) {
   return { element: h('div', { className: 'page' },
     h('div', { className: 'page-heading' }, h('div', {}, h('div', { className: 'eyebrow' }, 'WORKSPACE / DEAL RADAR'), h('h1', {}, '딜 레이더'), h('p', {}, '고객의 투자 조건에서, 검토할 딜을 찾으세요.')), linkButton('전체 매물 목록 ↗', '#/listings')),
     kpis, h('div', { className: 'radar-workspace' }, panel.element,
-      h('section', { className: 'radar-map-column', 'aria-label': '서울 가상 건물 지도' }, map.element,
-        h('div', { className: 'map-footnote' }, h('span', {}, '강조된 점은 모든 투자 조건 일치 · 흐린 점도 상세 열기 가능'), h('span', {}, `예시 스냅샷 ${data.metadata.snapshotDate}`)),
+      h('section', { className: 'radar-map-column', 'aria-label': '서울 예시 건물 지도' }, map.element,
+        h('div', { className: 'map-footnote' }, h('span', {}, '합성 좌표 · 실제 필지와 무관 · 빈 원도 선택 가능'), h('span', {}, `예시 스냅샷 ${data.metadata.snapshotDate}`)),
         h('details', { className: 'card scoring-guide' }, h('summary', {}, '적합도와 수익률을 읽는 방법'), h('p', {}, SCORE_EXPLANATION), h('p', {}, 'IRR 산출 불가에는 모호한 복수 해와 해 없음이 포함됩니다. 대출심사·세금·실물 상태는 검증 전이며, IRR은 수익을 보장하지 않습니다.'))),
       h('section', { className: 'radar-results', 'aria-label': '조건에 맞는 후보 목록' }, h('div', { className: 'section-heading results-heading' }, h('h2', {}, '발견한 후보'), count),
         h('div', { className: 'radar-list-toolbar' }, select, h('label', { className: 'check-label' }, outside, '조건 외도 보기')), results, pagination))),

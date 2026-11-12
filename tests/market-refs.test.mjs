@@ -143,11 +143,15 @@ test('documented funding example applies financing fees to debt and treats depos
   assert.ok(docs.includes('100 + 4.6 + 0.5 + 0.3 + 0.25 − 50 − 2 = 53.65억원'));
 });
 
-test('app shell and tracked folder scaffolding use only local relative resources', () => {
+test('app shell resources stay local except the explicitly pinned optional map CDN', () => {
   const html = readFileSync(at('web-v2/index.html'), 'utf8');
   assert.ok(html.includes('lang="ko"'));
   assert.ok(html.includes('href="./data/market_refs.json"'));
-  assert.ok(!html.match(/https?:\/\//i));
+  const external = [...html.matchAll(/(?:src|href)="(https?:\/\/[^\"]+)"/g)].map((m) => m[1]);
+  assert.deepEqual(external.sort(), [
+    'https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css',
+    'https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js',
+  ]);
   assert.ok(html.includes('<script type="module" src="./js/app.js"></script>'));
   for (const path of ['web-v2/css/.gitkeep', 'web-v2/js/engine/.gitkeep', 'scripts/.gitkeep']) assert.ok(existsSync(at(path)), path);
 });
