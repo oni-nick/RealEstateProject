@@ -2,9 +2,8 @@ import { createDataLoader } from './data.js';
 import { createRouter } from './router.js';
 import { store } from './store.js';
 import { h, button, linkButton, toast } from './ui/components.js';
-import { homeView, radarView, listingsView, buildingView, proposalView } from './views.js';
-import { bidView } from './ui/bid-view.js';
-import { valueUpView } from './ui/valueup-view.js';
+import { sceneView } from './scenes.js';
+import { bindShell } from './ui/shell.js';
 
 const loader = createDataLoader();
 export { openEvidence } from './ui/evidence-panel.js';
@@ -32,36 +31,25 @@ async function start() {
   }
   const context = { data, loader, store, ...createEvidenceControls(data, loader) };
   let currentView, renderId = 0;
-  const titles = { home: '딜의 다음 한 수', radar: '딜 레이더', listings: '매물 탐색', building: '건물 개요', bid: '매수 한도가', valueup: '밸류업 시뮬레이터', proposal: '제안서', 'not-found': '페이지를 찾을 수 없습니다' };
+  bindShell(store);
+  const titles = { home: '워크스페이스', radar: '딜 레이더', listings: '매물 탐색', building: '건물 개요', bid: '최대 매입가', valueup: '밸류업 시뮬레이터', proposal: '고객 제안서', 'not-found': '페이지를 찾을 수 없습니다' };
   createRouter(async (route) => {
     const requestId = ++renderId;
     closeEvidence();
     currentView?.destroy?.();
     currentView = null;
     for (const nav of document.querySelectorAll('[data-nav]')) {
-      const active = nav.dataset.nav === route.name || (['building', 'bid', 'valueup'].includes(route.name) && nav.dataset.nav === 'listings');
+      const active = nav.dataset.nav === route.name || (route.name === 'building' && nav.dataset.nav === 'listings');
       if (active) nav.setAttribute('aria-current', 'page'); else nav.removeAttribute('aria-current');
     }
-    document.title = `PLOT OS · ${titles[route.name] || '데모'}`;
+    const selected = route.id || store.getState().selectedId || data.buildings.find((b) => b.deepPath)?.id;
+    for (const nav of document.querySelectorAll('[data-building-scene]')) nav.href = `#/building/${selected}/${nav.dataset.buildingScene}`;
+    document.body.classList.toggle('radar-active', route.name === 'radar');
+    document.title = `PLOT OS · ${titles[route.name] || '워크스페이스'}`;
     main.setAttribute('aria-busy', 'true');
     try {
-      let view;
-      if (route.name === 'home') view = homeView(context);
-      else if (route.name === 'radar') view = radarView(context);
-      else if (route.name === 'listings') view = listingsView(context);
-      else if (route.name === 'building') {
-        main.replaceChildren(h('div', { className: 'state-screen', role: 'status' }, h('span', { className: 'loading-mark', 'aria-hidden': 'true' }), h('p', {}, '건물 상세를 불러오고 있습니다.')));
-        view = await buildingView(context, route);
-      } else if (route.name === 'bid') {
-        main.replaceChildren(h('div', { className: 'state-screen', role: 'status' }, h('p', {}, '임대차와 매수 한도를 계산하고 있습니다.')));
-        view = await bidView(context, route);
-      } else if (route.name === 'valueup') {
-        main.replaceChildren(h('div', { className: 'state-screen', role: 'status' }, h('p', {}, '실행안별 수익과 비용을 계산하고 있습니다.')));
-        view = await valueUpView(context, route);
-      } else if (route.name === 'proposal') {
-        main.replaceChildren(h('div', { className: 'state-screen', role: 'status' }, h('p', {}, '제안서의 수익·가격 한도·비교 거래를 계산하고 있습니다.')));
-        view = await proposalView(context, route);
-      } else view = { element: h('div', { className: 'state-screen' }, h('p', { className: 'eyebrow' }, 'PLOT OS / 404'), h('h1', {}, '아직 준비되지 않은 페이지입니다'), h('p', {}, '딜 레이더에서 가상 건물을 선택해 살펴보세요.'), linkButton('딜 레이더로 이동', '#/radar', 'primary')) };
+      if (['building', 'bid', 'valueup', 'proposal'].includes(route.name)) main.replaceChildren(h('div', { className: 'state-screen', role: 'status' }, h('span', { className: 'loading-mark', 'aria-hidden': 'true' }), h('p', {}, '건물 자료와 분석 결과를 불러오고 있습니다.')));
+      const view = await sceneView(context, route);
       if (requestId !== renderId) { view.destroy?.(); return; }
       currentView = view;
       if (view.selectId) store.setState({ selectedId: view.selectId });

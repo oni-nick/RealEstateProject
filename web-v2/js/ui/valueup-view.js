@@ -3,6 +3,7 @@ import { valueUpAnalysis, valueUpDefaults, rentRollHeat, VALUEUP_TYPES } from '.
 import { h, badge, button, emptyState, evidenceNumber, kpiCard, linkButton, slider, table } from './components.js';
 import { eok, manwon, number, percent } from './format.js';
 import { comparisonBars, downtimeTimeline } from './valueup-charts.js';
+import { sceneNav } from './scene-nav.js';
 
 const labels = { 'lease-up': '공실 임대', remodel: '리모델링', 'use-change': '용도 변경' };
 const descriptions = { 'lease-up': '빈 공간을 임대해 수입 회복', remodel: '공사비·중단 기간과 임대료 인상', 'use-change': '공간 재편 비용과 임대 수요 가정' };
@@ -47,7 +48,9 @@ export async function valueUpView(context, route) {
       const visible = control.applies === 'all' || (control.applies === 'lease' ? selected === 'lease-up' : selected !== 'lease-up' && selected !== null);
       control.wrapper.hidden = !visible;
       control.input.disabled = selected === null || !visible;
+      control.wrapper.setDisabled(selected === null || !visible);
       control.input.value = p[key] * control.scale;
+      control.wrapper.setValue(p[key] * control.scale);
       control.output.textContent = control.format(p[key] * control.scale);
       control.input.setAttribute('aria-valuetext', control.format(p[key] * control.scale));
     }
@@ -73,7 +76,7 @@ export async function valueUpView(context, route) {
     else if (selected) explanation = `잠재 임대료의 ${percent(p.affectedShare)}에 해당하는 부분을 ${p.downtimeMonths}개월 중단하고, 완료 후 해당 부분의 임대료가 ${percent(p.rentUpliftRate)} 높아진다고 가정합니다. 공실률은 기존 ${percent(input.vacancyRate)}를 유지하며 운영비·이자는 중단 기간에도 발생합니다. ${selected === 'use-change' ? '용도 변경 인허가·건축·소방 적합성과 추가 운영비는 미확인입니다.' : '퇴거 협의·견적·추가 수선비는 미확인입니다.'}`;
     else explanation = '실행안을 선택하지 않아 기존 운영과 같은 조건으로 계산합니다. 버튼을 다시 누르면 해당 실행안을 켤 수 있습니다.';
     results.replaceChildren(h('div', { className: 'valueup-selection' }, badge(active, 'accent'), h('span', {}, `호가 ${amount(input.purchasePriceKrw)} · 보유 ${input.holdYears}년 · LTV ${percent(input.ltv)}`)), kpis, comparison,
-      section('가치는 어디에서 생길까', h('div', { className: 'stack' }, h('p', {}, explanation),
+      section('개선 효과와 비용', h('div', { className: 'stack' }, h('p', {}, explanation),
         h('p', {}, `같은 시점의 전후 연 NOI를 각각 동일한 Cap ${cap}로 나눈 뒤 수익가치 차이를 비교합니다. NOI가 0 이하이면 수익가치는 0으로 표시하며 토지 가치를 평가한 결과가 아닙니다. 임대료 상승과 공실 해소가 수입을 늘려도, 실행 비용과 임대 중단이 크면 투자 수익률은 낮아질 수 있습니다.`),
         returns, result.delta.irr.value === null && h('p', { className: 'notice' }, 'IRR 변화 산출 불가 · 전후 중 하나의 IRR을 확정할 수 없습니다. 위 사유와 점선 수치의 현금흐름 근거를 확인해 주세요.'), costTable,
         h('p', { className: 'hint' }, '수익가치는 안정화 시점의 총액이며 실행 비용·매각 비용·세금을 차감하기 전입니다. 단순 차감 금액은 이익·NPV가 아닙니다. IRR은 월별 비용·손실·차입금 상환·매각 비용과 보증금 정산을 반영합니다.'))),
@@ -124,9 +127,10 @@ export async function valueUpView(context, route) {
   const href = `#/building/${building.id}`;
   return { selectId: building.id, element: h('div', { className: 'page valueup-page' },
     h('div', { className: 'breadcrumb' }, h('a', { href: '#/radar' }, '딜 레이더'), ' / ', h('a', { href }, building.nameKo), ' / 밸류업'),
-    h('div', { className: 'page-heading' }, h('div', {}, h('div', { className: 'eyebrow' }, 'DEAL ROOM / VALUE-UP'), h('h1', {}, '운영을 바꾸면, 가치가 얼마나 달라질까'),
+    h('div', { className: 'page-heading' }, h('div', {}, h('div', { className: 'eyebrow' }, building.nameKo), h('h1', {}, '밸류업 시뮬레이터'),
       h('p', {}, `${building.nameKo} · ${deep ? '상세 임대차·운영비' : '요약 수익 데이터'} 기반 · ${building.statusKo}`)),
       h('div', { className: 'actions' }, badge('예시 데이터 · 실제 매물 아님', 'accent'), linkButton('건물 개요', href), linkButton('매수 한도가', `${href}/bid`))),
+    sceneNav(building, 'valueup'),
     h('div', { className: 'bid-layout valueup-layout' }, controlsPanel, h('div', { className: 'bid-results stack' }, results, status)),
     section('현재 층별 임대차 · 기회와 리스크', heatStrip(), '실행안 적용 전 · 호실을 눌러 근거 확인'),
     h('p', { className: 'notice' }, '예시 데이터 · 실제 매물 아님. 모든 실행 비용·공사 기간·임대료·금융 조건은 검증 필요 가정입니다. 실제 수요·임대차 동의·건축 및 인허가 가능성·세금/VAT·공사비 증액·추가 운영비는 UNKNOWN입니다. 감정평가·매수 권고·대출 승인이 아닙니다. 수정값은 화면 이동·새로고침 시 초기화되며 제안서에 자동 반영되지 않습니다.')),

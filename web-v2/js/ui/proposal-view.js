@@ -2,8 +2,11 @@ import { proposalAnalysis } from '../proposal.js';
 import { h, badge, button, emptyState, evidenceNumber, linkButton, table } from './components.js';
 import { eok, manwon, number, percent } from './format.js';
 import { proposalNoiChart, proposalCashflowChart } from './proposal-charts.js';
+import { buildingPhoto } from './photo.js';
+import { EXAMPLE_DATA_LABEL } from './disclosure.js';
+import { sceneNav } from './scene-nav.js';
 
-const EXAMPLE = '예시 데이터 · 실제 매물 아님';
+const EXAMPLE = EXAMPLE_DATA_LABEL;
 const DEFAULT_BROKER = '예시 중개사';
 const money = (v) => Number.isFinite(v) ? `${eok(v)}억` : '산출 불가';
 const times = (v) => Number.isFinite(v) ? `${number(v)}배` : '해당 없음';
@@ -19,10 +22,10 @@ function picker(context) {
   const candidates = context.data.buildings.filter((b) => b.deepPath && b.statusKo !== '거래완료 참고')
     .toSorted((a, b) => a.askingPriceKrw - b.askingPriceKrw).slice(0, 3);
   return { element: h('div', { className: 'page' }, h('div', { className: 'page-heading' }, h('div', {}, h('p', { className: 'eyebrow' }, 'WORKSPACE / PROPOSAL'),
-    h('h1', {}, '고객에게 전할 다음 제안'), h('p', {}, '가상 건물을 선택하면 매수자·매도자용 제안서를 바로 구성합니다.')), linkButton('전체 매물에서 선택', '#/listings')),
+    h('h1', {}, '고객 제안서'), h('p', {}, '검토할 건물을 선택해 매수자·매도자용 제안서를 작성하세요.')), linkButton('전체 매물에서 선택', '#/listings')),
     h('p', { className: 'notice' }, EXAMPLE), h('div', { className: 'value-grid' }, candidates.map((b) => h('a', {
       className: 'card building-card', href: `#/building/${b.id}/proposal?for=buyer`, 'data-card-id': b.id },
-    badge('상세 임대차', 'accent'), h('h3', {}, b.nameKo), h('p', { className: 'location' }, b.addressKo), h('p', { className: 'price-row' }, `호가 ${money(b.askingPriceKrw)} · 제안서 보기 →`))))) };
+    buildingPhoto(b), badge('상세 임대차', 'accent'), h('h3', {}, b.nameKo), h('p', { className: 'location' }, b.addressKo), h('p', { className: 'price-row' }, `호가 ${money(b.askingPriceKrw)} · 제안서 보기 →`))))) };
 }
 
 export async function proposalView(context, route) {
@@ -68,10 +71,11 @@ export async function proposalView(context, route) {
     h('div', { className: 'proposal-cover-brand' }, 'PLOT', h('span', {}, ' OS')),
     h('p', { className: 'eyebrow' }, `PLOT OS / ${seller ? 'SELLER' : 'BUYER'} BRIEF`),
     h('h2', { className: 'proposal-cover-title' }, seller ? '매도 전략 제안서' : '매수 검토 제안서'),
+    h('div', { className: 'proposal-cover-photo' }, buildingPhoto(building), h('p', { className: 'hint' }, '해당 건물의 실제 사진 아님 · 생성된 건축 일러스트')),
     h('p', { className: 'proposal-cover-name' }, building.nameKo), h('p', { className: 'muted' }, building.addressKo),
     h('div', { className: 'actions' }, badge(EXAMPLE, 'accent'), badge('신뢰도 낮음 · 검증 필요')),
     decision(), facts([['작성 중개사', brokerText()], ['예시 스냅샷', snapshot], ['자료 기준', deep ? '합성 상세 임대차·운영비' : '요약 데이터 · 상세 임대차 없음'], ['문서 식별', `${id} / ${base.engineVersion}`]]),
-    h('p', { className: 'proposal-cover-note' }, '지도를 보는 도구가 아니라, 딜을 성사시키는 도구', h('br'), '조건과 근거를 공유하기 위한 예시 검토 자료입니다.'));
+    h('p', { className: 'proposal-cover-note' }, '검토 조건과 산출 근거를 공유하기 위한 예시 자료입니다. 실제 임대차·권리·현장 확인 후 판단하세요.'));
 
   const kpis = [
     ['매도 호가', money(building.askingPriceKrw), '합성 예시 호가'],
@@ -173,8 +177,10 @@ export async function proposalView(context, route) {
   const audienceLink = (label, audience) => h('a', { className: 'button', href: `#/building/${id}/proposal?for=${audience}`,
     'aria-current': (seller ? 'seller' : 'buyer') === audience ? 'page' : null }, label);
   const element = h('div', { className: 'page proposal-page' },
-    h('div', { className: 'page-heading no-print' }, h('div', {}, h('p', { className: 'eyebrow' }, 'WORKSPACE / PROPOSAL'), h('h1', {}, '원클릭 제안서'),
+    h('div', { className: 'breadcrumb no-print' }, h('a', { href: '#/radar' }, '딜 레이더'), ' / ', h('a', { href: `#/building/${id}` }, building.nameKo), ' / 제안서'),
+    h('div', { className: 'page-heading no-print' }, h('div', {}, h('p', { className: 'eyebrow' }, building.nameKo), h('h1', {}, '고객 제안서'),
       h('p', {}, '고객별 관점으로 전환하고, A4 제안서를 인쇄하세요.')), linkButton('건물 개요', `#/building/${id}`)),
+    sceneNav(building, 'proposal'),
     h('div', { className: 'card proposal-toolbar no-print' }, h('div', { className: 'actions', 'aria-label': '제안서 대상' }, audienceLink('매수자용', 'buyer'), audienceLink('매도자용', 'seller')),
       h('label', {}, '중개사명', brokerInput), button('인쇄', () => { if (!disposed) window.print(); }, 'primary')),
     h('p', { className: 'proposal-print-hint no-print' }, 'A4 세로 · 배율 100% · 브라우저 머리글/바닥글 끄기 권장. 문서에 예시 데이터·가정·면책 고지를 함께 인쇄합니다. 입력은 현재 세션에서만 유지됩니다.'),

@@ -143,12 +143,13 @@ test('documented funding example applies financing fees to debt and treats depos
   assert.ok(docs.includes('100 + 4.6 + 0.5 + 0.3 + 0.25 − 50 − 2 = 53.65억원'));
 });
 
-test('app shell resources stay local except the explicitly pinned optional map CDN', () => {
+test('app shell resources stay local except the pinned optional map and font stylesheets', () => {
   const html = readFileSync(at('web-v2/index.html'), 'utf8');
   assert.ok(html.includes('lang="ko"'));
   assert.ok(html.includes('href="./data/market_refs.json"'));
   const external = [...html.matchAll(/(?:src|href)="(https?:\/\/[^\"]+)"/g)].map((m) => m[1]);
   assert.deepEqual(external.sort(), [
+    'https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard-dynamic-subset.min.css',
     'https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css',
     'https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js',
   ]);

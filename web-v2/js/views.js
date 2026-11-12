@@ -1,11 +1,12 @@
 import { DEFAULT_FILTERS, filterBuildings, updateFilters } from './store.js';
 import { calculate, inputFromBuilding } from './engine/index.js';
 import { h, badge, button, emptyState, evidenceNumber, kpiCard, linkButton, table } from './ui/components.js';
-import { createSeoulMap } from './ui/map.js';
+import { createRadarMap } from './map/radar-map.js';
 import { eok, manwon, number, percent } from './ui/format.js';
 import { selectComps } from './building-analysis.js';
 import { leaseWaterfall } from './ui/lease-waterfall.js';
 import { buildingPhoto, buildingGallery } from './ui/photo.js';
+import { sceneNav } from './ui/scene-nav.js';
 
 const buildingHref = (b) => `#/building/${b.id}`;
 const heading = (eyebrow, title, description, actions) => h('div', { className: 'page-heading' }, h('div', {}, h('div', { className: 'eyebrow' }, eyebrow), h('h1', {}, title), h('p', {}, description)), actions);
@@ -13,7 +14,7 @@ const section = (title, body, detail) => h('section', { className: 'card section
 const resetFilters = () => updateFilters(DEFAULT_FILTERS);
 export function homeView(context) {
   const { data } = context;
-  const map = createSeoulMap({ geography: data.geography, buildings: data.buildings, compact: true, onOpen: (id) => { location.hash = `#/building/${id}`; } });
+  const map = createRadarMap({ geography: data.geography, buildings: data.buildings, onOpen: (id) => { location.hash = `#/building/${id}`; } });
   map.update({ matchingIds: new Set(filterBuildings(data.buildings, DEFAULT_FILTERS).map((b) => b.id)) });
   const deepCount = data.buildings.filter((b) => b.deepPath).length;
   const values = [
@@ -22,17 +23,17 @@ export function homeView(context) {
     ['03', '고객과 같은 화면에서', '선택한 건물의 핵심 수치와 검증할 항목을 요약해, 다음 대화의 출발점으로 사용하세요.', '요약 제안서 보기', '#/proposal'],
   ];
   const element = h('div', { className: 'landing' }, h('section', { className: 'hero' },
-    h('div', { className: 'hero-copy' }, h('div', { className: 'eyebrow' }, 'THE NEXT MOVE IN EVERY DEAL'),
-      h('h1', {}, '좋은 위치를 넘어,', h('br'), h('em', {}, '성사되는 가격으로.')),
-      h('p', { className: 'tagline' }, '지도를 보는 도구가 아니라, 딜을 성사시키는 도구'),
-      h('p', { className: 'hero-description' }, '후보 탐색부터 수익 구조와 근거 확인까지.', h('br'), '중개사의 판단을 고객이 이해할 수 있는 숫자로 연결합니다.'),
-      h('div', { className: 'actions' }, linkButton('딜 레이더 시작하기  ↗', '#/radar', 'primary button-large'), linkButton('매물 둘러보기', '#/listings', 'large')),
-      h('div', { className: 'hero-meta' }, h('span', {}, h('b', {}, data.buildings.length), '가상 건물'), h('span', {}, h('b', {}, data.geography.districts.length), '개 구 개략도'), h('span', {}, h('b', {}, deepCount), '개 상세 임대차')),
+    h('div', { className: 'hero-copy' }, h('div', { className: 'eyebrow' }, '워크스페이스 / 서울 상업용 부동산'),
+      h('h1', {}, '상업용 빌딩 검토', h('br'), h('em', {}, '후보 탐색부터 고객 제안까지')),
+      h('p', { className: 'tagline' }, '중개사·중개법인·매수자를 위한 분석 작업공간'),
+      h('p', { className: 'hero-description' }, '투자 조건으로 후보를 찾고 최대 매입가와 운영 개선 효과를 비교하세요. 수치의 근거를 확인하고 고객별 검토 자료로 정리할 수 있습니다.'),
+      h('div', { className: 'actions' }, linkButton('딜 레이더 열기', '#/radar', 'primary button-large'), linkButton('매물 목록', '#/listings', 'large')),
+      h('div', { className: 'hero-meta' }, h('span', {}, h('b', {}, data.buildings.length), '개 예시 건물'), h('span', {}, h('b', {}, data.geography.districts.length), '개 구'), h('span', {}, h('b', {}, deepCount), '개 상세 임대차')),
     ),
-    h('div', { className: 'hero-visual' }, h('div', { className: 'visual-heading' }, h('span', {}, 'PLOT OS / DEAL RADAR'), h('span', {}, '● EXAMPLE DATA')), map.element,
+    h('div', { className: 'hero-visual' }, h('div', { className: 'visual-heading' }, h('span', {}, '딜 레이더'), h('span', {}, '예시 건물 분포')), map.element,
       h('div', { className: 'visual-insight' }, h('div', {}, '탐색', h('strong', {}, '지역에서 후보로')), h('div', {}, '판단', h('strong', {}, '숫자에서 근거로')), h('div', {}, '대화', h('strong', {}, '고객과 다음 단계로')))),
     ),
-    h('section', { className: 'value-section', 'aria-label': '세 가지 핵심 가치' }, h('div', { className: 'value-heading' }, h('h2', {}, '발견에서 설득까지, 한 흐름으로'), h('p', {}, 'BROKER WORKSPACE / 예시 데이터 기반 데모')),
+    h('section', { className: 'value-section', 'aria-label': '분석 작업' }, h('div', { className: 'value-heading' }, h('h2', {}, '검토 작업'), h('p', {}, '예시 데이터 기반 · 실제 매물 아님')),
       h('div', { className: 'value-grid' }, values.map(([index, title, description, cta, href]) => h('article', { className: 'card value-card' }, h('div', { className: 'value-number' }, index, h('span', {}, '↗')), h('h3', {}, title), h('p', {}, description), h('a', { className: 'value-link', href }, cta, h('span', { 'aria-hidden': 'true' }, '→'))))),
     ));
   return { element, destroy: map.destroy };
@@ -67,7 +68,7 @@ export function listingsView(context) {
   }
   refresh();
   const unsubscribe = store.subscribe((state) => { if (state.filters !== filters) { filters = state.filters; page = 0; search.value = filters.query; refresh(); } });
-  return { element: h('div', { className: 'page' }, heading('WORKSPACE / LISTINGS', '매물 탐색', '가상 매물의 수익 구조를 비교하고, 검토할 건물을 선택하세요.', linkButton('지도로 보기  ↗', '#/radar')),
+  return { element: h('div', { className: 'page listings-page' }, h('div', { className: 'breadcrumb' }, h('a', { href: '#/' }, '워크스페이스'), ' / 매물 탐색'), heading('서울 상업용 빌딩', '매물 탐색', '예시 건물의 수익 구조를 비교하고 검토할 후보를 선택하세요.', linkButton('지도로 보기', '#/radar')),
     h('div', { className: 'listing-toolbar' }, search, h('div', { className: 'actions' }, resultCount, button('모든 조건 초기화', resetFilters, 'ghost'), select)), rowsSlot, pagination), destroy: unsubscribe };
 }
 
@@ -129,9 +130,9 @@ export async function buildingView(context, route) {
     ['보유기간', '10년'], ['LTV / 금리', `${ltvPct}% / 연 5%`], ['임대료 상승', '연 2%'], ['매각 Cap rate', '4.5%'],
     ['월별 현금흐름 IRR', context.metricNumber(result, 'leveredIrr', '레버리지 IRR', percent)], ['첫해 DSCR', context.metricNumber(result, 'dscr', 'DSCR', (v) => Number.isFinite(v) ? `${number(v)}배` : '해당 없음')],
   ].map(([label, value]) => h('div', {}, h('dt', {}, label), h('dd', {}, value)))), h('p', { className: 'notice' }, '검증 전 예시 가정입니다. 보증금은 부채로 반영하며, 임대료에 공실을 중복 차감하지 않습니다. VAT·양도소득세·법인세·재융자 등은 제외됩니다.'));
-  const element = h('div', { className: 'page' }, h('div', { className: 'breadcrumb' }, h('a', { href: '#/radar' }, '딜 레이더'), ' / ', h('a', { href: '#/listings' }, '매물 탐색'), ' / ', building.nameKo),
+  const element = h('div', { className: 'page building-page' }, h('div', { className: 'breadcrumb' }, h('a', { href: '#/radar' }, '딜 레이더'), ' / ', h('a', { href: '#/listings' }, '매물 탐색'), ' / ', building.nameKo),
     heading('PROPERTY / OVERVIEW', building.nameKo, `${building.addressKo} · ${building.statusKo}`, h('div', { className: 'actions' }, badge('예시 데이터 · 실제 매물 아님', 'accent'), linkButton('매수 한도가', `#/building/${proposalId}/bid`), linkButton('밸류업', `#/building/${proposalId}/valueup`), linkButton('요약 제안서  ↗', `#/building/${proposalId}/proposal?for=buyer`, 'primary'))),
-    buildingGallery(building),
+    sceneNav(building, 'building'), buildingGallery(building),
     buildingKpis(context, building, result),
     h('div', { className: 'content-grid' }, h('div', { className: 'stack' }, section('건물 개요', buildingFacts(building, context), building.id), section('임대차 현황', rentRoll, deep ? `${deep.rentRoll.length}개 가상 호실 · 금액 만원` : '요약만 보유'),
       section('임대차 만기 워터폴', deep ? leaseWaterfall(deep) : h('p', { className: 'notice' }, '요약 데이터에는 호실별 만기가 없습니다. 만기 노출은 상세 임대차 보유 건물에서만 확인할 수 있습니다.'), '월세 노출 · 확정 공실 예측 아님'),

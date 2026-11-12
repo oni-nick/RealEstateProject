@@ -55,7 +55,9 @@ test('Radar adapter queues filters, selects popup/marker, handles cluster races 
     get textContent() { return this._text + this.children.map((c) => c.textContent).join(''); }
     set textContent(t) { this._text = String(t); this.children = []; }
   }
-  const saved = { document: globalThis.document, Node: globalThis.Node };
+  const saved = { document: globalThis.document, Node: globalThis.Node, matchMedia: globalThis.matchMedia };
+  let overlay = true;
+  globalThis.matchMedia = () => ({ matches: overlay });
   globalThis.Node = Element;
   let cssTag = null;
   globalThis.document = { createElement: (tag) => new Element(tag), createTextNode: (text) => new Element('#text', text), getElementById: (id) => id === 'maplibre-css' ? cssTag : null };
@@ -76,6 +78,7 @@ test('Radar adapter queues filters, selects popup/marker, handles cluster races 
     flyTo(view) { this.lastFly = view; }
     easeTo(view) { this.lastEase = view; }
     resize() { this.resized = true; }
+    setPadding(padding) { this.padding = padding; }
     remove() { this.removed = true; this.handlers = []; }
   }
   class Popup {
@@ -93,8 +96,16 @@ test('Radar adapter queues filters, selects popup/marker, handles cluster races 
     assert.equal(instances.length, 0, 'no WebGL before attachment');
     const b = buildings[0], rows = [{ building: b, score: 87, matches: true }];
     map.update({ matchingIds: new Set([b.id]), rows });
+    map.resize({ detailOpen: true });
     map.element.isConnected = true; map.mount();
     const raw = instances[0];
+    assert.equal(raw.padding.right, 400, 'queued drawer layout applies after delayed map creation');
+    overlay = false; map.resize();
+    assert.equal(raw.padding.right, 0, 'wide layout removes overlay padding');
+    overlay = true; map.resize();
+    assert.equal(raw.padding.right, 400, 'narrow layout restores overlay padding');
+    map.resize({ detailOpen: false });
+    assert.equal(raw.padding.right, 0);
     assert.equal(raw.options.style, 'https://tiles.openfreemap.org/styles/positron');
     assert.deepEqual(raw.options.center, [126.98, 37.55]);
     raw.fire('style.load');

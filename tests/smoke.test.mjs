@@ -33,11 +33,11 @@ test('every web-v2 JSON file parses, and text assets are UTF-8 without BOM below
   assert.ok(parsed >= 32, `Only ${parsed} JSON files checked`);
 });
 
-test('index references local assets and exactly the pinned optional MapLibre CDN pair', () => {
+test('index references local assets, the pinned optional MapLibre pair and optional Pretendard font', () => {
   const html = readFileSync(join(root, 'index.html'), 'utf8');
   const resources = [...html.matchAll(/(?:src|href)="([^"]+)"/g)].map((m) => m[1]).filter((value) => !value.startsWith('#') && !value.startsWith('data:'));
   assert.ok(resources.length >= 6);
-  const cdn = ['https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css', 'https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js'];
+  const cdn = ['https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css', 'https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js', 'https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard-dynamic-subset.min.css'];
   assert.deepEqual(resources.filter((r) => r.startsWith('https:')).sort(), [...cdn].sort());
   for (const resource of resources) {
     if (cdn.includes(resource)) continue;
@@ -222,8 +222,9 @@ test('views construct with real mock data; filters, map activation and cleanup w
     let inspected, lastMetricResult;
     const context = { data, loader, store: appStore, inspect(details) { inspected = details; }, summaryNumber: (b, key, label, format) => h('span', {}, format(b[key])), metricNumber: (result, key, label, format) => { lastMetricResult = result; return h('span', {}, format(result.metrics[key].value)); } };
     const home = homeView(context); views.push(home);
-    assert.ok(home.element.textContent.includes('지도를 보는 도구가 아니라, 딜을 성사시키는 도구'));
-    assert.equal(home.element.querySelectorAll('circle').length, 400);
+    assert.ok(home.element.textContent.includes('상업용 빌딩 검토'));
+    assert.ok(home.element.textContent.includes('OpenFreeMap'));
+    assert.equal(home.element.querySelectorAll('polygon').length, 0);
     let radarMapUpdate, radarMapOptions;
     context.createRadarMap = (options) => {
       radarMapOptions = options;
@@ -243,7 +244,7 @@ test('views construct with real mock data; filters, map activation and cleanup w
     assert.ok(radar.element.textContent.includes('선택됨 · 지도 보기'));
     assert.notEqual(globalThis.document.activeElement, mapButton, 'replaced control cannot keep focus');
     assert.equal(globalThis.document.activeElement.textContent, '선택됨 · 지도 보기');
-    assert.equal(radar.element.querySelectorAll('img').length, radar.element.querySelectorAll('[data-card-id]').length);
+    assert.equal(radar.element.querySelectorAll('img').length, radar.element.querySelectorAll('[data-card-id]').length + 1, 'selected drawer includes example imagery');
     for (const card of radar.element.querySelectorAll('[data-card-id]')) assert.ok(card.textContent.includes('예시 사진 · 실제 매물 아님'));
     const listing = listingsView(context); views.push(listing);
     assert.ok(listing.element.textContent.includes('현재 조건'));

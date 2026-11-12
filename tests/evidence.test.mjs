@@ -237,7 +237,7 @@ test('Radar, overview, bid and value-up use the real shared evidence controls an
       assert.ok(controls.every((node) => node.getAttribute('data-confidence') === 'low'), label);
       const number = controls.find((node) => node.getAttribute('aria-label')?.startsWith(label));
       assert.ok(number, label); number.focus(); click(number);
-      const panel = document.body.querySelector('dialog');
+      const panel = document.body.querySelector('.panel-dialog');
       assert.ok(panel.textContent.includes('검증 필요'), label);
       assert.ok(panel.textContent.includes(source), label);
       assert.ok(panel.querySelectorAll('[data-trace-link]').length > 0, label);

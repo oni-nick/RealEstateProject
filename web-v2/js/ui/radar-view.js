@@ -4,6 +4,7 @@ import { h, badge, button, chip, emptyState, evidenceNumber, kpiCard, linkButton
 import { createRadarMap } from '../map/radar-map.js';
 import { buildingPhoto } from './photo.js';
 import { eok, manwon, number, percent } from './format.js';
+import { EXAMPLE_DATA_LABEL } from './disclosure.js';
 
 // Retain a small financial cache across route visits, not just individual renders.
 const matcher = createRadarMatcher();
@@ -51,7 +52,7 @@ function criteriaPanel(context) {
   function sync() {
     const f = store.getState().filters;
     for (const [key, control] of controls) {
-      control.input.value = f[key]; control.input.setAttribute('aria-valuetext', control.format(f[key])); control.output.textContent = control.format(f[key]);
+      control.control.setValue(f[key]);
     }
     for (const [id, control] of districts) control.setAttribute('aria-pressed', String(id === 'all' ? !f.districts.length : f.districts.includes(id)));
     let active;
@@ -69,15 +70,25 @@ function criteriaPanel(context) {
   sync();
   let previous = store.getState().filters;
   const unsubscribe = store.subscribe(({ filters }) => { if (filters !== previous) { previous = filters; sync(); } });
-  return { element: h('aside', { className: 'card filter-panel investor-panel', 'aria-label': '투자자 조건' },
-    h('div', { className: 'section-heading' }, h('h2', {}, '투자자 조건'), button('초기화', () => updateFilters(DEFAULT_FILTERS), 'ghost button-small')),
-    h('div', { className: 'filter-group' }, h('p', { className: 'filter-title' }, '빠른 프리셋'), presetList, presetNote),
-    h('div', { className: 'filter-group investor-ranges' }, ...['equityEok', 'targetIrrPct', 'ltvPct'].map((key) => controls.get(key).control)),
-    h('div', { className: 'filter-group' }, h('p', { className: 'filter-title' }, '관심 지역 · 복수 선택'), districtList),
-    h('div', { className: 'filter-group investor-ranges' }, ...['minPriceEok', 'maxPriceEok'].map((key) => controls.get(key).control), h('label', { className: 'filter-title' }, '용도', use), controls.get('maxWalk').control),
-    h('div', { className: 'filter-group' }, query, h('label', { className: 'check-label' }, deep, '상세 임대차 보유만')),
-    h('p', { className: 'filter-summary' }, '10년 보유 · 금리 5% · 임대료 상승 2% · 매각 Cap 4.5%. 보증금·취득 비용 반영, 미래 추가 출자 가능. 모든 조건을 통과해야 일치합니다.'),
-  ), destroy: unsubscribe };
+  const menu = (title, ...content) => h('details', { className: 'radar-filter-menu' }, h('summary', {}, title), h('div', { className: 'radar-filter-popover' }, content));
+  const summary = h('span', { className: 'criteria-summary', 'aria-live': 'polite' });
+  const summarize = ({ filters: f }) => {
+    summary.textContent = `${f.districts.length ? f.districts.map((id) => data.geography.districts.find((d) => d.id === id)?.nameKo ?? id).join('·') : '서울 전체'} · ${f.minPriceEok}–${f.maxPriceEok}억 · 자본 ${f.equityEok}억 · LTV ${f.ltvPct}% · IRR ${f.targetIrrPct}%`;
+  };
+  summarize(store.getState());
+  const stopSummary = store.subscribe(summarize);
+  const element = h('section', { className: 'investor-panel radar-filterbar', 'aria-label': '투자자 조건' },
+    query,
+    menu('지역 선택', h('p', { className: 'filter-title' }, '관심 지역 · 복수 선택'), districtList),
+    menu('매매가·용도', ...['minPriceEok', 'maxPriceEok'].map((key) => controls.get(key).control), h('label', { className: 'filter-title' }, '용도', use), controls.get('maxWalk').control, h('label', { className: 'check-label' }, deep, '상세 임대차 보유만')),
+    menu('투자 조건', ...['equityEok', 'targetIrrPct', 'ltvPct'].map((key) => controls.get(key).control), h('p', { className: 'filter-summary' }, '10년 보유 · 금리 5% · 임대료 상승 2% · 매각 Cap 4.5%. 보증금·취득 비용 반영, 미래 추가 출자 가능. 모든 조건을 통과해야 일치합니다.')),
+    menu('빠른 조건', presetList, presetNote),
+    summary, button('초기화', () => updateFilters(DEFAULT_FILTERS), 'ghost button-small'));
+  // Native details keeps the controls mounted while menus open/close.
+  const menus = [...element.querySelectorAll('details')];
+  for (const details of menus) details.addEventListener('toggle', () => { if (details.open) for (const other of menus) if (other !== details) other.open = false; });
+  element.addEventListener('keydown', (event) => { if (event.key === 'Escape') { for (const details of menus) if (details.open) { details.open = false; details.querySelector('summary')?.focus(); } } });
+  return { element, destroy() { unsubscribe(); stopSummary(); } };
 }
 
 function candidateCard(row, context, map, selectedId) {
@@ -90,8 +101,9 @@ function candidateCard(row, context, map, selectedId) {
     h('div', { className: 'candidate-summary' }, buildingPhoto(b, { compact: true }),
       h('a', { className: 'candidate-link', href: `#/building/${b.id}` }, h('h3', {}, b.nameKo), h('p', { className: 'location' }, `${b.neighborhood} · ${b.stationNameKo} 도보 ${b.walkMinutes}분`))),
     h('div', { className: 'price-row' }, h('span', { className: 'price numeric' }, context.summaryNumber(b, 'askingPriceKrw', '매도 호가', eok), h('small', {}, '억')), badge(b.deepPath ? '상세 임대차' : '요약')),
-    h('div', { className: 'radar-financials' }, h('div', {}, h('span', {}, '레버리지 IRR'), context.metricNumber(row, 'leveredIrr', '레버리지 IRR', percent)), h('div', {}, h('span', {}, '필요 자기자본'), context.metricNumber(row, 'equityRequired', '필요 자기자본', (v) => `${eok(v)}억`))),
-    h('details', { className: 'match-reasons', open: row.matches }, h('summary', {}, '왜 맞는지', h('span', {}, `${row.checks.filter((c) => c.passed).length}/6 조건`)),
+    h('p', { className: 'candidate-market' }, `대지 ${manwon(b.askingPriceKrw / (b.landAreaM2 * 121 / 400))}만원/평 · Cap rate ${percent(b.capRate)}`),
+    h('details', { className: 'match-reasons' }, h('summary', {}, '왜 맞는지', h('span', {}, `${row.checks.filter((c) => c.passed).length}/6 조건`)),
+      h('div', { className: 'radar-financials' }, h('div', {}, h('span', {}, '레버리지 IRR'), context.metricNumber(row, 'leveredIrr', '레버리지 IRR', percent)), h('div', {}, h('span', {}, '필요 자기자본'), context.metricNumber(row, 'equityRequired', '필요 자기자본', (v) => `${eok(v)}억`))),
       h('ul', {}, row.checks.map((c) => h('li', { className: c.passed ? 'check-pass' : 'check-fail' }, h('span', { 'aria-hidden': 'true' }, c.passed ? '✓ ' : '× '), c.text))),
       !row.matches && h('p', { className: 'hint' }, '검색·상세자료·거래 상태 조건도 적용됩니다.')),
     h('div', { className: 'radar-card-actions' },
@@ -106,6 +118,11 @@ export function radarView(context) {
   let filters = store.getState().filters, sort = 'score', page = 0, includeOutside = false, rows;
   let timer, selectedId = null;
   const size = 20, kpis = h('div', { className: 'kpi-strip' }), results = h('div', { className: 'result-list' });
+  const drawer = h('aside', { className: 'radar-detail', 'data-radar-drawer': '', 'aria-label': '선택 건물 상세', hidden: true });
+  drawer.hidden = true;
+  const mobileDialog = h('dialog', { className: 'radar-mobile-dialog', 'data-radar-modal': '', 'aria-label': '선택 건물 상세' });
+  const mobileMedia = globalThis.matchMedia?.('(max-width: 767px)');
+  const workspace = h('div', { className: 'radar-workspace' });
   const count = h('small', { role: 'status', 'aria-live': 'polite', 'aria-atomic': 'true' }), pagination = h('div', { className: 'radar-pagination' });
   const map = (context.createRadarMap ?? createRadarMap)({ geography: data.geography, buildings: data.buildings,
     onOpen: (id) => { location.hash = `#/building/${id}`; },
@@ -114,6 +131,7 @@ export function radarView(context) {
       const index = listCandidates().findIndex((r) => r.building.id === id);
       if (index >= 0) page = Math.floor(index / size);
       renderList();
+      renderDrawer();
       const card = [...results.querySelectorAll('[data-card-id]')].find((el) => el.dataset.cardId === id);
       card?.scrollIntoView?.({ block: 'nearest', behavior: 'instant' });
     },
@@ -123,6 +141,44 @@ export function radarView(context) {
   const select = h('select', { className: 'select-field', 'aria-label': '후보 정렬', onChange(e) { sort = e.target.value; page = 0; renderList(); } },
     ...[['score', '적합도 높은 순'], ['irr', 'IRR 높은 순'], ['price', '호가 낮은 순'], ['equity', '필요 자본 낮은 순']].map(([value, label]) => h('option', { value }, label)));
   const outside = h('input', { type: 'checkbox', onChange(e) { includeOutside = e.target.checked; page = 0; renderList(); } });
+  function syncDrawerMode() {
+    if (!drawer.hidden && mobileMedia?.matches && mobileDialog.showModal) {
+      if (drawer.parentNode !== mobileDialog) mobileDialog.append(drawer);
+      if (!mobileDialog.open) mobileDialog.showModal();
+    } else {
+      if (mobileDialog.open) mobileDialog.close();
+      if (drawer.parentNode === mobileDialog) workspace.append(drawer);
+    }
+    map.resize?.({ detailOpen: !drawer.hidden });
+  }
+  function closeSelection() {
+    const previous = selectedId;
+    selectedId = null; store.setState({ selectedId: null }); map.select(null, { fly: false, notify: false });
+    renderDrawer(); renderList();
+    [...results.querySelectorAll('[data-map-select]')].find((node) => node.getAttribute('data-map-select') === previous)?.focus({ preventScroll: true });
+  }
+  mobileDialog.addEventListener('cancel', (event) => { event.preventDefault(); closeSelection(); });
+  drawer.addEventListener('keydown', (event) => { if (event.key === 'Escape' && !mobileDialog.open) closeSelection(); });
+  mobileMedia?.addEventListener?.('change', syncDrawerMode);
+  function renderDrawer() {
+    const row = rows.find((r) => r.building.id === selectedId);
+    drawer.hidden = !row;
+    workspace.classList.toggle('has-detail', Boolean(row));
+    if (!row) drawer.replaceChildren();
+    else {
+      const b = row.building, href = `#/building/${b.id}`;
+      drawer.replaceChildren(
+        h('header', { className: 'radar-detail-header' }, h('div', {}, h('p', { className: 'eyebrow' }, '선택 건물'), h('h2', {}, b.nameKo)), h('button', { className: 'button button-ghost', type: 'button', 'aria-label': '건물 상세 닫기', onClick: closeSelection }, '닫기 ×')),
+        h('div', { className: 'radar-detail-body' }, buildingPhoto(b), h('p', { className: 'hint' }, '해당 건물의 실제 사진 아님 · 생성된 건축 일러스트'),
+          h('div', { className: 'drawer-price' }, h('span', {}, '매도 호가'), h('strong', {}, context.summaryNumber(b, 'askingPriceKrw', '매도 호가', eok), h('small', {}, '억')), badge(row.matches ? '조건 일치' : '조건 외', row.matches ? 'accent' : 'outline')),
+          h('p', { className: 'hint' }, `${b.addressKo} · 예시 위치`),
+          h('dl', { className: 'info-grid drawer-facts' }, [['용도', b.useKo], ['대지 / 연면적', `${number(b.landAreaM2)} / ${number(b.gfaM2)}m²`], ['대지 평당가', `${manwon(b.askingPriceKrw / (b.landAreaM2 * 121 / 400))}만원/평`], ['Cap rate', percent(b.capRate)], ['역 접근성 (가정)', `${b.stationNameKo} · ${b.walkMinutes}분`], ['규모 / 준공', `${b.floorsAbove}층 / ${b.builtYear}년`]].map(([label, value]) => h('div', {}, h('dt', {}, label), h('dd', {}, value)))),
+          h('div', { className: 'drawer-kpis' }, kpiCard({ label: '레버리지 IRR', value: context.metricNumber(row, 'leveredIrr', '레버리지 IRR', percent), note: `LTV ${filters.ltvPct}% · 10년 보유` }), kpiCard({ label: '필요 자기자본', value: context.metricNumber(row, 'equityRequired', '필요 자기자본', eok), unit: '억', note: '취득 비용·보증금 반영' })),
+          h('div', { className: 'drawer-actions' }, linkButton('건물 개요·임대차', href, 'primary'), linkButton('최대 매입가', `${href}/bid`), linkButton('밸류업', `${href}/valueup`), linkButton('고객 제안서', `${href}/proposal?for=buyer`)),
+          h('p', { className: 'hint' }, EXAMPLE_DATA_LABEL)));
+    }
+    syncDrawerMode();
+  }
   function listCandidates() {
     const eligible = new Set(filterBuildings(data.buildings, filters).map((b) => b.id));
     const candidates = sortRadarRows(rows.filter((r) => r.matches || (includeOutside && eligible.has(r.building.id))), sort);
@@ -160,6 +216,7 @@ export function radarView(context) {
     if (selectedId && !matches.some((r) => r.building.id === selectedId)) { selectedId = null; store.setState({ selectedId: null }); }
     map.update({ matchingIds: new Set(matches.map((r) => r.building.id)), rows, selected: selectedId });
     renderList();
+    renderDrawer();
   }
   refresh();
   const unsubscribe = store.subscribe((state) => {
@@ -168,16 +225,18 @@ export function radarView(context) {
     filters = state.filters; page = 0; clearTimeout(timer);
     // LTV changes re-project 400 buildings; coalesce drag events. Other criteria
     // only compare cached metrics, so respond synchronously without losing focus.
-    if (changedLtv) timer = setTimeout(refresh, 100); else refresh();
+    if (changedLtv) { count.textContent = '계산 중 · 이전 결과 표시'; timer = setTimeout(refresh, 100); } else refresh();
   });
-  return { element: h('div', { className: 'page' },
-    h('div', { className: 'page-heading' }, h('div', {}, h('div', { className: 'eyebrow' }, 'WORKSPACE / DEAL RADAR'), h('h1', {}, '딜 레이더'), h('p', {}, '고객의 투자 조건에서, 검토할 딜을 찾으세요.')), linkButton('전체 매물 목록 ↗', '#/listings')),
-    kpis, h('div', { className: 'radar-workspace' }, panel.element,
+  workspace.append(
+    h('section', { className: 'radar-results', 'aria-label': '조건에 맞는 후보 목록' }, h('div', { className: 'radar-results-header' }, h('div', { className: 'section-heading results-heading' }, h('h2', {}, '발견한 후보'), count),
+      h('div', { className: 'radar-list-toolbar' }, select, h('label', { className: 'check-label' }, outside, '조건 외도 보기')),
+      h('details', { className: 'radar-aggregates' }, h('summary', {}, '후보 집계·수익률'), kpis)), results, pagination),
       h('section', { className: 'radar-map-column', 'aria-label': '서울 예시 건물 지도' }, map.element,
         h('div', { className: 'map-footnote' }, h('span', {}, '합성 좌표 · 실제 필지와 무관 · 빈 원도 선택 가능'), h('span', {}, `예시 스냅샷 ${data.metadata.snapshotDate}`)),
-        h('details', { className: 'card scoring-guide' }, h('summary', {}, '적합도와 수익률을 읽는 방법'), h('p', {}, SCORE_EXPLANATION), h('p', {}, 'IRR 산출 불가에는 모호한 복수 해와 해 없음이 포함됩니다. 대출심사·세금·실물 상태는 검증 전이며, IRR은 수익을 보장하지 않습니다.'))),
-      h('section', { className: 'radar-results', 'aria-label': '조건에 맞는 후보 목록' }, h('div', { className: 'section-heading results-heading' }, h('h2', {}, '발견한 후보'), count),
-        h('div', { className: 'radar-list-toolbar' }, select, h('label', { className: 'check-label' }, outside, '조건 외도 보기')), results, pagination))),
-    destroy() { clearTimeout(timer); unsubscribe(); panel.destroy(); map.destroy(); },
+        h('details', { className: 'scoring-guide' }, h('summary', {}, '적합도와 수익률을 읽는 방법'), h('p', {}, SCORE_EXPLANATION), h('p', {}, 'IRR 산출 불가에는 모호한 복수 해와 해 없음이 포함됩니다. 대출심사·세금·실물 상태는 검증 전이며, IRR은 수익을 보장하지 않습니다.'))), drawer, mobileDialog);
+  return { element: h('div', { className: 'page radar-page' },
+    h('div', { className: 'page-heading radar-page-heading' }, h('div', { className: 'radar-heading-title' }, h('span', { className: 'breadcrumb' }, '워크스페이스 / 매물 탐색'), h('h1', {}, '딜 레이더')), linkButton('전체 목록', '#/listings', 'ghost button-small')),
+    panel.element, workspace),
+    destroy() { clearTimeout(timer); unsubscribe(); panel.destroy(); mobileMedia?.removeEventListener?.('change', syncDrawerMode); if (mobileDialog.open) mobileDialog.close(); map.destroy(); },
   };
 }

@@ -1,7 +1,6 @@
 :root {
   color-scheme: light;
-  /* v2 service tokens: adopt in scene styles during UI step 04.
-     Legacy variables below retain current rendering until that migration. */
+  /* Shared service tokens. Compatibility names below resolve to this palette. */
   --color-canvas: #f3f5f7;
   --color-surface: #ffffff;
   --color-surface-subtle: #f8fafb;
@@ -72,7 +71,7 @@
   --drawer-width: 400px;
   --drawer-width-wide: 440px;
   --map-min-width: 480px;
-  --page-max-width: 1920px;
+  --page-max-width: 1600px;
   --z-map-control: 10;
   --z-sticky: 20;
   --z-nav: 30;
@@ -82,25 +81,24 @@
   --z-toast: 70;
   --motion-duration: 160ms;
   --motion-easing: ease;
-  /* Compatibility values. Do not silently map the old radii/layout to
-     the new tokens: those changes belong to the scene migration. */
+  /* Compatibility names used by the original financial scene styles. */
   --navy: #111e30;
   --navy-raised: #192b40;
   --canvas: #f3f5f7;
   --surface: #fff;
   --surface-soft: #f8fafb;
   --ink: #17283b;
-  --muted: #647286;
+  --muted: var(--color-text-muted);
   --line: #e0e6ec;
-  --line-strong: #ccd6e0;
+  --line-strong: var(--color-border-strong);
   --accent: #087e75;
   --accent-hover: #05665f;
   --accent-soft: #e7f4f1;
   --accent-bright: #83dbca;
-  --shadow: 0 8px 28px #14263b09;
-  --shadow-float: 0 16px 48px #111e3026;
-  --radius: 12px;
-  --radius-small: 7px;
+  --shadow: var(--shadow-panel);
+  --shadow-float: var(--shadow-popover);
+  --radius: var(--radius-panel);
+  --radius-small: var(--radius-control);
   --font: var(--font-sans);
   --mono: "SFMono-Regular", Consolas, monospace;
   --ease: 160ms ease;
@@ -123,11 +121,11 @@ button { color: inherit; }
 a { color: inherit; text-decoration: none; }
 button:disabled { cursor: default; opacity: .45; }
 button, a, input, select { touch-action: manipulation; }
-:focus-visible { outline: 3px solid var(--accent); outline-offset: 4px; }
+:focus-visible { outline: var(--focus-width) solid var(--color-focus); outline-offset: var(--focus-offset); }
 ::selection { color: var(--navy); background: #bfe8df; }
 h1, h2, h3, p { margin: 0; }
 h1, h2, h3 { font-weight: 700; line-height: 1.4; word-break: keep-all; }
-h1 { font-size: 28px; letter-spacing: -.045em; }
+h1 { font-size: var(--font-size-title); letter-spacing: -.025em; }
 h2 { font-size: 18px; letter-spacing: -.025em; }
 h3 { font-size: 15px; }
 small { font-size: 12px; }
@@ -135,7 +133,7 @@ svg { display: block; }
 [hidden] { display: none !important; }
 .muted, .hint { color: var(--muted); }
 .hint { font-size: 12px; }
-.numeric, output, .kpi-value, td { font-variant-numeric: tabular-nums; }
+.numeric, output, .kpi-value, td { font-variant-numeric: var(--numeric-variant); }
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; animation: none !important; transition: none !important; }

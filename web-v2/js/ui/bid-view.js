@@ -2,6 +2,7 @@ import { createBidInput, bidAnalysis, bidSensitivity, bidGuidance, bidPolicy, ex
 import { h, badge, button, emptyState, evidenceNumber, kpiCard, linkButton, slider, table } from './components.js';
 import { bidAmount, eok, number, percent } from './format.js';
 import { priceRuler, cashflowChart, tornadoChart, sensitivityLabels, sensitivityValue } from './bid-charts.js';
+import { sceneNav } from './scene-nav.js';
 
 const constraintLabel = (value, floor = false) => ({ target_irr: floor ? '최소 IRR' : '목표 IRR', min_dscr: '최소 DSCR', both: 'IRR + DSCR',
   infeasible: '충족 가능한 가격 없음', unavailable: '판단 불가' }[value] ?? '판단 불가');
@@ -64,7 +65,7 @@ export async function bidView(context, route) {
       onInput(value) { if (disposed) return; overrides = { ...overrides, [key]: value / scale }; refresh(); } });
     const input = control.querySelector('input'), output = control.querySelector('output');
     input.setAttribute('data-bid-control', key); input.setAttribute('aria-label', label);
-    controls.set(key, { input, output, scale, format });
+    controls.set(key, { input, output, scale, format, control });
     return control;
   }
 
@@ -164,6 +165,7 @@ export async function bidView(context, route) {
     for (const [key, control] of controls) {
       const value = (key in policy ? policy[key] : currentInput[key]) * control.scale;
       control.input.value = value;
+      control.control?.setValue(value);
       if (control.output) { control.output.textContent = control.format(value); control.input.setAttribute('aria-valuetext', control.format(value)); }
     }
     policyStatus.textContent = '처음 불러온 예시 가정으로 초기화했습니다.';
@@ -180,7 +182,7 @@ export async function bidView(context, route) {
     range('holdYears', '보유기간', 1, 20, 1, 1, (v) => `${v}년`));
   const policies = policyFields();
   const controlsPanel = h('aside', { className: 'card bid-controls', 'aria-label': '매수 검토 가정' },
-    h('div', { className: 'section-heading' }, h('h2', {}, '딜의 조건'), button('가정 초기화', reset, 'ghost')), ranges,
+    h('div', { className: 'section-heading' }, h('h2', {}, '매입·금융 가정'), button('가정 초기화', reset, 'ghost')), ranges,
     h('div', { className: 'bid-policy' }, h('h3', {}, 'BUY / WALK-AWAY 기준'), policies, policyStatus,
       h('p', { className: 'hint' }, '목표 IRR은 레이더에서 가져옵니다. 최초 최소 IRR은 목표보다 3%p 낮게 (양수 목표는 0% 하한), 최소 DSCR은 1.20배로 가정합니다. 음수 목표의 최소 IRR도 3%p 낮게 설정합니다 (−99% 하한). 모두 편집 가능한 예시 투자 기준입니다.')),
     h('p', { className: 'notice' }, '공실은 잠재 임대료 대비 미수취 비율입니다. 면적 공실률과 다르며, 기존 수취 임대료에 공실을 중복 차감하지 않습니다. 보증금은 손실률 변경 시 자동 조정하지 않습니다.'));
@@ -188,15 +190,16 @@ export async function bidView(context, route) {
   const href = `#/building/${building.id}`;
   const element = h('div', { className: 'page bid-page' },
     h('div', { className: 'breadcrumb' }, h('a', { href: '#/radar' }, '딜 레이더'), ' / ', h('a', { href }, building.nameKo), ' / 매수 한도가'),
-    h('div', { className: 'page-heading' }, h('div', {}, h('div', { className: 'eyebrow' }, 'DEAL ROOM / MAX BID'), h('h1', {}, '얼마까지 제안할 수 있을까'),
+    h('div', { className: 'page-heading' }, h('div', {}, h('div', { className: 'eyebrow' }, building.nameKo), h('h1', {}, '최대 매입가 계산기'),
       h('p', {}, `${building.nameKo} · ${deep ? `상세 임대차 ${deep.rentRoll.length}개 호실·운영비` : '요약 수익 데이터'} 기반 · ${building.statusKo}`)),
       h('div', { className: 'actions' }, badge('예시 데이터 · 실제 매물 아님', 'accent'), linkButton('건물 개요', href), linkButton('밸류업', `${href}/valueup`))),
+    sceneNav(building, 'bid'),
     h('div', { className: 'bid-layout' }, controlsPanel, h('div', { className: 'stack bid-results' }, kpis, metricsStatus,
-      section('호가에서 합의 가능한 가격으로', h('div', { className: 'stack' }, rulerSlot, ceilingSlot, guidanceSlot,
+      section('호가와 매입 한도', h('div', { className: 'stack' }, rulerSlot, ceilingSlot, guidanceSlot,
         h('p', { className: 'hint' }, 'BUY = 목표 IRR과 최소 DSCR을 함께 충족하는 최대 가격. WALK-AWAY = 최소 IRR과 동일 DSCR을 함께 충족하는 최대 가격. 같은 제약이 적용되면 두 선이 겹칩니다. 한도가 숫자는 0.1억 단위 내림, 차트 위치·비교율은 원 계산값 기준입니다.'))),
       section('보유부터 매각까지의 현금흐름', cashSlot, '월별 모델 → 연도별 합계'),
       section('자금 조달과 정산', fundingSlot, '핵심 수치를 눌러 근거 확인'))),
-    h('div', { className: 'bid-sensitivity-heading' }, h('h2', {}, '가정이 바뀌면, 한도도 바뀝니다'), sensitivityStatus), sensitivitySlot,
+    h('div', { className: 'bid-sensitivity-heading' }, h('h2', {}, '민감도 분석'), sensitivityStatus), sensitivitySlot,
     h('p', { className: 'notice' }, '예시 데이터 · 실제 매물 아님. 모든 계산은 검증 전 가정이며 매수 권고·감정평가·대출 승인이 아닙니다. VAT·소득세·양도세·재융자·중도상환 수수료·실제 만기별 갱신을 모델링하지 않습니다. 실제 임대차·비용·금융 조건·세무 검토가 필요합니다.'));
   return { element, selectId: building.id, destroy() { disposed = true; clearTimeout(sensitivityTimer); } };
 }

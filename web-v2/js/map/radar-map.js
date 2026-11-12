@@ -38,6 +38,7 @@ export function createRadarMap({ buildings, geography, onOpen = () => {}, onSele
   let map = null, popup = null, ready = false, destroyed = false, selectedId = null, hoveredId = null;
   let data = radarGeoJSON(buildings), revision = 0, observer = null, resizeObserver = null, timeout = null;
   let library = null, errorSeen = false;
+  let detailOpen = false;
   let css = document.getElementById?.('maplibre-css');
 
   function status(text, canRetry = true) {
@@ -50,6 +51,14 @@ export function createRadarMap({ buildings, geography, onOpen = () => {}, onSele
     status(ready ? '일부 지도 정보가 표시되지 않습니다. 목록에서 건물을 확인해 주세요.' : '지도를 불러오지 못했습니다. 목록에서 건물을 확인해 주세요.');
   }
   function allFeatures() { return [...data.matching.features, ...data.context.features]; }
+  function resize(options = {}) {
+    if (destroyed) return;
+    if (Object.hasOwn(options, 'detailOpen')) detailOpen = options.detailOpen;
+    if (!map) return;
+    const right = detailOpen && globalThis.matchMedia?.('(min-width: 768px) and (max-width: 1439px)').matches ? 400 : 0;
+    map.setPadding?.({ top: 0, bottom: 0, left: 0, right });
+    map.resize();
+  }
   function focusData() {
     if (!ready || !map) return;
     map.getSource('radar-focus')?.setData({ type: 'FeatureCollection', features: allFeatures().filter((f) => f.id === selectedId || f.id === hoveredId) });
@@ -77,10 +86,12 @@ export function createRadarMap({ buildings, geography, onOpen = () => {}, onSele
   function select(id, { fly = true, notify = true } = {}) {
     if (destroyed) return;
     selectedId = byId.has(id) ? id : null;
+    // The selection may open a drawer and change map size/padding. Apply its
+    // layout before computing the selected point's camera destination.
+    if (notify) onSelect(selectedId);
     focusData(); popupFor(selectedId);
     const coordinates = selectedId && buildingCoordinates(byId.get(selectedId));
     if (ready && fly && coordinates) map.flyTo({ center: coordinates, zoom: Math.max(map.getZoom(), 15.5), duration: globalThis.matchMedia?.('(prefers-reduced-motion: reduce)').matches ? 0 : 650 });
-    if (notify) onSelect(selectedId);
   }
   function update(options = {}) {
     if (destroyed) return;
@@ -138,6 +149,7 @@ export function createRadarMap({ buildings, geography, onOpen = () => {}, onSele
       const instance = new library.Map({ container: canvas, style: STYLE, center: [126.98, 37.55], zoom: 11,
         minZoom: 9, maxZoom: 18, maxBounds: [[126.6, 37.3], [127.4, 37.8]], attributionControl: false });
       map = instance;
+      resize();
       instance.addControl(new library.NavigationControl({ showCompass: false }), 'top-right');
       instance.addControl(new library.AttributionControl({ compact: false, customAttribution: ATTRIBUTION }), 'bottom-right');
       instance.on('error', () => { if (map === instance) fail(); });
@@ -174,7 +186,7 @@ export function createRadarMap({ buildings, geography, onOpen = () => {}, onSele
       });
       instance.getCanvas().addEventListener('webglcontextlost', fail, { signal: controller.signal });
       if (globalThis.ResizeObserver) {
-        resizeObserver = new ResizeObserver(() => { if (map === instance && !destroyed) instance.resize(); });
+        resizeObserver = new ResizeObserver(() => { if (map === instance && !destroyed) resize(); });
         resizeObserver.observe(canvas);
       }
       timeout = setTimeout(() => { if (map === instance) fail(); }, 15000);
@@ -228,7 +240,7 @@ export function createRadarMap({ buildings, geography, onOpen = () => {}, onSele
       observer.observe(document.documentElement, { childList: true, subtree: true });
     }
   });
-  return { element: shell, mount, update, highlight, select,
+  return { element: shell, mount, update, highlight, select, resize,
     destroy() {
       if (destroyed) return;
       destroyed = true; revision++; clearTimeout(timeout); controller.abort();

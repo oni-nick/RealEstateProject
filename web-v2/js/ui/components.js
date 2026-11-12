@@ -24,12 +24,39 @@ export function kpiCard({ label, value, unit = '', note = '', accent = false }) 
 }
 export function slider({ label, value, min, max, step = 1, format = String, onInput, onChange }) {
   const id = `range-${++sequence}`;
+  let current = value;
+  let editingNumber = false;
   const output = h('output', { for: id }, format(value));
+  const normalize = (raw) => {
+    if (String(raw).trim() === '' || !Number.isFinite(Number(raw))) return null;
+    const clamped = Math.max(min, Math.min(max, Number(raw)));
+    return step === 'any' ? clamped : Number(Math.max(min, Math.min(max, min + Math.round((clamped - min) / step) * step)).toFixed(8));
+  };
+  function setValue(next) {
+    current = next; input.value = next;
+    if (!editingNumber) numeric.value = next;
+    output.textContent = format(next); input.setAttribute('aria-valuetext', format(next));
+  }
   const input = h('input', { id, type: 'range', min, max, step, value, 'aria-valuetext': format(value),
-    onInput(event) { const next = Number(event.target.value); output.textContent = format(next); input.setAttribute('aria-valuetext', format(next)); onInput?.(next); },
+    onInput(event) { const next = Number(event.target.value); setValue(next); onInput?.(next); },
     onChange(event) { onChange?.(Number(event.target.value)); },
   });
-  return h('div', { className: 'range-control' }, h('label', { className: 'range-label', for: id }, label, output), input, h('div', { className: 'range-bounds', 'aria-hidden': 'true' }, h('span', {}, format(min)), h('span', {}, format(max))));
+  const numeric = h('input', { type: 'number', min, max, step, value, className: 'range-number', 'aria-label': `${label} 직접 입력`,
+    onInput(event) {
+      const raw = event.target.value, next = normalize(raw);
+      // A first digit can be outside bounds or between slider steps. Keep the
+      // draft intact so typing 85 (min 30) and 65 (step 5) is possible.
+      if (next === null || Math.abs(next - Number(raw)) > 1e-8) return;
+      editingNumber = true;
+      try { setValue(next); onInput?.(next); } finally { editingNumber = false; }
+    },
+    onChange(event) { const next = normalize(event.target.value); if (next === null) { setValue(current); return; } setValue(next); onInput?.(next); onChange?.(next); },
+  });
+  const element = h('div', { className: 'range-control' }, h('label', { className: 'range-label', for: id }, label, output),
+    h('div', { className: 'range-editor' }, input, numeric), h('div', { className: 'range-bounds', 'aria-hidden': 'true' }, h('span', {}, format(min)), h('span', {}, format(max))));
+  element.setValue = setValue;
+  element.setDisabled = (disabled) => { input.disabled = disabled; numeric.disabled = disabled; };
+  return element;
 }
 export function table({ columns, rows, caption }) {
   return h('div', { className: 'table-wrap' }, h('table', { className: 'data-table' },

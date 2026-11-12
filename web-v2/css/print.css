@@ -1,4 +1,4 @@
-@page { size: A4 portrait; margin: 16mm; }
+@page { size: A4 portrait; margin: 12mm; }
 *, *::before, *::after { box-shadow: none !important; animation: none !important; transition: none !important; }
 body { background: #fff; color: #111e30; font-size: 10pt; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 .app-header, .context-bar, .app-footer, .skip-link, .toast-region, .panel-dialog, .no-print, .breadcrumb { display: none !important; }
@@ -71,3 +71,17 @@ h2, h3 { break-after: avoid; }
 .proposal-appendix .proposal-block > p, .proposal-appendix .data-table { font-size: 7pt; }
 .proposal-appendix .proposal-disclaimer { font-size: 7.5pt; }
 .proposal-sheet .evidence-number { padding: 0; text-decoration: none; }
+
+/* Service screen layout must never constrain a flowing printed report. */
+.radar-active { display: block; height: auto; overflow: visible; }
+.radar-active #main { display: block; }
+.radar-filterbar, .radar-detail, .radar-mobile-dialog, .scene-nav, .radar-results-header { display: none !important; }
+.data-table th, .radar-detail-header { position: static; }
+.proposal-cover-brand { margin: 4pt 0 16pt; font-size: 22pt; }
+.proposal-sheet-body > .proposal-cover-title { font-size: 26pt; margin: 6pt 0 14pt; }
+.proposal-cover-photo { margin-bottom: 12pt; break-inside: avoid; }
+.proposal-cover-photo .photo-frame { height: 48mm; aspect-ratio: auto; }
+.proposal-cover-photo .photo-disclosure, .proposal-cover-photo > .hint { font-size: 7.5pt; }
+.proposal-cover .actions { margin: 12pt 0; }
+.proposal-cover-note { margin-top: 16pt; }
+.proposal-sheet .building-photo { break-inside: avoid; }
