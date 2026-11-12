@@ -2,6 +2,7 @@ import { DEFAULT_FILTERS, filterBuildings, updateFilters } from '../store.js';
 import { RADAR_PRESETS, createRadarMatcher, radarStats, sortRadarRows } from '../radar.js';
 import { h, badge, button, chip, emptyState, evidenceNumber, kpiCard, linkButton, slider } from './components.js';
 import { createSeoulMap } from './map.js';
+import { buildingPhoto } from './photo.js';
 import { eok, manwon, number, percent } from './format.js';
 
 // Retain a small financial cache across route visits, not just individual renders.
@@ -85,7 +86,8 @@ function candidateCard(row, context, map) {
   score.className = 'evidence-number match-score';
   const card = h('article', { className: `card building-card radar-card${row.matches ? '' : ' is-near-miss'}`, 'data-card-id': b.id },
     h('div', { className: 'building-card-top' }, badge(row.matches ? '조건 일치' : '조건 외', row.matches ? 'accent' : 'outline'), score),
-    h('a', { className: 'candidate-link', href: `#/building/${b.id}` }, h('h3', {}, b.nameKo), h('p', { className: 'location' }, `${b.neighborhood} · ${b.stationNameKo} 도보 ${b.walkMinutes}분`)),
+    h('div', { className: 'candidate-summary' }, buildingPhoto(b, { compact: true }),
+      h('a', { className: 'candidate-link', href: `#/building/${b.id}` }, h('h3', {}, b.nameKo), h('p', { className: 'location' }, `${b.neighborhood} · ${b.stationNameKo} 도보 ${b.walkMinutes}분`))),
     h('div', { className: 'price-row' }, h('span', { className: 'price numeric' }, context.summaryNumber(b, 'askingPriceKrw', '매도 호가', eok), h('small', {}, '억')), badge(b.deepPath ? '상세 임대차' : '요약')),
     h('div', { className: 'radar-financials' }, h('div', {}, h('span', {}, '레버리지 IRR'), context.metricNumber(row, 'leveredIrr', '레버리지 IRR', percent)), h('div', {}, h('span', {}, '필요 자기자본'), context.metricNumber(row, 'equityRequired', '필요 자기자본', (v) => `${eok(v)}억`))),
     h('details', { className: 'match-reasons', open: row.matches }, h('summary', {}, '왜 맞는지', h('span', {}, `${row.checks.filter((c) => c.passed).length}/6 조건`)),

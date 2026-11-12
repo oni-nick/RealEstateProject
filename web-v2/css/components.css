@@ -49,6 +49,25 @@ button.chip:hover { border-color: var(--accent); color: var(--accent); }
 .building-card .price small { font-size: 12px; margin-left: 3px; font-weight: 400; }
 .building-card .price-row > span:last-child { font-size: 10px; color: var(--muted); }
 .building-card .building-facts { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--line); display: flex; justify-content: space-between; gap: 8px; color: var(--muted); font-size: 10px; }
+/* Shared offline example imagery; the disclosure stays visible even on failure. */
+.building-photo { min-width: 0; margin: 0; }
+.photo-frame { position: relative; aspect-ratio: 4 / 3; overflow: hidden; border: 1px solid var(--color-border); border-radius: var(--radius-control); background: var(--color-surface-subtle); }
+.photo-frame img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.photo-badge { position: absolute; top: 5px; left: 5px; padding: 1px 5px; border-radius: var(--radius-badge); background: var(--color-nav); color: var(--color-text-inverse); font-size: 12px; line-height: 1.5; }
+.photo-disclosure { margin-top: 4px; color: var(--color-text-muted); font-size: 12px; line-height: 1.5; white-space: normal; word-break: keep-all; overflow-wrap: anywhere; }
+.photo-fallback { display: grid; place-items: center; width: 100%; height: 100%; min-height: inherit; padding: 24px 6px 8px; color: var(--color-text-muted); font-size: 12px; text-align: center; }
+.photo-compact { width: 96px; flex: 0 0 96px; }
+.candidate-summary, .listing-identity { display: flex; align-items: flex-start; gap: 12px; min-width: 0; }
+.radar-card .candidate-summary .candidate-link { min-width: 0; margin: 0; word-break: keep-all; overflow-wrap: anywhere; }
+.candidate-summary h3 { font-size: 14px; }
+.candidate-summary .location { font-size: 12px; line-height: 1.6; }
+.listing-identity { align-items: center; }
+.building-gallery { margin-bottom: 24px; }
+.photo-gallery-grid { display: grid; grid-template-columns: minmax(0, 440px); gap: 12px; }
+.has-gallery .photo-gallery-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.photo-gallery-note { margin-top: 8px; color: var(--color-text-muted); font-size: 12px; line-height: 1.7; word-break: keep-all; overflow-wrap: anywhere; }
+@media (max-width: 900px) { .has-gallery .photo-gallery-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media print { .building-gallery { break-inside: avoid; } }
 .table-wrap { width: 100%; overflow-x: auto; border-radius: var(--radius); background: #fff; border: 1px solid var(--line); }
 .data-table { width: 100%; border-collapse: collapse; white-space: nowrap; font-size: 12px; text-align: left; }
 .data-table th { padding: 13px 16px; color: var(--muted); background: var(--surface-soft); border-bottom: 1px solid var(--line); font-size: 10px; font-weight: 500; }

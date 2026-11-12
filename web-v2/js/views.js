@@ -5,6 +5,7 @@ import { createSeoulMap } from './ui/map.js';
 import { eok, manwon, number, percent } from './ui/format.js';
 import { selectComps } from './building-analysis.js';
 import { leaseWaterfall } from './ui/lease-waterfall.js';
+import { buildingPhoto, buildingGallery } from './ui/photo.js';
 
 const buildingHref = (b) => `#/building/${b.id}`;
 const heading = (eyebrow, title, description, actions) => h('div', { className: 'page-heading' }, h('div', {}, h('div', { className: 'eyebrow' }, eyebrow), h('h1', {}, title), h('p', {}, description)), actions);
@@ -52,7 +53,7 @@ export function listingsView(context) {
     resultCount.textContent = `현재 조건 ${matches.length}개 / 전체 ${data.buildings.length}개 · 거래완료 제외 · 레이더 지역·가격·용도·도보 조건 (IRR·자본 미적용)`;
     const visible = matches.slice(page * size, (page + 1) * size);
     rowsSlot.replaceChildren(matches.length ? table({ caption: '가상 매물 목록 — 레이더 조건 적용', rows: visible, columns: [
-      { label: '건물 / 위치', render: (b) => h('div', {}, h('a', { className: 'text-link', href: buildingHref(b) }, b.nameKo), h('span', { className: 'subtext' }, b.addressKo)) },
+      { label: '건물 / 위치', render: (b) => h('div', { className: 'listing-identity' }, buildingPhoto(b, { compact: true }), h('div', {}, h('a', { className: 'text-link', href: buildingHref(b) }, b.nameKo), h('span', { className: 'subtext' }, b.addressKo))) },
       { label: '호가 (억)', numeric: true, render: (b) => context.summaryNumber(b, 'askingPriceKrw', '호가', eok) },
       { label: 'Cap rate', numeric: true, render: (b) => context.summaryNumber(b, 'capRate', 'Cap rate', percent) },
       { label: '대지 / 연면적 (m²)', numeric: true, render: (b) => `${number(b.landAreaM2)} / ${number(b.gfaM2)}` },
@@ -130,6 +131,7 @@ export async function buildingView(context, route) {
   ].map(([label, value]) => h('div', {}, h('dt', {}, label), h('dd', {}, value)))), h('p', { className: 'notice' }, '검증 전 예시 가정입니다. 보증금은 부채로 반영하며, 임대료에 공실을 중복 차감하지 않습니다. VAT·양도소득세·법인세·재융자 등은 제외됩니다.'));
   const element = h('div', { className: 'page' }, h('div', { className: 'breadcrumb' }, h('a', { href: '#/radar' }, '딜 레이더'), ' / ', h('a', { href: '#/listings' }, '매물 탐색'), ' / ', building.nameKo),
     heading('PROPERTY / OVERVIEW', building.nameKo, `${building.addressKo} · ${building.statusKo}`, h('div', { className: 'actions' }, badge('예시 데이터 · 실제 매물 아님', 'accent'), linkButton('매수 한도가', `#/building/${proposalId}/bid`), linkButton('밸류업', `#/building/${proposalId}/valueup`), linkButton('요약 제안서  ↗', `#/building/${proposalId}/proposal?for=buyer`, 'primary'))),
+    buildingGallery(building),
     buildingKpis(context, building, result),
     h('div', { className: 'content-grid' }, h('div', { className: 'stack' }, section('건물 개요', buildingFacts(building, context), building.id), section('임대차 현황', rentRoll, deep ? `${deep.rentRoll.length}개 가상 호실 · 금액 만원` : '요약만 보유'),
       section('임대차 만기 워터폴', deep ? leaseWaterfall(deep) : h('p', { className: 'notice' }, '요약 데이터에는 호실별 만기가 없습니다. 만기 노출은 상세 임대차 보유 건물에서만 확인할 수 있습니다.'), '월세 노출 · 확정 공실 예측 아님'),

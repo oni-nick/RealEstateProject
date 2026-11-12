@@ -221,8 +221,11 @@ test('views construct with real mock data; filters, map activation and cleanup w
     assert.equal(home.element.querySelectorAll('circle').length, 400);
     const radar = radarView(context); views.push(radar);
     assert.equal(radar.element.querySelectorAll('polygon').length, 10);
+    assert.equal(radar.element.querySelectorAll('img').length, radar.element.querySelectorAll('[data-card-id]').length);
+    for (const card of radar.element.querySelectorAll('[data-card-id]')) assert.ok(card.textContent.includes('예시 사진 · 실제 매물 아님'));
     const listing = listingsView(context); views.push(listing);
     assert.ok(listing.element.textContent.includes('현재 조건'));
+    assert.equal(listing.element.querySelectorAll('img').length, 20);
     updateFilters({ query: 'NO SUCH MOCK BUILDING' });
     assert.ok(radar.element.textContent.includes('일치하는 후보가 없습니다'));
     assert.ok(listing.element.textContent.includes('검색 결과가 없습니다'));
@@ -270,6 +273,8 @@ test('views construct with real mock data; filters, map activation and cleanup w
     assert.ok(detail.element.textContent.includes('가상 강남구 001'));
     assert.ok(detail.element.textContent.includes('1F-A (가상)'));
     assert.equal(detail.selectId, 'bld-gangnam-001');
+    assert.equal(detail.element.querySelectorAll('img').length, 4);
+    assert.ok(detail.element.textContent.includes('해당 건물의 실제 사진 아님'));
     assert.ok(detail.element.textContent.includes('임대차 만기 워터폴'));
     assert.ok(detail.element.textContent.includes('가상 비교 거래'));
     assert.ok(detail.element.textContent.includes('cmp-gangnam-011'));
@@ -282,6 +287,7 @@ test('views construct with real mock data; filters, map activation and cleanup w
     assert.ok(detail.element.querySelectorAll('a').some((a) => a.getAttribute('href') === '#/building/bld-gangnam-001/bid'));
     const summaryBuilding = buildings.find((b) => !b.deepPath);
     const summaryDetail = await buildingView(context, parseRoute(`#/building/${summaryBuilding.id}`)); views.push(summaryDetail);
+    assert.equal(summaryDetail.element.querySelectorAll('img').length, 1);
     assert.ok(summaryDetail.element.textContent.includes('만기 노출은 상세 임대차 보유 건물에서만'));
     assert.equal(summaryDetail.element.querySelectorAll('svg').length, 0);
     assert.ok(summaryDetail.element.textContent.includes('가상 비교 거래'));
