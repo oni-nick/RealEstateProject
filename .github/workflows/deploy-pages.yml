@@ -12,7 +12,7 @@ on:
 
 permissions:
   contents: read
-  actions: read # Restore the last successful Pages artifact if no built root exists.
+  actions: read
   pages: write
   id-token: write
 
@@ -30,48 +30,35 @@ jobs:
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
 
-      - name: Preserve old demo at site root
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: plot-os-demo/package-lock.json
+
+      - name: Build old demo at site root
+        working-directory: plot-os-demo
+        run: |
+          set -euo pipefail
+          npm ci --no-audit --no-fund
+          npm run build
+          test -s dist/client/index.html
+
+      - name: Stage old demo at site root and v2 under /v2/
         env:
-          GH_TOKEN: ${{ github.token }}
+          NAVER_MAPS_CLIENT_ID: ${{ secrets.NAVER_MAPS_CLIENT_ID }}
         shell: bash
         run: |
           set -euo pipefail
           mkdir -p _pages_out
-          if [ -f plot-os-demo/dist/client/index.html ]; then
-            cp -a plot-os-demo/dist/client/. _pages_out/
-          elif git fetch --depth=1 origin gh-pages; then
-            git archive FETCH_HEAD | tar -x -C _pages_out
-          else
-            # Actions-based Pages deployments may have no gh-pages branch.
-            restored=false
-            for run_id in $(gh run list --repo "$GITHUB_REPOSITORY" --workflow deploy-pages.yml --status success --limit 20 --json databaseId --jq '.[].databaseId'); do
-              artifact_id=$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$run_id/artifacts" --jq '.artifacts[] | select(.name == "github-pages" and .expired == false) | .id' | head -n 1)
-              if [ -n "$artifact_id" ]; then
-                gh api "repos/$GITHUB_REPOSITORY/actions/artifacts/$artifact_id/zip" > "$RUNNER_TEMP/previous-pages.zip"
-                unzip -q "$RUNNER_TEMP/previous-pages.zip" -d "$RUNNER_TEMP/previous-pages"
-                tar -xf "$RUNNER_TEMP/previous-pages/artifact.tar" -C _pages_out
-                restored=true
-                break
-              fi
-            done
-            if [ "$restored" != true ]; then
-              echo '::error::Old demo unavailable. Refusing to replace the live site.'
-              exit 1
-            fi
-          fi
+          cp -a plot-os-demo/dist/client/. _pages_out/
           test -s _pages_out/index.html || { echo '::error::Old root index missing; deployment stopped.'; exit 1; }
-
-      - name: Stage static v2 under its own path
-        shell: bash
-        run: |
-          set -euo pipefail
           # Discard only a previous v2 copy; preserve every old root asset.
           rm -rf _pages_out/v2
           mkdir -p _pages_out/v2
           cp -a web-v2/. _pages_out/v2/
-          # Never carry a local config into the artifact from the checkout.
           rm -f _pages_out/v2/local-naver-config.js
-          # Deployment-only base keeps localhost previews at their own root.
           python3 - <<'PY'
           from pathlib import Path
           index = Path('_pages_out/v2/index.html')
@@ -82,12 +69,6 @@ jobs:
           index.write_text(html, encoding='utf-8')
           PY
           test -s _pages_out/v2/js/app.js
-
-      - name: Inject optional Naver runtime configuration
-        env:
-          NAVER_MAPS_CLIENT_ID: ${{ secrets.NAVER_MAPS_CLIENT_ID }}
-        shell: bash
-        run: |
           if [ -n "$NAVER_MAPS_CLIENT_ID" ]; then
             printf "window.PLOT_OS_NAVER_CONFIG = { clientId: '%s' };\n" "$NAVER_MAPS_CLIENT_ID" > _pages_out/v2/local-naver-config.js
           fi
